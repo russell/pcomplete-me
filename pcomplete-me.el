@@ -173,10 +173,12 @@
          (global-fn (intern (mapconcat 'symbol-name `(pcmpl ,global-command -global-matchers) "-")))
          (global-flags (intern (mapconcat 'symbol-name `(pcmpl ,global-command -global-flags) "-")))
          (subcommand-fn (intern (mapconcat 'symbol-name `(pcmpl ,@command-list) "-")))
-         (subcommand-flags (intern (mapconcat 'symbol-name `(pcmpl ,@command-list -flags) "-"))))
+         (subcommand-flags (intern (mapconcat 'symbol-name `(pcmpl ,@command-list -flags) "-")))
+         (subcommand-subcommands (intern (mapconcat 'symbol-name `(pcmpl ,@command-list -subcommands) "-"))))
     `(progn
 
        (defconst ,subcommand-flags (quote ,(pcmpl-me--flags flags)))
+       (defconst ,subcommand-subcommands ,(when (listp subcommands) subcommands))
 
        (defun ,subcommand-fn ()
          (while t
@@ -185,7 +187,7 @@
                                ((or (functionp subcommands) (functionp (car subcommands)))
                                 `(funcall ,subcommands))
                                ((listp subcommands)
-                                subcommands))
+                                subcommand-subcommands))
                              ,subcommand-flags
                              ,@(when inherit-global-flags
                                  `(,global-flags))))
