@@ -297,21 +297,21 @@
   (declare (indent 1))
   (let ((subcommand-fn (intern (mapconcat 'symbol-name (append '(pcmpl) subcommand-list) "-")))
         (subcommand-flags (intern (mapconcat 'symbol-name (append '(pcmpl) subcommand-list '(flags)) "-"))))
-   `(progn
-     (defconst ,subcommand-flags
-       (append ,global-flags ,flags))
-     (defun ,(intern (mapconcat 'symbol-name (append '(pcmpl) subcommand-list) "-")) ()
-       (pcomplete-here* (append
-                         (pcmpl-kubectl-get-subcommands (quote ,(mapcar 'symbol-name (cdr subcommand-list)))
-                                                        pcmpl-kubectl-commands)
-                         ,(unless (null subcommands)
-                            `(funcall ,subcommands))
-                         ,subcommand-flags))
-       ,@body)
-     (add-to-list 'pcmpl-kubectl-subcommand-flags
-                  (cons ,(if (null (cdr subcommand-list))
-                             nil
-                           (mapconcat 'symbol-name (cdr subcommand-list) " ")) (quote ,subcommand-fn))))))
+    `(progn
+       (defconst ,subcommand-flags
+         (append ,global-flags ,flags))
+       (defun ,(intern (mapconcat 'symbol-name (append '(pcmpl) subcommand-list) "-")) ()
+         (pcomplete-here* (append
+                           (pcmpl-kubectl-get-subcommands (quote ,(mapcar 'symbol-name (cdr subcommand-list)))
+                                                          pcmpl-kubectl-commands)
+                           ,(unless (null subcommands)
+                              `(funcall ,subcommands))
+                           ,subcommand-flags))
+         ,@body)
+       (add-to-list 'pcmpl-kubectl-subcommand-flags
+                    (cons ,(if (null (cdr subcommand-list))
+                               nil
+                             (mapconcat 'symbol-name (cdr subcommand-list) " ")) (quote ,subcommand-fn))))))
 
 
 (defmacro pcmpl-kubectl--base-flag-file= (matchers)
@@ -391,9 +391,9 @@
 (defun pcmpl-kubectl--complete (type)
   ""
   (lambda ()
-   (split-string
-    (shell-command-to-string
-     (format "kubectl config view -o template --template=\"{{ range .%s}}{{ .name }}\n{{end}}\"" type)))))
+    (split-string
+     (shell-command-to-string
+      (format "kubectl config view -o template --template=\"{{ range .%s}}{{ .name }}\n{{end}}\"" type)))))
 
 (plist-put pcmpl-me-completers :kubernetes-context (pcmpl-kubectl--complete "contexts"))
 (plist-put pcmpl-me-completers :kubernetes-user (pcmpl-kubectl--complete "users"))
@@ -705,75 +705,63 @@
      (("--output" "--output=" "-o") . (:list "json" "yaml" "name" "go-template" "go-template-file" "template" "templatefile" "jsonpath" "jsonpath-as-json" "jsonpath-file")))))
 
 (pcmpl-me-command (kubectl attach)
-  (
-   :inherit-global-flags
+  (:inherit-global-flags
    t
    :flags
    ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl attach" pcmpl-kubectl--global-flags))
    '(((
-     "--pod-running-timeout"
-     "--pod-running-timeout="
-     "--quiet"
-     "--stdin"
-     "--tty"
-     "-c"
-     "-i"
-     "-q"
-     "-t"))
+       "--pod-running-timeout"
+       "--pod-running-timeout="
+       "--quiet"
+       "--stdin"
+       "--tty"
+       "-c"
+       "-i"
+       "-q"
+       "-t"))
      ;; TODO support finding containers
-     ("--container" "--container=")))
-  )
+     (("--container" "--container=")))))
 
+(pcmpl-me-command (kubectl auth)
+  (:inherit-global-flags
+   t
+   :flags
+   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl auth" pcmpl-kubectl--global-flags))
+   'nil))
 
-(pcmpl-me-command ((kubectl auth)
-                   :inherit-global-flags t
-                   :flags
-                   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl auth" pcmpl-kubectl--global-flags))
-                   'nil))
+(pcmpl-me-command (kubectl auth can-i)
+  (:inherit-global-flags
+   t
+   :flags
+   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl auth can-i" pcmpl-kubectl--global-flags))
+   '((("--all-namespaces"
+       "--list"
+       "--no-headers"
+       "--quiet"
+       "--subresource"
+       "--subresource="
+       "-A"
+       "-q")))))
 
-(pcmpl-me-command ((kubectl auth can-i)
-                   :inherit-global-flags t
-                   :flags
-                   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl auth can-i" pcmpl-kubectl--global-flags))
-                   '("--all-namespaces"
-                     "--list"
-                     "--no-headers"
-                     "--quiet"
-                     "--subresource"
-                     "--subresource="
-                     "-A"
-                     "-q")))
-
-(pcmpl-me-command ((kubectl auth reconcile)
-                   :inherit-global-flags t
-                   :flags
-                   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl auth reconcile" pcmpl-kubectl--global-flags))
-                   '("--allow-missing-template-keys"
-                     "--dry-run"
-                     "--filename"
-                     "--filename="
-                     "--kustomize"
-                     "--kustomize="
-                     "--output"
-                     "--output="
-                     "--recursive"
-                     "--remove-extra-permissions"
-                     "--remove-extra-subjects"
-                     "--show-managed-fields"
-                     "--template"
-                     "--template="
-                     "-R"
-                     "-f"
-                     "-k"
-                     "-o"))
-  (when (pcomplete-match "^--" 0)
-    (cond
-     (pcmpl-kubectl--flag-filename=)
-     (pcmpl-kubectl--flag-kustomize=)))
-  (when (pcomplete-match "^-" 1)
-    (cond
-     (pcmpl-kubectl--flag-filename)
-     (pcmpl-kubectl--flag-kustomize))))
+(pcmpl-me-command (kubectl auth reconcile)
+  (:inherit-global-flags
+   t
+   :flags
+   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl auth reconcile" pcmpl-kubectl--global-flags))
+   '((("--allow-missing-template-keys"
+       "--dry-run"
+       "--output"
+       "--output="
+       "--recursive"
+       "--remove-extra-permissions"
+       "--remove-extra-subjects"
+       "--show-managed-fields"
+       "--template"
+       "--template="
+       "-R"
+       "-o"))
+     (("-k" "--kustomize" "--kustomize=") . (:dirs))
+     (("-f" "--filename" "--filename=") . (:files)))))
 
 
 ;;
@@ -782,7 +770,6 @@
 
 (defvar pcmpl-kubectl--namespace nil)
 (defvar pcmpl-kubectl--context nil)
-
 
 ;;;###autoload
 (defun pcomplete/kubectl ()
