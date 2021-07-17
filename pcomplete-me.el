@@ -176,7 +176,6 @@
          (subcommand-flags (intern (mapconcat 'symbol-name `(pcmpl ,@command-list -flags) "-")))
          (subcommand-subcommands (intern (mapconcat 'symbol-name `(pcmpl ,@command-list -subcommands) "-"))))
     `(progn
-
        (defconst ,subcommand-flags (quote ,(pcmpl-me--flags flags)))
        (defconst ,subcommand-subcommands ,(when (listp subcommands) subcommands))
 
@@ -188,9 +187,9 @@
                                 `(funcall ,subcommands))
                                ((listp subcommands)
                                 subcommand-subcommands))
-                             ,subcommand-flags
                              ,@(when inherit-global-flags
-                                 `(,global-flags))))
+                                 `(,global-flags))
+                             ,subcommand-flags))
            ,(pcmpl-me--flag-matchers flags)
            ,(pcmpl-me--subcommand-matchers command-list subcommands-list)
            ,(when inherit-global-flags

@@ -1,4 +1,4 @@
-;;; bash-export-utils.el --- Utils to help exporting data from bash  -*- lexical-binding: t; -*-
+;;; bash-completion-export-utils.el --- Utils to help exporting data from bash  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2021  Russell Sim
 
@@ -25,6 +25,7 @@
 ;;; Code:
 
 (require 'cl-lib)
+(require 'bash-completion)
 
 (defvar temp-dir)
 
@@ -40,13 +41,15 @@
 (defun rs//bash-complete-subcommand (subcommand &optional env)
   ""
   (cl-letf* ((process-environment (append env process-environment)))
-   (seq-filter
-   (lambda (e) (string-match "^[^-]" e))
-   (mapcar #'string-trim
-    (caddr
-     (with-temp-buffer
-       (insert (format "%s " subcommand))
-       (bash-completion-dynamic-complete-nocomint (line-beginning-position) (point))))))))
+    (cl-sort
+     (seq-filter
+      (lambda (e) (string-match "^[^-]" e))
+      (mapcar #'string-trim
+              (caddr
+               (with-temp-buffer
+                 (insert (format "%s " subcommand))
+                 (bash-completion-dynamic-complete-nocomint (line-beginning-position) (point))))))
+     'string-lessp)))
 
 (defun rs//bash-complete-recursive-subcommand (subcommand &optional env)
   ""
@@ -84,14 +87,13 @@
    (rs//bash-complete-isolated
     (cl-sort
      (cl-set-difference
-     (caddr
-      (with-temp-buffer
-        (insert (format "%s -" command-or-subcommand))
-        (bash-completion-dynamic-complete-nocomint (line-beginning-position) (point))))
-     global-flags
-     :test #'string-equal)
-     'string-lessp
-     ))))
+      (caddr
+       (with-temp-buffer
+         (insert (format "%s -" command-or-subcommand))
+         (bash-completion-dynamic-complete-nocomint (line-beginning-position) (point))))
+      global-flags
+      :test #'string-equal)
+     'string-lessp))))
 
 (defun rs//replace-sexp (options)
   ""
@@ -113,5 +115,5 @@
 
 
 
-(provide 'bash-export-utils)
-;;; bash-export-utils.el ends here
+(provide 'bash-completion-export-utils)
+;;; bash-completion-export-utils.el ends here
