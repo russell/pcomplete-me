@@ -26,6 +26,7 @@
 
 (require 'cl-lib)
 (require 'pcomplete)
+;;(require 'pcomplete-me)
 
 (defconst pcmpl-kubectl-commands
   ;; (rs//replace-sexp (rs//bash-complete-kubectl-subcommands "kubectl"))
@@ -413,6 +414,8 @@
        "--as="
        "--as-group"
        "--as-group="
+       "-h"
+       "--help"
        "--insecure-skip-tls-verify"
        "--log-backtrace-at"
        "--log-backtrace-at="
@@ -459,157 +462,310 @@
        "--cache-dir" "--cache-dir=")
       . (:dirs)))))
 
-(pcmpl-subcommand ((kubectl)
-                   :flags
-                   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl"))
-                   '("--add-dir-header" "--alsologtostderr" "--as=" "--as-group=" "--cache-dir=" "--certificate-authority=" "--client-certificate=" "--client-key=" "--cluster=" "--context=" "--insecure-skip-tls-verify" "--kubeconfig=" "--log-backtrace-at=" "--log-dir=" "--log-file=" "--log-file-max-size=" "--log-flush-frequency=" "--logtostderr" "--match-server-version" "--namespace=" "--one-output" "--password=" "--profile=" "--profile-output=" "--request-timeout=" "--server=" "--skip-headers" "--skip-log-headers" "--stderrthreshold=" "--tls-server-name=" "--token=" "--user=" "--username=" "--v=" "--vmodule=" "--warnings-as-errors" "--as" "--as-group" "--cache-dir" "--certificate-authority" "--client-certificate" "--client-key" "--cluster" "--context" "--kubeconfig" "--log-backtrace-at" "--log-dir" "--log-file" "--log-file-max-size" "--log-flush-frequency" "--namespace" "-n" "--password" "--profile" "--profile-output" "--request-timeout" "--server" "-s" "--stderrthreshold" "--tls-server-name" "--token" "--user" "--username" "--v" "-v" "--vmodule"))
-                  (when (pcomplete-match "^--" 0)
-                    (cond
-                     ((pcomplete-match "\\`--context=\\(.*\\)" 0)
-                      (pcomplete-here* (pcmpl-kubectl--contexts)
-                                       (pcomplete-match-string 1 0)))
-                     ((pcomplete-match "\\`--profile=\\(.*\\)" 0)
-                      (pcomplete-here* '("none" "cpu" "heap" "goroutine" "threadcreate" "block" "mutex")
-                                       (pcomplete-match-string 1 0)))
-                     (pcmpl-kubectl--base-flag-file= '("kubeconfig"
-                                                       "certificate-authority"
-                                                       "client-certificates"
-                                                       "client-key"
-                                                       "log-file"
-                                                       "profile-output"))
-                     (pcmpl-kubectl--base-flag-directory= '("cache-dir" "log-dir"))))
-                  (when (pcomplete-match "^-" 1)
-                    (cond
-                     ((pcomplete-match "\\`--context\\'" 1)
-                      (pcomplete-here* (pcmpl-kubectl--contexts)))
-                     ((pcomplete-match "\\`--profile\\'" 1)
-                      (pcomplete-here* '("none" "cpu" "heap" "goroutine" "threadcreate" "block" "mutex")))
-                     ((pcomplete-match "\\`--\\(?:c\\(?:ertificate-authority\\|lient-\\(?:certificates\\|key\\)\\)\\|kubeconfig\\|log-file\\|profile-output\\)\\'" 1)
-                      (pcomplete-here*
-                       (pcomplete-entries)))
-                     ((pcomplete-match "\\`--\\(?:\\(?:cache\\|log\\)-dir\\)\\'" 1)
-                      (pcomplete-here*
-                       (pcomplete-dirs))))))
+(pcmpl-me-command kubectl
+  (:inherit-global-flags
+   t
+   :subcommands
+   '("annotate"
+     "api-resources"
+     "api-versions"
+     "apply"
+     "attach"
+     "auth"
+     "autoscale"
+     "certificate"
+     "cluster-info"
+     "completion"
+     "config"
+     "cordon"
+     "cp"
+     "create"
+     "debug"
+     "delete"
+     "describe"
+     "diff"
+     "drain"
+     "edit"
+     "exec"
+     "explain"
+     "expose"
+     "get"
+     "help"
+     "kustomize"
+     "label"
+     "logs"
+     "options"
+     "patch"
+     "plugin"
+     "port-forward"
+     "proxy"
+     "replace"
+     "rollout"
+     "run"
+     "scale"
+     "set"
+     "taint"
+     "top"
+     "uncordon"
+     "version"
+     "wait")))
 
-(pcmpl-subcommand ((kubectl annotate)
-                   :flags
-                   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl annotate" pcmpl-kubectl-flags))
-                   '("--all" "--allow-missing-template-keys" "--dry-run" "--field-manager=" "--field-selector=" "--filename=" "--kustomize=" "--list" "--local" "--output=" "--overwrite" "--record" "--recursive" "-R" "--resource-version=" "--selector=" "--show-managed-fields" "--template=" "--field-manager" "--field-selector" "--filename" "-f" "--kustomize" "-k" "--output" "-o" "--resource-version" "--selector" "-l" "--template")))
+(pcmpl-me-command (kubectl annotate)
+  (:inherit-global-flags
+   t
+   :flags
+   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl annotate" pcmpl-kubectl--global-flags))
+   '((("--all"
+       "--allow-missing-template-keys"
+       "--dry-run"
+       "--field-manager"
+       "--field-manager="
+       "--field-selector"
+       "--field-selector="
+       "--filename"
+       "--filename="
+       "--kustomize"
+       "--kustomize="
+       "--list"
+       "--local"
+       "--output"
+       "--output="
+       "--overwrite"
+       "--record"
+       "--recursive"
+       "--resource-version"
+       "--resource-version="
+       "--selector"
+       "--selector="
+       "--show-managed-fields"
+       "--template"
+       "--template="
+       "-R"
+       "-f"
+       "-k"
+       "-l"
+       "-o")))))
 
-(pcmpl-subcommand ((kubectl api-versions)
+(pcmpl-me-command (kubectl api-versions)
+  (:inherit-global-flags
+   t
+   :flags
+   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl api-versions" pcmpl-kubectl--global-flags))
+   'nil))
+
+(pcmpl-me-command (kubectl config)
+  (:inherit-global-flags
+   t
+   :subcommands
+   '("current-context"
+     "delete-cluster"
+     "delete-context"
+     "delete-user"
+     "get-clusters"
+     "get-contexts"
+     "get-users"
+     "rename-context"
+     "set"
+     "set-cluster"
+     "set-context"
+     "set-credentials"
+     "unset"
+     "use-context"
+     "view")
+   :flags
+   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl config" pcmpl-kubectl--global-flags))
+   'nil))
+
+(pcmpl-me-command (kubectl config current-context)
+  (:inherit-global-flags
+   t
+   :flags
+   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl config current-context" pcmpl-kubectl--global-flags))
+   'nil))
+
+(pcmpl-me-command (kubectl config delete-cluster)
+  (:inherit-global-flags
+   t
+   :flags
+   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl config delete-cluster" pcmpl-kubectl--global-flags))
+   'nil
+   :subcommands
+   (pcmpl-kubectl--complete "clusters")))
+
+(pcmpl-me-command (kubectl config delete-context)
+  (:inherit-global-flags
+   t
+   :flags
+   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl config delete-context" pcmpl-kubectl--global-flags))
+   'nil
+   :subcommands
+   (pcmpl-kubectl--complete "context")))
+
+(pcmpl-me-command (kubectl config use-context)
+  (:inherit-global-flags
+   t
+   :flags
+   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl config use-context" pcmpl-kubectl--global-flags))
+   'nil
+   :subcommands
+   (pcmpl-kubectl--complete "contexts")))
+
+(pcmpl-me-command (kubectl api-resources)
+  (:inherit-global-flags
+   t
+   :flags
+   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl api-resources" pcmpl-kubectl--global-flags))
+   '((("--api-group"
+       "--api-group="
+       "--cached"
+       "--namespaced"
+       "--no-headers"
+       "--output"
+       "--output="
+       "--sort-by"
+       "--sort-by="
+       "--verbs"
+       "--verbs="
+       "-o")))))
+
+(pcmpl-me-command (kubectl apply)
+  (:inherit-global-flags
+   t
+   :flags
+   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl apply" pcmpl-kubectl--global-flags))
+   '((("--all"
+       "--allow-missing-template-keys"
+       "--field-manager"
+       "--field-manager="
+       "--force"
+       "--force-conflicts"
+       "--grace-period"
+       "--grace-period="
+       "--openapi-patch"
+       "--overwrite"
+       "--prune"
+       "--prune-whitelist"
+       "--prune-whitelist="
+       "--record"
+       "--recursive"
+       "--selector"
+       "--selector="
+       "--server-side"
+       "--show-managed-fields"
+       "--template"
+       "--template="
+       "--timeout"
+       "--timeout="
+       "--validate"
+       "--wait"
+       "-R"
+       "-f"
+       "-l"))
+     (("-k" "--kustomize" "--kustomize=") . (:dirs))
+     (("-f" "--filename" "--filename=") . (:files))
+     (("--output" "--output=" "-o") . (:list "json" "yaml" "name" "go-template" "go-template-file" "template" "templatefile" "jsonpath" "jsonpath-as-json" "jsonpath-file"))
+     (("--cascade") . (:list "background" "orphan" "foreground"))
+     (("--dry-run") . (:list "none" "server" "client")))
+   :subcommands
+   '("edit-last-applied" "set-last-applied" "view-last-applied")))
+
+
+(pcmpl-me-command (kubectl apply edit-last-applied)
+  (:inherit-global-flags
+   t
+   :flags
+   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl apply edit-last-applied" pcmpl-kubectl--global-flags))
+   '((("--allow-missing-template-keys"
+       "--field-manager"
+       "--field-manager="
+       "--record"
+       "--recursive"
+       "--show-managed-fields"
+       "--template"
+       "--template="
+       "--windows-line-endings"
+       "-R"))
+     (("-k" "--kustomize" "--kustomize=") . (:dirs))
+     (("-f" "--filename" "--filename=") . (:files))
+     (("--output" "--output=" "-o") . (:list "json" "yaml" "name" "go-template" "go-template-file" "template" "templatefile" "jsonpath" "jsonpath-as-json" "jsonpath-file")))))
+
+(pcmpl-me-command (kubectl apply set-last-applied)
+  (:inherit-global-flags
+   t
+   :flags
+   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl apply set-last-applied" pcmpl-kubectl--global-flags))
+   '((("--allow-missing-template-keys"
+       "--create-annotation"
+       "--dry-run"
+       "--show-managed-fields"
+       "--template"
+       "--template="
+       "-f"))
+     (("-f" "--filename" "--filename=") . (:files))
+     (("--output" "--output=" "-o") . (:list "json" "yaml" "name" "go-template" "go-template-file" "template" "templatefile" "jsonpath" "jsonpath-as-json" "jsonpath-file")))))
+
+(pcmpl-me-command (kubectl attach)
+  (
+   :inherit-global-flags
+   t
+   :flags
+   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl attach" pcmpl-kubectl--global-flags))
+   '(((
+     "--pod-running-timeout"
+     "--pod-running-timeout="
+     "--quiet"
+     "--stdin"
+     "--tty"
+     "-c"
+     "-i"
+     "-q"
+     "-t"))
+     ;; TODO support finding containers
+     ("--container" "--container=")))
+  )
+
+
+(pcmpl-me-command ((kubectl auth)
+                   :inherit-global-flags t
                    :flags
-                   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl api-versions" pcmpl-kubectl-flags))
+                   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl auth" pcmpl-kubectl--global-flags))
                    'nil))
 
-(pcmpl-subcommand ((kubectl config)
-                   :global-flags pcmpl-kubectl-flags
+(pcmpl-me-command ((kubectl auth can-i)
+                   :inherit-global-flags t
                    :flags
-                   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl config" pcmpl-kubectl-flags))
-                   'nil))
+                   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl auth can-i" pcmpl-kubectl--global-flags))
+                   '("--all-namespaces"
+                     "--list"
+                     "--no-headers"
+                     "--quiet"
+                     "--subresource"
+                     "--subresource="
+                     "-A"
+                     "-q")))
 
-(pcmpl-subcommand ((kubectl config current-context)
-                   :global-flags pcmpl-kubectl-flags
+(pcmpl-me-command ((kubectl auth reconcile)
+                   :inherit-global-flags t
                    :flags
-                   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl config current-context" pcmpl-kubectl-flags))
-                   'nil))
-
-(pcmpl-subcommand ((kubectl config delete-cluster)
-                   :global-flags pcmpl-kubectl-flags
-                   :flags
-                   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl config delete-cluster" pcmpl-kubectl-flags))
-                   'nil))
-
-(pcmpl-subcommand ((kubectl config delete-context)
-                   :global-flags pcmpl-kubectl-flags
-                   :flags
-                   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl config delete-context" pcmpl-kubectl-flags))
-                   'nil))
-
-(pcmpl-subcommand ((kubectl config use-context)
-                   :global-flags pcmpl-kubectl-flags
-                   :flags
-                   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl config use-context" pcmpl-kubectl-flags))
-                   'nil
-                   :subcommands (pcmpl-kubectl--contexts)))
-
-(pcmpl-subcommand ((kubectl api-resources)
-                   :global-flags pcmpl-kubectl-flags
-                   :flags
-                   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl api-resources" pcmpl-kubectl-flags))
-                   '("--api-group=" "--cached" "--namespaced" "--no-headers" "--output=" "--sort-by=" "--verbs=" "--api-group" "--output" "-o" "--sort-by" "--verbs")))
-
-(pcmpl-subcommand ((kubectl apply)
-                   :global-flags pcmpl-kubectl-flags
-                   :flags
-                   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl apply" pcmpl-kubectl-flags))
-                   '("--all" "--allow-missing-template-keys" "--cascade" "--dry-run" "--field-manager=" "--filename=" "--force" "--force-conflicts" "--grace-period=" "--kustomize=" "--openapi-patch" "--output=" "--overwrite" "--prune" "--prune-whitelist=" "--record" "--recursive" "-R" "--selector=" "--server-side" "--show-managed-fields" "--template=" "--timeout=" "--validate" "--wait" "--field-manager" "--filename" "-f" "--grace-period" "--kustomize" "-k" "--output" "-o" "--prune-whitelist" "--selector" "-l" "--template" "--timeout"))
-  (when (pcomplete-match "^--" 0)
-    (cond
-     (pcmpl-kubectl--flag-filename=)
-     (pcmpl-kubectl--flag-kustomize=)))
-  (when (pcomplete-match "^-" 1)
-    (cond
-     (pcmpl-kubectl--flag-filename)
-     (pcmpl-kubectl--flag-kustomize))))
-
-
-(pcmpl-subcommand ((kubectl apply edit-last-applied)
-                   :global-flags pcmpl-kubectl-flags
-                   :flags
-                   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl apply edit-last-applied" pcmpl-kubectl-flags))
-                   '("--allow-missing-template-keys" "--field-manager=" "--filename=" "--kustomize=" "--output=" "--record" "--recursive" "-R" "--show-managed-fields" "--template=" "--windows-line-endings" "--field-manager" "--filename" "-f" "--kustomize" "-k" "--output" "-o" "--template"))
-  (when (pcomplete-match "^--" 0)
-    (cond
-     (pcmpl-kubectl--flag-filename=)
-     (pcmpl-kubectl--flag-kustomize=)))
-  (when (pcomplete-match "^-" 1)
-    (cond
-     (pcmpl-kubectl--flag-filename)
-     (pcmpl-kubectl--flag-kustomize))))
-
-(pcmpl-subcommand ((kubectl apply set-last-applied)
-                   :global-flags pcmpl-kubectl-flags
-                   :flags
-                   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl apply set-last-applied" pcmpl-kubectl-flags))
-                   '("--allow-missing-template-keys" "--create-annotation" "--dry-run" "--filename=" "--output=" "--show-managed-fields" "--template=" "--filename" "-f" "--output" "-o" "--template"))
-  (when (pcomplete-match "^--" 0)
-    (cond
-     (pcmpl-kubectl--flag-filename=)))
-  (when (pcomplete-match "^-" 1)
-    (cond
-     (pcmpl-kubectl--flag-filename))))
-
-(pcmpl-subcommand ((kubectl attach)
-                   :global-flags pcmpl-kubectl-flags
-                   :flags
-                   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl attach" pcmpl-kubectl-flags))
-                   '("--container=" "--pod-running-timeout=" "--quiet" "-q" "--stdin" "-i" "--tty" "-t" "--container" "-c" "--pod-running-timeout"))
-  (when (pcomplete-match "^--" 0)
-    (cond
-     ;; TODO containers
-     ))
-  (when (pcomplete-match "^-" 1)
-    (cond
-     )))
-
-
-(pcmpl-subcommand ((kubectl auth)
-                   :global-flags pcmpl-kubectl-flags
-                   :flags
-                   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl auth" pcmpl-kubectl-flags))
-                   'nil))
-
-(pcmpl-subcommand ((kubectl auth can-i)
-                   :global-flags pcmpl-kubectl-flags
-                   :flags
-                   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl auth can-i" pcmpl-kubectl-flags))
-                   '("--all-namespaces" "-A" "--list" "--no-headers" "--quiet" "-q" "--subresource=" "--subresource")))
-
-(pcmpl-subcommand ((kubectl auth reconcile)
-                   :global-flags pcmpl-kubectl-flags
-                   :flags
-                   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl auth reconcile" pcmpl-kubectl-flags))
-                   '("--allow-missing-template-keys" "--dry-run" "--filename=" "--kustomize=" "--output=" "--recursive" "-R" "--remove-extra-permissions" "--remove-extra-subjects" "--show-managed-fields" "--template=" "--filename" "-f" "--kustomize" "-k" "--output" "-o" "--template"))
+                   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl auth reconcile" pcmpl-kubectl--global-flags))
+                   '("--allow-missing-template-keys"
+                     "--dry-run"
+                     "--filename"
+                     "--filename="
+                     "--kustomize"
+                     "--kustomize="
+                     "--output"
+                     "--output="
+                     "--recursive"
+                     "--remove-extra-permissions"
+                     "--remove-extra-subjects"
+                     "--show-managed-fields"
+                     "--template"
+                     "--template="
+                     "-R"
+                     "-f"
+                     "-k"
+                     "-o"))
   (when (pcomplete-match "^--" 0)
     (cond
      (pcmpl-kubectl--flag-filename=)
@@ -630,20 +786,8 @@
 
 ;;;###autoload
 (defun pcomplete/kubectl ()
-  "Completion for `kubectl'"
-  (pcmpl-kubectl)
-  (let* (current-subcommand)
-    (while t
-      ;; Look backwards at the last thing, if it's a subcommand, add
-      ;; it to the stack
-      (when (member (substring-no-properties (pcomplete-arg 1))
-                    (pcmpl-kubectl-get-subcommands (reverse current-subcommand)
-                                                   pcmpl-kubectl-commands))
-        (push (substring-no-properties (pcomplete-arg 1)) current-subcommand))
-      (let ((subcompletions (pcmpl-kubectl-get-deepest (reverse current-subcommand))))
-        (if (functionp subcompletions)
-            (funcall subcompletions)
-          (pcomplete-here* nil))))))
+  "Completion for kubectl."
+  (pcmpl-kubectl))
 
 (provide 'pcmpl-kubectl)
 ;;; pcmpl-kubectl.el ends here

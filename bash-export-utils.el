@@ -24,6 +24,8 @@
 
 ;;; Code:
 
+(require 'cl-lib)
+
 (defvar temp-dir)
 
 (defmacro rs//bash-complete-isolated (&rest body)
@@ -80,13 +82,16 @@
   ""
   (cl-letf* ((process-environment (append env process-environment)))
    (rs//bash-complete-isolated
-    (cl-set-difference
+    (cl-sort
+     (cl-set-difference
      (caddr
       (with-temp-buffer
         (insert (format "%s -" command-or-subcommand))
         (bash-completion-dynamic-complete-nocomint (line-beginning-position) (point))))
      global-flags
-     :test #'string-equal))))
+     :test #'string-equal)
+     'string-lessp
+     ))))
 
 (defun rs//replace-sexp (options)
   ""
