@@ -382,9 +382,82 @@
         (pcomplete-match "\\`--output\\'" 1))
     (pcomplete-here* ,outputs)))
 
+
 (defun pcmpl-kubectl--contexts ()
   (split-string
    (shell-command-to-string "kubectl config get-contexts -o name")))
+
+(defun pcmpl-kubectl--complete (type)
+  ""
+  (lambda ()
+   (split-string
+    (shell-command-to-string
+     (format "kubectl config view -o template --template=\"{{ range .%s}}{{ .name }}\n{{end}}\"" type)))))
+
+(plist-put pcmpl-me-completers :kubernetes-context (pcmpl-kubectl--complete "contexts"))
+(plist-put pcmpl-me-completers :kubernetes-user (pcmpl-kubectl--complete "users"))
+(plist-put pcmpl-me-completers :kubernetes-cluster (pcmpl-kubectl--complete "clusters"))
+
+(pcmpl-me-global-args kubectl
+  (:flags
+   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl"))
+   '((("--add-dir-header"
+       "--alsologtostderr"
+       "--one-output"
+       "--logtostderr"
+       "--match-server-version"
+       "--skip-headers"
+       "--skip-log-headers"
+       "--warnings-as-errors"))
+     (("--as"
+       "--as="
+       "--as-group"
+       "--as-group="
+       "--insecure-skip-tls-verify"
+       "--log-backtrace-at"
+       "--log-backtrace-at="
+       "--log-file-max-size"
+       "--log-file-max-size="
+       "--log-flush-frequency"
+       "--log-flush-frequency="
+       "-n"
+       "--namespace"
+       "--namespace="
+       "--password"
+       "--password="
+       "--profile-output"
+       "--profile-output="
+       "--request-timeout"
+       "--request-timeout="
+       "-s"
+       "--server"
+       "--server="
+       "--stderrthreshold"
+       "--stderrthreshold="
+       "--tls-server-name"
+       "--tls-server-name="
+       "--token"
+       "--token="
+       "--username"
+       "--username="
+       "--vmodule"
+       "--vmodule="
+       "-v"
+       "--v"
+       "--v="))
+     (("--profile" "--profile=")
+      . (:list "none" "cpu" "heap" "goroutine" "threadcreate" "block" "mutex"))
+     (("--cluster" "--cluster=") . (:kubernetes-cluster))
+     (("--user" "--user=") . (:kubernetes-user))
+     (("--context" "--context=") . (:kubernetes-context))
+     (("--log-file" "--log-file=" "--kubeconfig" "--kubeconfig="
+       "--certificate-authority" "--certificate-authority="
+       "--client-certificate" "--client-certificate="
+       "--client-key" "--client-key=")
+      . (:files))
+     (("--log-dir" "--log-dir="
+       "--cache-dir" "--cache-dir=")
+      . (:dirs)))))
 
 (pcmpl-subcommand ((kubectl)
                    :flags

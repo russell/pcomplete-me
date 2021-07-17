@@ -52,12 +52,12 @@
     `((pcomplete-match ,(format "\\`--%s\\'" (regexp-opt matchers-list)) 1)
       (pcomplete-here* (pcomplete-dirs)))))
 
-(defconst pcmpl-me-completers
+(defvar pcmpl-me-completers
   '(:files pcomplete-entries
            :dirs pcomplete-dirs
            :list list))
 
-(defun pcmpl-me--get-deepest (search-path )
+(defun pcmpl-me--get-deepest (search-path collected-subcommand)
   ""
   (let (
         ;; collect all the possible subcommands so we can search for
@@ -67,12 +67,16 @@
                             collect s into ss
                             collect (mapconcat 'identity ss " ")))))
     (assoc-default (seq-find
-                    (lambda (e) (assoc-default e pcmpl-kubectl-subcommand-flags)) searches)
-                   pcmpl-kubectl-subcommand-flags)))
+                    (lambda (e) (assoc-default e collected-subcommand)) searches)
+                   collected-subcommand)))
 
 (defun pcmpl-me--flags (pflags)
   "Return the combine all the flags from `PFLAGS'."
   (apply #'append (mapcar #'car pflags)))
+
+;; (apply #'append '(("--profile" "--profile=")))
+
+;; (pcmpl-me-global-args lorem (:flags '((("--profile" "--profile=") . (:files)))))
 
 (defun pcmpl-me--matcher-expression (plist)
   "Generate an expression for matchers from plist"
@@ -89,9 +93,10 @@
     ;; Add the final entry to the list
     (when pkey
       (push `(,(plist-get pcmpl-me-completers pkey) ,@args) matchers))
-    (if (> (length matchers) 1)
-        `(append ,@matchers)
-      (car matchers))))
+    (cond
+     ((> (length matchers) 1)
+      `(append ,@matchers))
+     (t (car matchers)))))
 
 (defun pcmpl-me--flag-matchers (pflags)
   ""
@@ -121,32 +126,49 @@
                        (cond
                         ,@conds)))))
 
-(cl-defmacro pcmpl-me-command ((name &key subcommands) &rest body)
-  `(progn
-     ,(when subcommands `(defconst ,(intern (mapconcat 'symbol-name `(pcmpl ,name subcommands) "-"))))))
-
-;; (macroexpand )
-
-;; (pcmpl-me-command (com :subcommands t))
-
-(cl-defmacro pcmpl-me-subcommand ((subcommand-list &key global-flags flags subcommands) &rest body)
+(cl-defmacro pcmpl-me-global-args (name (&key flags) &rest body)
   ""
   (declare (indent 1))
-  (let* ((collected-subcommands (intern (mapconcat 'symbol-name `(pcmpl ,(car subcommand-list) -subcommands) "-")))
-         (subcommand-fn (intern (mapconcat 'symbol-name `(pcmpl ,@subcommand-list) "-")))
-         (subcommand-flags (intern (mapconcat 'symbol-name `(pcmpl ,@subcommand-list flags) "-"))))
+  (let* ((flags (eval flags))
+         (global-fn (intern (mapconcat 'symbol-name `(pcmpl ,name -global-matchers) "-")))
+         (global-flags (intern (mapconcat 'symbol-name `(pcmpl ,name -global-flags) "-"))))
     `(progn
-       (defconst ,subcommand-flags
-         (append ,global-flags ,(pcmpl-me--flags flags)))
+       (defconst ,global-flags (quote ,(pcmpl-me--flags flags)))
 
-       (defun ,(intern (mapconcat 'symbol-name (append '(pcmpl) subcommand-list) "-")) ()
+       (defun ,global-fn ()
+         ,(pcmpl-me--flag-matchers flags)
+         ,@body))))
+
+;; (macroexpand
+;;  '(pcmpl-me-global-args lorem (:flags ((("--profile" "--profile=") . (:files))))))
+
+(cl-defmacro pcmpl-me-command (command (&key inherit-global-flags flags subcommands) &rest body)
+  ""
+  (declare (indent 1))
+  (let* ((flags (eval flags))
+         (subcommand-list (if (listp command) command (cons command nil)))
+         (global-command (car subcommand-list))
+         (collected-subcommands (intern (mapconcat 'symbol-name `(pcmpl ,(car subcommand-list) -subcommands) "-")))
+         (global-fn (intern (mapconcat 'symbol-name `(pcmpl ,global-command -global-matchers) "-")))
+         (global-flags (intern (mapconcat 'symbol-name `(pcmpl ,global-command -global-flags) "-")))
+         (subcommand-fn (intern (mapconcat 'symbol-name `(pcmpl ,@subcommand-list) "-")))
+         (subcommand-flags (intern (mapconcat 'symbol-name `(pcmpl ,@subcommand-list -flags) "-"))))
+    `(progn
+       (defconst ,subcommand-flags (quote ,(pcmpl-me--flags flags)))
+
+       (defun ,subcommand-fn ()
          (pcomplete-here* (append
                            ,(cond
                              ((functionp subcommands)
                               `(funcall ,subcommands))
                              ((listp subcommands)
-                              subcommands))
-                           ,subcommand-flags))
+                              (eval subcommands)))
+                           ,subcommand-flags
+                           ,@(when inherit-global-flags
+                              `(,global-flags))
+                           ))
+         ,(when inherit-global-flags
+             `(,global-fn))
          ,(pcmpl-me--flag-matchers flags)
          ,@body)
 
@@ -158,6 +180,10 @@
                                nil
                              (mapconcat 'symbol-name (cdr subcommand-list) " ")) (quote ,subcommand-fn))))))
 
+;; (macroexpand
+;;  '(pcmpl-me-command (lorem
+;;                      :flags ((("--profile" "--profile=") . (:files)))
+;;                      :subcommands car)))
 
 ;; (macroexpand '(pcmpl-me-subcommand ((lorem ipsum)
 ;;                        :flags ((("--profile" "--profile=") . (:files))))))
