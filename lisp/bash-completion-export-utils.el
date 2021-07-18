@@ -25,6 +25,7 @@
 ;;; Code:
 
 (require 'cl-lib)
+(require 'subr-x)
 (require 'bash-completion)
 
 (defvar temp-dir)
@@ -84,16 +85,16 @@
 (defun rs//bash-complete-flags (command-or-subcommand &optional global-flags env)
   ""
   (cl-letf* ((process-environment (append env process-environment)))
-   (rs//bash-complete-isolated
-    (cl-sort
-     (cl-set-difference
-      (caddr
-       (with-temp-buffer
-         (insert (format "%s -" command-or-subcommand))
-         (bash-completion-dynamic-complete-nocomint (line-beginning-position) (point))))
-      global-flags
-      :test #'string-equal)
-     'string-lessp))))
+    (rs//bash-complete-isolated
+     (cl-sort
+      (cl-set-difference
+       (caddr
+        (with-temp-buffer
+          (insert (format "%s -" command-or-subcommand))
+          (bash-completion-dynamic-complete-nocomint (line-beginning-position) (point))))
+       global-flags
+       :test #'string-equal)
+      'string-lessp))))
 
 (defun rs//replace-sexp (options)
   ""
@@ -103,17 +104,13 @@
     (insert (string-trim (format "'%s" (pp-to-string options)))))
   (indent-pp-sexp))
 
-
 (defun rs//bash-complete-kubectl-subcommands (command)
   ""
   (rs//bash-complete-recursive-subcommands command '("KUBECONFIG=/dev/null")))
 
 (defun rs//bash-complete-kubectl-flags (command &optional global-flags)
   ""
-  (rs//bash-complete-recursive-subcommands command global-flags '("KUBECONFIG=/dev/null")))
-
-
-
+  (rs//bash-complete-flags command global-flags '("KUBECONFIG=/dev/null")))
 
 (provide 'bash-completion-export-utils)
 ;;; bash-completion-export-utils.el ends here

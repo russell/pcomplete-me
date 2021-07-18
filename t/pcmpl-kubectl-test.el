@@ -25,6 +25,10 @@
 ;;; Code:
 
 (require 'pcmpl-kubectl)
+(require 'bash-completion-export-utils)
+
+(defconst pcmpl-kubectl-test-bashinit (format "%s/pcmpl-kubectl-test.sh"
+                                              (file-name-directory load-file-name)))
 
 (defun rs//bash-complete-kubectl-subcommand (command &optional global-flags)
   ""
@@ -45,7 +49,8 @@
             (cl-sort
              ,subcommand-flags
              'string-lessp)
-            (rs//bash-complete-flags ,(mapconcat 'symbol-name command-list " ") ,global-flags)
+            (let ((bash-completion-start-files `(,pcmpl-kubectl-test-bashinit)))
+              (rs//bash-complete-flags ,(mapconcat 'symbol-name command-list " ") ,global-flags))
             :test #'string-equal)
            nil)))
        (ert-deftest ,(intern (mapconcat 'symbol-name `(pcmpl ,@command-list -subcommands) "-")) ()
@@ -53,12 +58,13 @@
           (equal
            (cl-set-difference
             ,subcommand-subcommands
-            (rs//bash-complete-kubectl-subcommand ,(mapconcat 'symbol-name command-list " "))
+            (let ((bash-completion-start-files `(,pcmpl-kubectl-test-bashinit)))
+             (rs//bash-complete-kubectl-subcommand ,(mapconcat 'symbol-name command-list " ")))
             :test #'string-equal)
            nil))))))
 
 (pcmpl-me-test (kubectl annotate) (:inherit-global-flags t))
-(pcmpl-me-test (kubectl api-version) (:inherit-global-flags t))
+(pcmpl-me-test (kubectl api-versions) (:inherit-global-flags t))
 (pcmpl-me-test (kubectl api-resources) (:inherit-global-flags t))
 (pcmpl-me-test (kubectl apply) (:inherit-global-flags t))
 

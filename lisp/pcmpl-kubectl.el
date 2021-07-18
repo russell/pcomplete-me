@@ -25,8 +25,7 @@
 ;;; Code:
 
 (require 'cl-lib)
-(require 'pcomplete)
-;;(require 'pcomplete-me)
+(require 'pcomplete-me)
 
 (defconst pcmpl-kubectl-commands
   ;; (rs//replace-sexp (rs//bash-complete-kubectl-subcommands "kubectl"))
@@ -272,132 +271,22 @@
 
 (defconst pcmpl-kubectl-subcommand-flags nil)
 
-(defun pcmpl-kubectl-get-deepest (search-path)
-  ""
-  (let (
-        ;; collect all the possible subcommands so we can search for
-        ;; the farthest one.
-        (searches (reverse
-                   (cl-loop for s in search-path
-                            collect s into ss
-                            collect (mapconcat 'identity ss " ")))))
-    (assoc-default (seq-find
-                    (lambda (e) (assoc-default e pcmpl-kubectl-subcommand-flags)) searches)
-                   pcmpl-kubectl-subcommand-flags)))
-
-(defun pcmpl-kubectl-get-subcommands (search-path tree)
-  ""
-  (let ((subtree tree))
-    (dolist (command search-path)
-      (setq subtree (car (assoc-default command subtree))))
-    (mapcar #'car subtree)))
-
-(cl-defmacro pcmpl-subcommand ((subcommand-list &key global-flags flags subcommands) &rest body)
-  ""
-  (declare (indent 1))
-  (let ((subcommand-fn (intern (mapconcat 'symbol-name (append '(pcmpl) subcommand-list) "-")))
-        (subcommand-flags (intern (mapconcat 'symbol-name (append '(pcmpl) subcommand-list '(flags)) "-"))))
-    `(progn
-       (defconst ,subcommand-flags
-         (append ,global-flags ,flags))
-       (defun ,(intern (mapconcat 'symbol-name (append '(pcmpl) subcommand-list) "-")) ()
-         (pcomplete-here* (append
-                           (pcmpl-kubectl-get-subcommands (quote ,(mapcar 'symbol-name (cdr subcommand-list)))
-                                                          pcmpl-kubectl-commands)
-                           ,(unless (null subcommands)
-                              `(funcall ,subcommands))
-                           ,subcommand-flags))
-         ,@body)
-       (add-to-list 'pcmpl-kubectl-subcommand-flags
-                    (cons ,(if (null (cdr subcommand-list))
-                               nil
-                             (mapconcat 'symbol-name (cdr subcommand-list) " ")) (quote ,subcommand-fn))))))
-
-
-(defmacro pcmpl-kubectl--base-flag-file= (matchers)
-  ""
-  (let ((matchers-list (if (listp matchers) (eval matchers) (list matchers))))
-    `((pcomplete-match ,(format "\\`--%s=\\(.*\\)" (regexp-opt matchers-list)) 0)
-      (pcomplete-here* (pcomplete-entries)
-                       (pcomplete-match-string 1 0)))))
-
-(defmacro pcmpl-kubectl--base-flag-file (matchers)
-  ""
-  (let ((matchers-list (if (listp matchers) (eval matchers) (list matchers))))
-    `((pcomplete-match ,(format "\\`--%s\\'" (regexp-opt matchers-list)) 1)
-      (pcomplete-here* (pcomplete-entries)))))
-
-(defmacro pcmpl-kubectl--base-flag-directory= (matchers)
-  ""
-  (let ((matchers-list (if (listp matchers) (eval matchers) (list matchers))))
-    `((pcomplete-match ,(format "\\`--%s=\\(.*\\)" (regexp-opt matchers-list)) 0)
-      (pcomplete-here* (pcomplete-dirs)
-                       (pcomplete-match-string 1 0)))))
-
-(defmacro pcmpl-kubectl--base-flag-directory (matchers)
-  ""
-  (let ((matchers-list (if (listp matchers) (eval matchers) (list matchers))))
-    `((pcomplete-match ,(format "\\`--%s\\'" (regexp-opt matchers-list)) 1)
-      (pcomplete-here* (pcomplete-dirs)))))
-
-(defmacro pcmpl-kubectl--flag-filename= ()
-  ""
-  `((pcomplete-match "\\`--filename=\\(.*\\)" 0)
-    (pcomplete-here* (pcomplete-entries)
-                     (pcomplete-match-string 1 0))))
-
-(defmacro pcmpl-kubectl--flag-filename ()
-  ""
-  `((or (pcomplete-match "\\`-f\\'" 1)
-        (pcomplete-match "\\`--filename\\'" 1))
-    (pcomplete-here* (pcomplete-entries))))
-
-(defmacro pcmpl-kubectl--flag-kustomize= ()
-  ""
-  `((pcomplete-match "\\`--kustomize=\\(.*\\)" 0)
-    (pcomplete-here* (pcomplete-dirs)
-                     (pcomplete-match-string 1 0))))
-
-(defmacro pcmpl-kubectl--flag-kustomize ()
-  ""
-  `((or (pcomplete-match "\\`-k\\'" 1)
-        (pcomplete-match "\\`--kustomize\\'" 1))
-    (pcomplete-here* (pcomplete-dirs))))
-
-
 (defconst kubectl-output-all
   '("json" "yaml" "name" "go-template" "go-template-file" "template" "templatefile" "jsonpath" "jsonpath-as-json" "jsonpath-file"))
 
 (defconst kubectl-output-name
   '("name"))
 
-(defmacro pcmpl-kubectl--flag-output= (outputs)
-  ""
-  `((pcomplete-match "\\`--output=\\(.*\\)" 0)
-    (pcomplete-here* ,outputs
-                     (pcomplete-match-string 1 0))))
-
-(defmacro pcmpl-kubectl--flag-output (outputs)
-  ""
-  `((or (pcomplete-match "\\`-o\\'" 1)
-        (pcomplete-match "\\`--output\\'" 1))
-    (pcomplete-here* ,outputs)))
-
-
-(defun pcmpl-kubectl--contexts ()
-  (split-string
-   (shell-command-to-string "kubectl config get-contexts -o name")))
-
 (defun pcmpl-kubectl--complete (type)
   ""
-  (lambda ()
-    (split-string
-     (shell-command-to-string
-      (format "kubectl config view -o template --template=\"{{ range .%s}}{{ .name }}\n{{end}}\"" type)))))
+  (split-string
+   (shell-command-to-string
+    (format "kubectl config view -o template --template=\"{{ range .%s}}{{ .name }}\n{{end}}\"" type))))
 
-(plist-put pcmpl-me-completers :kubernetes-context (pcmpl-kubectl--complete "contexts"))
-(plist-put pcmpl-me-completers :kubernetes-user (pcmpl-kubectl--complete "users"))
-(plist-put pcmpl-me-completers :kubernetes-cluster (pcmpl-kubectl--complete "clusters"))
+(eval-when-compile
+ (plist-put pcmpl-me-completers :kubernetes-context (lambda () (pcmpl-kubectl--complete "contexts")))
+ (plist-put pcmpl-me-completers :kubernetes-user (lambda () (pcmpl-kubectl--complete "users")))
+ (plist-put pcmpl-me-completers :kubernetes-cluster (lambda () (pcmpl-kubectl--complete "clusters"))))
 
 (pcmpl-me-global-args kubectl
   (:flags
@@ -448,19 +337,16 @@
        "-v"
        "--v"
        "--v="))
-     (("--profile" "--profile=")
-      . (:list "none" "cpu" "heap" "goroutine" "threadcreate" "block" "mutex"))
+     (("--profile" "--profile=") . (:list "none" "cpu" "heap" "goroutine" "threadcreate" "block" "mutex"))
      (("--cluster" "--cluster=") . (:kubernetes-cluster))
      (("--user" "--user=") . (:kubernetes-user))
      (("--context" "--context=") . (:kubernetes-context))
      (("--log-file" "--log-file=" "--kubeconfig" "--kubeconfig="
        "--certificate-authority" "--certificate-authority="
        "--client-certificate" "--client-certificate="
-       "--client-key" "--client-key=")
-      . (:files))
+       "--client-key" "--client-key=") . (:files))
      (("--log-dir" "--log-dir="
-       "--cache-dir" "--cache-dir=")
-      . (:dirs)))))
+       "--cache-dir" "--cache-dir=") . (:dirs)))))
 
 (pcmpl-me-command kubectl
   (:inherit-global-flags
@@ -590,7 +476,7 @@
    ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl config delete-cluster" pcmpl-kubectl--global-flags))
    'nil
    :subcommands
-   (pcmpl-kubectl--complete "clusters")))
+   (lambda () (pcmpl-kubectl--complete "clusters"))))
 
 (pcmpl-me-command (kubectl config delete-context)
   (:inherit-global-flags
@@ -599,7 +485,7 @@
    ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl config delete-context" pcmpl-kubectl--global-flags))
    'nil
    :subcommands
-   (pcmpl-kubectl--complete "context")))
+   (lambda () (pcmpl-kubectl--complete "context"))))
 
 (pcmpl-me-command (kubectl config use-context)
   (:inherit-global-flags
@@ -608,7 +494,7 @@
    ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl config use-context" pcmpl-kubectl--global-flags))
    'nil
    :subcommands
-   (pcmpl-kubectl--complete "contexts")))
+   (lambda () (pcmpl-kubectl--complete "contexts"))))
 
 (pcmpl-me-command (kubectl api-resources)
   (:inherit-global-flags

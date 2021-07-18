@@ -25,6 +25,7 @@
 ;;; Code:
 
 (require 'cl-lib)
+(require 'pcomplete)
 
 (defmacro pcmpl-me--base-flag-file= (matchers)
   ""
@@ -99,7 +100,7 @@
      (t (car matchers)))))
 
 (defun pcmpl-me--flag-matchers (pflags)
-  ""
+  "Take `PFLAGS' and return matcher form."
   (cl-loop for (flags . matchers) in pflags
            for inline-flags = (seq-filter (lambda (s) (string-match-p "=\\'" s)) flags)
            for post-flags = (seq-filter (lambda (s) (string-match-p "[^=]\\'" s)) flags)
@@ -124,7 +125,7 @@
                                    (cond
                                     ,@inline-conds)))
                              ,(unless (null conds)
-                                 `(when (pcomplete-match "^-" 1)
+                                `(when (pcomplete-match "^-" 1)
                                    (cond
                                     ,@conds))))))
 
@@ -167,9 +168,10 @@
   (let* ((flags (eval flags))
          (command-list (if (listp command) command (cons command nil)))
          (global-command (car command-list))
-         (subcommands-list (when (and (listp subcommands) (not (functionp (car subcommands))))
+         (subcommands-list (when (and (listp subcommands)
+                                      (not (functionp (car subcommands)))
+                                      (not (eq (car subcommands) 'lambda)))
                              (eval subcommands)))
-         (collected-subcommands (intern (mapconcat 'symbol-name `(pcmpl ,(car command-list) -subcommands) "-")))
          (global-fn (intern (mapconcat 'symbol-name `(pcmpl ,global-command -global-matchers) "-")))
          (global-flags (intern (mapconcat 'symbol-name `(pcmpl ,global-command -global-flags) "-")))
          (subcommand-fn (intern (mapconcat 'symbol-name `(pcmpl ,@command-list) "-")))

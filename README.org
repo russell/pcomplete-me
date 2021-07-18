@@ -1,0 +1,5 @@
+* test
+
+  #+begin_src sh
+  nix-shell -p '(import ./default.nix).emacs-27-1'
+  #+end_src
