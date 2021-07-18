@@ -100,7 +100,7 @@
      (t (car matchers)))))
 
 (defun pcmpl-me--flag-matchers (pflags)
-  "Take `PFLAGS' and return matcher form."
+  "Take `PFLAGS' and return flag matcher form."
   (cl-loop for (flags . matchers) in pflags
            for inline-flags = (seq-filter (lambda (s) (string-match-p "=\\'" s)) flags)
            for post-flags = (seq-filter (lambda (s) (string-match-p "[^=]\\'" s)) flags)
@@ -120,13 +120,50 @@
            into conds
 
            finally return `(,@(unless (null inline-conds)
-                                `((when (pcomplete-match "^-" 0)
+                                `((when (pcomplete-match "\\`-" 0)
                                     (cond
                                      ,@inline-conds))))
                             ,@(unless (null conds)
-                                `((when (pcomplete-match "^-" 1)
+                                `((when (pcomplete-match "\\`-" 1)
                                     (cond
                                      ,@conds)))))))
+
+(defun pcmpl-me--flag-post-matchers (pflags)
+  "Take `PFLAGS' and return matcher form."
+  (cl-loop for (flags . matchers) in pflags
+           for post-flags = (seq-filter (lambda (s) (string-match-p "[^=]\\'" s)) flags)
+
+           when matchers
+           for match-expr = (pcmpl-me--matcher-expression matchers)
+
+           when  (and matchers post-flags)
+           collect `((pcomplete-match ,(format "\\`%s\\'" (regexp-opt-group post-flags nil t)) 1)
+                     (pcomplete-here* ,match-expr))
+           into conds
+
+           finally return `(,@(unless (null conds)
+                                `((when (pcomplete-match "\\`-" 1)
+                                    (cond
+                                     ,@conds)))))))
+
+(defun pcmpl-me--flag-inline-matchers (pflags)
+  "Take `PFLAGS' and return inline matcher form."
+  (cl-loop for (flags . matchers) in pflags
+           for inline-flags = (seq-filter (lambda (s) (string-match-p "=\\'" s)) flags)
+
+           when matchers
+           for match-expr = (pcmpl-me--matcher-expression matchers)
+
+           when (and matchers inline-flags)
+           collect `((pcomplete-match ,(format "\\`%s\\(.*\\)" (regexp-opt-group inline-flags nil t)) 0)
+                     (pcomplete-here* ,match-expr
+                                      (pcomplete-match-string 1 0) t))
+           into inline-conds
+
+           finally return `(,@(unless (null inline-conds)
+                                `((when (pcomplete-match "\\`-" 0)
+                                    (cond
+                                     ,@inline-conds)))))))
 
 (defun pcmpl-me--to-string (object)
   "Convert `OBJECT' to a string."
@@ -149,13 +186,18 @@
   ""
   (declare (indent 1))
   (let* ((flags (eval flags))
-         (global-fn (intern (mapconcat 'symbol-name `(pcmpl ,name -global-matchers) "-")))
+         (global-inline-fn (intern (mapconcat 'symbol-name `(pcmpl ,name -global-inline-matchers) "-")))
+         (global-post-fn (intern (mapconcat 'symbol-name `(pcmpl ,name -global-post-matchers) "-")))
          (global-flags (intern (mapconcat 'symbol-name `(pcmpl ,name -global-flags) "-"))))
     `(progn
        (defconst ,global-flags (quote ,(pcmpl-me--flags flags)))
 
-       (defun ,global-fn ()
-         ,@(pcmpl-me--flag-matchers flags)
+       (defun ,global-inline-fn ()
+         ,@(pcmpl-me--flag-inline-matchers flags)
+         ,@body)
+
+       (defun ,global-post-fn ()
+         ,@(pcmpl-me--flag-post-matchers flags)
          ,@body))))
 
 ;; (macroexpand
@@ -171,7 +213,8 @@
                                       (not (functionp (car subcommands)))
                                       (not (eq (car subcommands) 'lambda)))
                              (eval subcommands)))
-         (global-fn (intern (mapconcat 'symbol-name `(pcmpl ,global-command -global-matchers) "-")))
+         (global-inline-fn (intern (mapconcat 'symbol-name `(pcmpl ,global-command -global-inline-matchers) "-")))
+         (global-post-fn (intern (mapconcat 'symbol-name `(pcmpl ,global-command -global-post-matchers) "-")))
          (global-flags (intern (mapconcat 'symbol-name `(pcmpl ,global-command -global-flags) "-")))
          (subcommand-fn (intern (mapconcat 'symbol-name `(pcmpl ,@command-list) "-")))
          (subcommand-flags (intern (mapconcat 'symbol-name `(pcmpl ,@command-list -flags) "-")))
@@ -183,19 +226,30 @@
 
        (defun ,subcommand-fn ()
          (while t
-           (pcomplete-here* (append
-                             ,(cond
-                               ((or (functionp subcommands) (functionp (car subcommands)))
-                                `(funcall ,subcommands))
-                               ((listp subcommands)
-                                subcommand-subcommands))
-                             ,@(when inherit-global-flags
-                                 `(,global-flags))
-                             ,subcommand-flags))
-           ,@(pcmpl-me--flag-matchers flags)
+           ,@(pcmpl-me--flag-inline-matchers flags)
+           ,(when inherit-global-flags
+              `(,global-inline-fn))
+           (if (pcomplete-match "\\`-" 0)
+               (pcomplete-here* (append
+                                 ,(cond
+                                   ((or (functionp subcommands) (functionp (car subcommands)))
+                                    `(funcall ,subcommands))
+                                   ((listp subcommands)
+                                    subcommand-subcommands))
+                                 ,@(when inherit-global-flags
+                                     `(,global-flags))))
+             (pcomplete-here* (append
+                                 ,(cond
+                                   ((or (functionp subcommands) (functionp (car subcommands)))
+                                    `(funcall ,subcommands))
+                                   ((listp subcommands)
+                                    subcommand-subcommands))
+                                 ,subcommand-flags)))
+
+           ,@(pcmpl-me--flag-post-matchers flags)
            ,@(pcmpl-me--subcommand-matchers command-list subcommands-list)
            ,(when inherit-global-flags
-              `(,global-fn))
+              `(,global-post-fn))
            ,@body)))))
 
 ;; (macroexpand
