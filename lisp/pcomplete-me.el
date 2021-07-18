@@ -27,57 +27,14 @@
 (require 'cl-lib)
 (require 'pcomplete)
 
-(defmacro pcmpl-me--base-flag-file= (matchers)
-  ""
-  (let ((matchers-list (if (listp matchers) (eval matchers) (list matchers))))
-    `((pcomplete-match ,(format "\\`--%s=\\(.*\\)" (regexp-opt matchers-list)) 0)
-      (pcomplete-here* (pcomplete-entries)
-                       (pcomplete-match-string 1 0)))))
-
-(defmacro pcmpl-me--base-flag-file (matchers)
-  ""
-  (let ((matchers-list (if (listp matchers) (eval matchers) (list matchers))))
-    `((pcomplete-match ,(format "\\`--%s\\'" (regexp-opt matchers-list)) 1)
-      (pcomplete-here* (pcomplete-entries)))))
-
-(defmacro pcmpl-me--base-flag-directory= (matchers)
-  ""
-  (let ((matchers-list (if (listp matchers) (eval matchers) (list matchers))))
-    `((pcomplete-match ,(format "\\`--%s=\\(.*\\)" (regexp-opt matchers-list)) 0)
-      (pcomplete-here* (pcomplete-dirs)
-                       (pcomplete-match-string 1 0)))))
-
-(defmacro pcmpl-me--base-flag-directory (matchers)
-  ""
-  (let ((matchers-list (if (listp matchers) (eval matchers) (list matchers))))
-    `((pcomplete-match ,(format "\\`--%s\\'" (regexp-opt matchers-list)) 1)
-      (pcomplete-here* (pcomplete-dirs)))))
-
 (defvar pcmpl-me-completers
   '(:files pcomplete-entries
            :dirs pcomplete-dirs
            :list list))
 
-(defun pcmpl-me--get-deepest (search-path collected-subcommand)
-  ""
-  (let (
-        ;; collect all the possible subcommands so we can search for
-        ;; the farthest one.
-        (searches (reverse
-                   (cl-loop for s in search-path
-                            collect s into ss
-                            collect (mapconcat 'identity ss " ")))))
-    (assoc-default (seq-find
-                    (lambda (e) (assoc-default e collected-subcommand)) searches)
-                   collected-subcommand)))
-
 (defun pcmpl-me--flags (pflags)
   "Return the combine all the flags from `PFLAGS'."
   (apply #'append (mapcar #'car pflags)))
-
-;; (apply #'append '(("--profile" "--profile=")))
-
-;; (pcmpl-me-global-args lorem (:flags '((("--profile" "--profile=") . (:files)))))
 
 (defun pcmpl-me--matcher-expression (plist)
   "Generate an expression for matchers from plist"
@@ -251,14 +208,6 @@
            ,(when inherit-global-flags
               `(,global-post-fn))
            ,@body)))))
-
-;; (macroexpand
-;;  '(pcmpl-me-command (lorem
-;;                      :flags ((("--profile" "--profile=") . (:files)))
-;;                      :subcommands car)))
-
-;; (macroexpand '(pcmpl-me-subcommand ((lorem ipsum)
-;;                        :flags ((("--profile" "--profile=") . (:files))))))
 
 (provide 'pcomplete-me)
 ;;; pcomplete-me.el ends here
