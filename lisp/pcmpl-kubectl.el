@@ -434,10 +434,7 @@
 
 (pcmpl-me-command (kubectl api-versions)
   (:inherit-global-flags
-   t
-   :flags
-   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl api-versions" pcmpl-kubectl--global-flags))
-   'nil))
+   t))
 
 (pcmpl-me-command (kubectl config)
   (:inherit-global-flags
@@ -457,42 +454,57 @@
      "set-credentials"
      "unset"
      "use-context"
-     "view")
-   :flags
-   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl config" pcmpl-kubectl--global-flags))
-   'nil))
+     "view")))
 
 (pcmpl-me-command (kubectl config current-context)
   (:inherit-global-flags
-   t
-   :flags
-   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl config current-context" pcmpl-kubectl--global-flags))
-   'nil))
+   t))
 
 (pcmpl-me-command (kubectl config delete-cluster)
   (:inherit-global-flags
    t
-   :flags
-   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl config delete-cluster" pcmpl-kubectl--global-flags))
-   'nil
    :subcommands
    (lambda () (pcmpl-kubectl--complete "clusters"))))
 
 (pcmpl-me-command (kubectl config delete-context)
   (:inherit-global-flags
    t
-   :flags
-   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl config delete-context" pcmpl-kubectl--global-flags))
-   'nil
+   :subcommands
+   (lambda () (pcmpl-kubectl--complete "contexts"))))
+
+(pcmpl-me-command (kubectl config delete-user)
+  (:inherit-global-flags
+   t
+   :subcommands
+   (lambda () (pcmpl-kubectl--complete "users"))))
+
+(pcmpl-me-command (kubectl config get-clusters)
+  (:inherit-global-flags
+   t
+   :subcommands
+   (lambda () (pcmpl-kubectl--complete "clusters"))))
+
+(pcmpl-me-command (kubectl config get-contexts)
+  (:inherit-global-flags
+   t
+   :subcommands
+   (lambda () (pcmpl-kubectl--complete "contexts"))))
+
+(pcmpl-me-command (kubectl config get-users)
+  (:inherit-global-flags
+   t
+   :subcommands
+   (lambda () (pcmpl-kubectl--complete "users"))))
+
+(pcmpl-me-command (kubectl config rename-context)
+  (:inherit-global-flags
+   t
    :subcommands
    (lambda () (pcmpl-kubectl--complete "contexts"))))
 
 (pcmpl-me-command (kubectl config use-context)
   (:inherit-global-flags
    t
-   :flags
-   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl config use-context" pcmpl-kubectl--global-flags))
-   'nil
    :subcommands
    (lambda () (pcmpl-kubectl--complete "contexts"))))
 

@@ -81,6 +81,11 @@
 (pcmpl-me-test (kubectl config current-context) (:inherit-global-flags t))
 (pcmpl-me-test (kubectl config delete-cluster) (:inherit-global-flags t))
 (pcmpl-me-test (kubectl config delete-context) (:inherit-global-flags t))
+(pcmpl-me-test (kubectl config delete-user) (:inherit-global-flags t))
+(pcmpl-me-test (kubectl config get-clusters) (:inherit-global-flags t))
+(pcmpl-me-test (kubectl config get-contexts) (:inherit-global-flags t))
+(pcmpl-me-test (kubectl config get-users) (:inherit-global-flags t))
+(pcmpl-me-test (kubectl config rename-context) (:inherit-global-flags t))
 (pcmpl-me-test (kubectl config use-context) (:inherit-global-flags t))
 (pcmpl-me-test (kubectl config) (:inherit-global-flags t))
 
