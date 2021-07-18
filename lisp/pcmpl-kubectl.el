@@ -341,12 +341,13 @@
      (("--cluster" "--cluster=") . (:kubernetes-cluster))
      (("--user" "--user=") . (:kubernetes-user))
      (("--context" "--context=") . (:kubernetes-context))
-     (("--log-file" "--log-file=" "--kubeconfig" "--kubeconfig="
-       "--certificate-authority" "--certificate-authority="
-       "--client-certificate" "--client-certificate="
-       "--client-key" "--client-key=") . (:files))
-     (("--log-dir" "--log-dir="
-       "--cache-dir" "--cache-dir=") . (:dirs)))))
+     (("--log-file" "--log-file=") . (:files))
+     (("--kubeconfig" "--kubeconfig=") . (:files))
+     (("--certificate-authority" "--certificate-authority=") . (:files))
+     (("--client-certificate" "--client-certificate=") . (:files))
+     (("--client-key" "--client-key=") . (:files))
+     (("--log-dir" "--log-dir=") . (:dirs))
+     (("--cache-dir" "--cache-dir=") . (:dirs)))))
 
 (pcmpl-me-command kubectl
   (:inherit-global-flags
@@ -487,8 +488,8 @@
        "-R"
        "-f"
        "-l"))
-     (("-k" "--kustomize" "--kustomize=") . (:dirs))
-     (("-f" "--filename" "--filename=") . (:files))
+     (("--kustomize" "--kustomize=" "-k") . (:dirs))
+     (("--filename" "--filename=" "-f") . (:files))
      (("--output" "--output=" "-o") . (:list "json" "yaml" "name" "go-template" "go-template-file" "template" "templatefile" "jsonpath" "jsonpath-as-json" "jsonpath-file"))
      (("--cascade") . (:list "background" "orphan" "foreground"))
      (("--dry-run") . (:list "none" "server" "client")))
@@ -511,8 +512,8 @@
        "--template="
        "--windows-line-endings"
        "-R"))
-     (("-k" "--kustomize" "--kustomize=") . (:dirs))
-     (("-f" "--filename" "--filename=") . (:files))
+     (("--kustomize" "--kustomize=" "-k") . (:dirs))
+     (("--filename" "--filename=" "-f") . (:files))
      (("--output" "--output=" "-o") . (:list "json" "yaml" "name" "go-template" "go-template-file" "template" "templatefile" "jsonpath" "jsonpath-as-json" "jsonpath-file")))))
 
 (pcmpl-me-command (kubectl apply set-last-applied)
@@ -527,7 +528,7 @@
        "--template"
        "--template="
        "-f"))
-     (("-f" "--filename" "--filename=") . (:files))
+     (("--filename" "--filename=" "-f") . (:files))
      (("--output" "--output=" "-o") . (:list "json" "yaml" "name" "go-template" "go-template-file" "template" "templatefile" "jsonpath" "jsonpath-as-json" "jsonpath-file")))))
 
 (pcmpl-me-command (kubectl apply view-last-applied)
@@ -536,7 +537,7 @@
    :flags
    ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl apply view-last-applied" pcmpl-kubectl--global-flags))
    '((("--all" "--recursive" "--selector" "--selector=" "-R" "-l"))
-     (("-f" "--filename" "--filename=") . (:files))
+     (("--filename" "--filename=" "-f") . (:files))
      (("--output" "--output=" "-o") . (:list "json" "yaml" "name" "go-template" "go-template-file" "template" "templatefile" "jsonpath" "jsonpath-as-json" "jsonpath-file")))))
 
 (pcmpl-me-command (kubectl attach)
@@ -596,8 +597,8 @@
        "--template="
        "-R"
        "-o"))
-     (("-k" "--kustomize" "--kustomize=") . (:dirs))
-     (("-f" "--filename" "--filename=") . (:files)))))
+     (("--kustomize" "--kustomize=" "-k") . (:dirs))
+     (("--filename" "--filename=" "-f") . (:files)))))
 
 (pcmpl-me-command (kubectl autoscale)
   (:inherit-global-flags
@@ -654,8 +655,8 @@
        "--template="
        "-R"
        "-o"))
-     (("-k" "--kustomize" "--kustomize=") . (:dirs))
-     (("-f" "--filename" "--filename=") . (:files)))))
+     (("--kustomize" "--kustomize=" "-k") . (:dirs))
+     (("--filename" "--filename=" "-f") . (:files)))))
 
 (pcmpl-me-command (kubectl certificate deny)
   (:inherit-global-flags
@@ -672,8 +673,8 @@
        "--template="
        "-R"
        "-o"))
-     (("-k" "--kustomize" "--kustomize=") . (:dirs))
-     (("-f" "--filename" "--filename=") . (:files)))))
+     (("--kustomize" "--kustomize=" "-k") . (:dirs))
+     (("--filename" "--filename=" "-f") . (:files)))))
 
 (pcmpl-me-command (kubectl cluster-info)
   (:inherit-global-flags t))
