@@ -119,15 +119,14 @@
                      (pcomplete-here* ,match-expr))
            into conds
 
-           finally return `(progn
-                             ,(unless (null inline-conds)
-                                `(when (pcomplete-match "^-" 0)
-                                   (cond
-                                    ,@inline-conds)))
-                             ,(unless (null conds)
-                                `(when (pcomplete-match "^-" 1)
-                                   (cond
-                                    ,@conds))))))
+           finally return `(,@(unless (null inline-conds)
+                                `((when (pcomplete-match "^-" 0)
+                                    (cond
+                                     ,@inline-conds))))
+                            ,@(unless (null conds)
+                                `((when (pcomplete-match "^-" 1)
+                                    (cond
+                                     ,@conds)))))))
 
 (defun pcmpl-me--to-string (object)
   "Convert `OBJECT' to a string."
@@ -156,7 +155,7 @@
        (defconst ,global-flags (quote ,(pcmpl-me--flags flags)))
 
        (defun ,global-fn ()
-         ,(pcmpl-me--flag-matchers flags)
+         ,@(pcmpl-me--flag-matchers flags)
          ,@body))))
 
 ;; (macroexpand
@@ -192,7 +191,7 @@
                              ,@(when inherit-global-flags
                                  `(,global-flags))
                              ,subcommand-flags))
-           ,(pcmpl-me--flag-matchers flags)
+           ,@(pcmpl-me--flag-matchers flags)
            ,(pcmpl-me--subcommand-matchers command-list subcommands-list)
            ,(when inherit-global-flags
               `(,global-fn))
