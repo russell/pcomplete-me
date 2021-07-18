@@ -143,7 +143,7 @@
                      (,(intern (mapconcat 'pcmpl-me--to-string `(pcmpl ,@command ,subcommand) "-"))))
            into conds
 
-           finally return `(cond ,@conds)))
+           finally return (when conds `((cond ,@conds)))))
 
 (cl-defmacro pcmpl-me-global-args (name (&key flags) &rest body)
   ""
@@ -192,7 +192,7 @@
                                  `(,global-flags))
                              ,subcommand-flags))
            ,@(pcmpl-me--flag-matchers flags)
-           ,(pcmpl-me--subcommand-matchers command-list subcommands-list)
+           ,@(pcmpl-me--subcommand-matchers command-list subcommands-list)
            ,(when inherit-global-flags
               `(,global-fn))
            ,@body)))))
