@@ -284,9 +284,9 @@
     (format "kubectl config view -o template --template=\"{{ range .%s}}{{ .name }}\n{{end}}\"" type))))
 
 (eval-when-compile
- (plist-put pcmpl-me-completers :kubernetes-context (lambda () (pcmpl-kubectl--complete "contexts")))
- (plist-put pcmpl-me-completers :kubernetes-user (lambda () (pcmpl-kubectl--complete "users")))
- (plist-put pcmpl-me-completers :kubernetes-cluster (lambda () (pcmpl-kubectl--complete "clusters"))))
+  (plist-put pcmpl-me-completers :kubernetes-context (lambda () (pcmpl-kubectl--complete "contexts")))
+  (plist-put pcmpl-me-completers :kubernetes-user (lambda () (pcmpl-kubectl--complete "users")))
+  (plist-put pcmpl-me-completers :kubernetes-cluster (lambda () (pcmpl-kubectl--complete "clusters"))))
 
 (pcmpl-me-global-args kubectl
   (:flags
@@ -436,78 +436,6 @@
   (:inherit-global-flags
    t))
 
-(pcmpl-me-command (kubectl config)
-  (:inherit-global-flags
-   t
-   :subcommands
-   '("current-context"
-     "delete-cluster"
-     "delete-context"
-     "delete-user"
-     "get-clusters"
-     "get-contexts"
-     "get-users"
-     "rename-context"
-     "set"
-     "set-cluster"
-     "set-context"
-     "set-credentials"
-     "unset"
-     "use-context"
-     "view")))
-
-(pcmpl-me-command (kubectl config current-context)
-  (:inherit-global-flags
-   t))
-
-(pcmpl-me-command (kubectl config delete-cluster)
-  (:inherit-global-flags
-   t
-   :subcommands
-   (lambda () (pcmpl-kubectl--complete "clusters"))))
-
-(pcmpl-me-command (kubectl config delete-context)
-  (:inherit-global-flags
-   t
-   :subcommands
-   (lambda () (pcmpl-kubectl--complete "contexts"))))
-
-(pcmpl-me-command (kubectl config delete-user)
-  (:inherit-global-flags
-   t
-   :subcommands
-   (lambda () (pcmpl-kubectl--complete "users"))))
-
-(pcmpl-me-command (kubectl config get-clusters)
-  (:inherit-global-flags
-   t
-   :subcommands
-   (lambda () (pcmpl-kubectl--complete "clusters"))))
-
-(pcmpl-me-command (kubectl config get-contexts)
-  (:inherit-global-flags
-   t
-   :subcommands
-   (lambda () (pcmpl-kubectl--complete "contexts"))))
-
-(pcmpl-me-command (kubectl config get-users)
-  (:inherit-global-flags
-   t
-   :subcommands
-   (lambda () (pcmpl-kubectl--complete "users"))))
-
-(pcmpl-me-command (kubectl config rename-context)
-  (:inherit-global-flags
-   t
-   :subcommands
-   (lambda () (pcmpl-kubectl--complete "contexts"))))
-
-(pcmpl-me-command (kubectl config use-context)
-  (:inherit-global-flags
-   t
-   :subcommands
-   (lambda () (pcmpl-kubectl--complete "contexts"))))
-
 (pcmpl-me-command (kubectl api-resources)
   (:inherit-global-flags
    t
@@ -629,6 +557,7 @@
      ;; TODO support finding containers
      (("--container" "--container=")))))
 
+
 (pcmpl-me-command (kubectl auth)
   (:inherit-global-flags
    t
@@ -669,6 +598,188 @@
        "-o"))
      (("-k" "--kustomize" "--kustomize=") . (:dirs))
      (("-f" "--filename" "--filename=") . (:files)))))
+
+(pcmpl-me-command (kubectl autoscale)
+  (:inherit-global-flags
+   t
+   :flags
+   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl autoscale" pcmpl-kubectl--global-flags))
+   '((("--max=")))
+   :subcommands
+   '("deployment" "replicaset" "replicationcontroller" "statefulset")))
+
+(pcmpl-me-command (kubectl autoscale deployment)
+  (:inherit-global-flags
+   t
+   :flags
+   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl autoscale deployment" pcmpl-kubectl--global-flags))
+   '((("--max=")))))
+
+(pcmpl-me-command (kubectl autoscale replicaset)
+  (:inherit-global-flags
+   t
+   :flags
+   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl autoscale replicaset" pcmpl-kubectl--global-flags))
+   '((("--max=")))))
+
+(pcmpl-me-command (kubectl autoscale replicationcontroller)
+  (:inherit-global-flags
+   t
+   :flags
+   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl autoscale replicationcontroller" pcmpl-kubectl--global-flags))
+   '((("--max=")))))
+
+(pcmpl-me-command (kubectl autoscale statefulset)
+  (:inherit-global-flags
+   t
+   :flags
+   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl autoscale statefulset" pcmpl-kubectl--global-flags))
+   '((("--max=")))))
+
+(pcmpl-me-command (kubectl certificate)
+  (:inherit-global-flags t))
+
+(pcmpl-me-command (kubectl certificate approve)
+  (:inherit-global-flags
+   t
+   :flags
+   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl certificate approve" pcmpl-kubectl--global-flags))
+   '((("--allow-missing-template-keys"
+       "--force"
+       "--output"
+       "--output="
+       "--recursive"
+       "--show-managed-fields"
+       "--template"
+       "--template="
+       "-R"
+       "-o"))
+     (("-k" "--kustomize" "--kustomize=") . (:dirs))
+     (("-f" "--filename" "--filename=") . (:files)))))
+
+(pcmpl-me-command (kubectl certificate deny)
+  (:inherit-global-flags
+   t
+   :flags
+   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl certificate deny" pcmpl-kubectl--global-flags))
+   '((("--allow-missing-template-keys"
+       "--force"
+       "--output"
+       "--output="
+       "--recursive"
+       "--show-managed-fields"
+       "--template"
+       "--template="
+       "-R"
+       "-o"))
+     (("-k" "--kustomize" "--kustomize=") . (:dirs))
+     (("-f" "--filename" "--filename=") . (:files)))))
+
+(pcmpl-me-command (kubectl cluster-info)
+  (:inherit-global-flags t))
+
+(pcmpl-me-command (kubectl cluster-info dump)
+  (:inherit-global-flags
+   t
+   :flags
+   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl cluster-info dump" pcmpl-kubectl--global-flags))
+   '((("--all-namespaces"
+       "--allow-missing-template-keys"
+       "--namespaces"
+       "--namespaces="
+       "--output"
+       "--output-directory"
+       "--output-directory="
+       "--output="
+       "--pod-running-timeout"
+       "--pod-running-timeout="
+       "--show-managed-fields"
+       "--template"
+       "--template="
+       "-A"
+       "-o")))
+   ))
+
+(pcmpl-me-command (kubectl completion)
+  (:inherit-global-flags t))
+
+(pcmpl-me-command (kubectl completion bash)
+  (:inherit-global-flags t))
+
+(pcmpl-me-command (kubectl completion zsh)
+  (:inherit-global-flags t))
+
+(pcmpl-me-command (kubectl config)
+  (:inherit-global-flags
+   t
+   :subcommands
+   '("current-context"
+     "delete-cluster"
+     "delete-context"
+     "delete-user"
+     "get-clusters"
+     "get-contexts"
+     "get-users"
+     "rename-context"
+     "set"
+     "set-cluster"
+     "set-context"
+     "set-credentials"
+     "unset"
+     "use-context"
+     "view")))
+
+(pcmpl-me-command (kubectl config current-context)
+  (:inherit-global-flags
+   t))
+
+(pcmpl-me-command (kubectl config delete-cluster)
+  (:inherit-global-flags
+   t
+   :subcommands
+   (lambda () (pcmpl-kubectl--complete "clusters"))))
+
+(pcmpl-me-command (kubectl config delete-context)
+  (:inherit-global-flags
+   t
+   :subcommands
+   (lambda () (pcmpl-kubectl--complete "contexts"))))
+
+(pcmpl-me-command (kubectl config delete-user)
+  (:inherit-global-flags
+   t
+   :subcommands
+   (lambda () (pcmpl-kubectl--complete "users"))))
+
+(pcmpl-me-command (kubectl config get-clusters)
+  (:inherit-global-flags
+   t
+   :subcommands
+   (lambda () (pcmpl-kubectl--complete "clusters"))))
+
+(pcmpl-me-command (kubectl config get-contexts)
+  (:inherit-global-flags
+   t
+   :subcommands
+   (lambda () (pcmpl-kubectl--complete "contexts"))))
+
+(pcmpl-me-command (kubectl config get-users)
+  (:inherit-global-flags
+   t
+   :subcommands
+   (lambda () (pcmpl-kubectl--complete "users"))))
+
+(pcmpl-me-command (kubectl config rename-context)
+  (:inherit-global-flags
+   t
+   :subcommands
+   (lambda () (pcmpl-kubectl--complete "contexts"))))
+
+(pcmpl-me-command (kubectl config use-context)
+  (:inherit-global-flags
+   t
+   :subcommands
+   (lambda () (pcmpl-kubectl--complete "contexts"))))
 
 
 ;;
