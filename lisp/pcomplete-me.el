@@ -25,12 +25,23 @@
 ;;; Code:
 
 (require 'cl-lib)
+(require 'subr-x)
 (require 'pcomplete)
+
+(defvar pcmpl-me--context nil)
 
 (defvar pcmpl-me-completers
   '(:files pcomplete-entries
            :dirs pcomplete-dirs
            :list list))
+
+(defun pcmpl-me--context-get (key)
+  ""
+  (assoc key pcmpl-me--context))
+
+(defun pcmpl-me--context-set (key value)
+  ""
+  (push (cons key value) pcmpl-me--context))
 
 (defun pcmpl-me--flags (pflags)
   "Return the combine all the flags from `PFLAGS'."
@@ -56,46 +67,21 @@
       `(append ,@matchers))
      (t (car matchers)))))
 
-(defun pcmpl-me--flag-matchers (pflags)
-  "Take `PFLAGS' and return flag matcher form."
-  (cl-loop for (flags . matchers) in pflags
-           for inline-flags = (seq-filter (lambda (s) (string-match-p "=\\'" s)) flags)
-           for post-flags = (seq-filter (lambda (s) (string-match-p "[^=]\\'" s)) flags)
-
-           when matchers
-           for match-expr = (pcmpl-me--matcher-expression matchers)
-
-           when (and matchers inline-flags)
-           collect `((pcomplete-match ,(format "\\`%s\\(.*\\)" (regexp-opt-group inline-flags nil t)) 0)
-                     (pcomplete-here* ,match-expr
-                                      (pcomplete-match-string 1 0)))
-           into inline-conds
-
-           when  (and matchers post-flags)
-           collect `((pcomplete-match ,(format "\\`%s\\'" (regexp-opt-group post-flags nil t)) 1)
-                     (pcomplete-here* ,match-expr))
-           into conds
-
-           finally return `(,@(unless (null inline-conds)
-                                `((when (pcomplete-match "\\`-" 0)
-                                    (cond
-                                     ,@inline-conds))))
-                            ,@(unless (null conds)
-                                `((when (pcomplete-match "\\`-" 1)
-                                    (cond
-                                     ,@conds)))))))
-
 (defun pcmpl-me--flag-post-matchers (pflags)
-  "Take `PFLAGS' and return matcher form."
+  "Take `PFLAGS' and return post matcher form."
   (cl-loop for (flags . matchers) in pflags
            for post-flags = (seq-filter (lambda (s) (string-match-p "[^=]\\'" s)) flags)
 
            when matchers
            for match-expr = (pcmpl-me--matcher-expression matchers)
 
+           when flags
+           for flag-keyword = (intern (format ":%s" (string-trim (car flags) "[- \t\n\r]+" "[= \t\n\r]+")))
+
            when  (and matchers post-flags)
            collect `((pcomplete-match ,(format "\\`%s\\'" (regexp-opt-group post-flags nil t)) 1)
-                     (pcomplete-here* ,match-expr))
+                     (pcomplete-here* ,match-expr)
+                     (pcmpl-me--context-set ,flag-keyword (pcomplete-arg 1)))
            into conds
 
            finally return `(,@(unless (null conds)
@@ -111,10 +97,15 @@
            when matchers
            for match-expr = (pcmpl-me--matcher-expression matchers)
 
+           when inline-flags
+           for flag-keyword = (intern (format ":%s" (string-trim  (car flags) "[- \t\n\r]+" "[= \t\n\r]+")))
+
            when (and matchers inline-flags)
            collect `((pcomplete-match ,(format "\\`%s\\(.*\\)" (regexp-opt-group inline-flags nil t)) 0)
                      (pcomplete-here* ,match-expr
-                                      (pcomplete-match-string 1 0) t))
+                                      (pcomplete-match-string 1 0) t)
+                     (pcomplete-match ,(format "\\`%s\\(.*\\)" (regexp-opt-group inline-flags nil t)) 1)
+                     (pcmpl-me--context-set ,flag-keyword (pcomplete-match-string 1)))
            into inline-conds
 
            finally return `(,@(unless (null inline-conds)
@@ -142,72 +133,81 @@
 (cl-defmacro pcmpl-me-global-args (name (&key flags) &rest body)
   ""
   (declare (indent 1))
-  (let* ((flags (eval flags))
-         (global-inline-fn (intern (mapconcat 'symbol-name `(pcmpl ,name -global-inline-matchers) "-")))
-         (global-post-fn (intern (mapconcat 'symbol-name `(pcmpl ,name -global-post-matchers) "-")))
-         (global-flags (intern (mapconcat 'symbol-name `(pcmpl ,name -global-flags) "-"))))
-    `(progn
-       (defconst ,global-flags (quote ,(pcmpl-me--flags flags)))
+  (cl-flet ((intern-symbol (args) (intern (mapconcat 'symbol-name args "-"))))
+    (let* ((flags (eval flags))
+           (global-inline-fn (intern-symbol `(pcmpl ,name -global-inline-matchers)))
+           (global-post-fn (intern-symbol `(pcmpl ,name -global-post-matchers)))
+           (global-flags (intern-symbol `(pcmpl ,name -global-flags))))
+      `(progn
+         (defconst ,global-flags (quote ,(pcmpl-me--flags flags)))
 
-       (defun ,global-inline-fn ()
-         ,@(pcmpl-me--flag-inline-matchers flags)
-         ,@body)
+         (defun ,global-inline-fn ()
+           ,@(pcmpl-me--flag-inline-matchers flags)
+           ,@body)
 
-       (defun ,global-post-fn ()
-         ,@(pcmpl-me--flag-post-matchers flags)
-         ,@body))))
-
-;; (macroexpand
-;;  '(pcmpl-me-global-args lorem (:flags ((("--profile" "--profile=") . (:files))))))
+         (defun ,global-post-fn ()
+           ,@(pcmpl-me--flag-post-matchers flags)
+           ,@body)))))
 
 (cl-defmacro pcmpl-me-command (command (&key inherit-global-flags flags subcommands) &rest body)
   ""
   (declare (indent 1))
-  (let* ((flags (eval flags))
-         (command-list (if (listp command) command (cons command nil)))
-         (global-command (car command-list))
-         (subcommands-list (when (and (listp subcommands)
-                                      (not (functionp (car subcommands)))
-                                      (not (eq (car subcommands) 'lambda)))
-                             (eval subcommands)))
-         (global-inline-fn (intern (mapconcat 'symbol-name `(pcmpl ,global-command -global-inline-matchers) "-")))
-         (global-post-fn (intern (mapconcat 'symbol-name `(pcmpl ,global-command -global-post-matchers) "-")))
-         (global-flags (intern (mapconcat 'symbol-name `(pcmpl ,global-command -global-flags) "-")))
-         (subcommand-fn (intern (mapconcat 'symbol-name `(pcmpl ,@command-list) "-")))
-         (subcommand-flags (intern (mapconcat 'symbol-name `(pcmpl ,@command-list -flags) "-")))
-         (subcommand-subcommands (intern (mapconcat 'symbol-name `(pcmpl ,@command-list -subcommands) "-"))))
-    `(progn
-       (defconst ,subcommand-flags (quote ,(pcmpl-me--flags flags)))
-       (defconst ,subcommand-subcommands ,(unless (or (functionp subcommands) (functionp (car subcommands)))
-                                            subcommands))
+  (cl-flet ((intern-symbol (args) (intern (mapconcat 'symbol-name args "-"))))
+   (let* ((flags (eval flags))
+          (command-list (if (listp command) command (cons command nil)))
+          (global-command (car command-list))
+          (subcommands-list (when (and (listp subcommands)
+                                       (not (functionp (car subcommands)))
+                                       (not (eq (car subcommands) 'lambda)))
+                              (eval subcommands)))
+          (global-inline-fn (intern-symbol `(pcmpl ,global-command -global-inline-matchers)))
+          (global-post-fn (intern-symbol `(pcmpl ,global-command -global-post-matchers)))
+          (global-flags (intern-symbol `(pcmpl ,global-command -global-flags)))
+          (subcommand-fn (intern-symbol `(pcmpl ,@command-list)))
+          (subcommand-flags (intern-symbol `(pcmpl ,@command-list -flags)))
+          (subcommand-subcommands (intern-symbol `(pcmpl ,@command-list -subcommands))))
+     `(progn
+        (defconst ,subcommand-flags (quote ,(pcmpl-me--flags flags)))
+        (defconst ,subcommand-subcommands ,(unless (or (functionp subcommands)
+                                                       (functionp (car subcommands)))
+                                             subcommands))
 
-       (defun ,subcommand-fn ()
-         (while t
-           ,@(pcmpl-me--flag-inline-matchers flags)
-           ,(when inherit-global-flags
-              `(,global-inline-fn))
-           (if (pcomplete-match "\\`-" 0)
-               (pcomplete-here* (append
-                                 ,(cond
-                                   ((or (functionp subcommands) (functionp (car subcommands)))
-                                    `(funcall ,subcommands))
-                                   ((listp subcommands)
-                                    subcommand-subcommands))
-                                 ,@(when inherit-global-flags
-                                     `(,global-flags))))
-             (pcomplete-here* (append
-                                 ,(cond
-                                   ((or (functionp subcommands) (functionp (car subcommands)))
-                                    `(funcall ,subcommands))
-                                   ((listp subcommands)
-                                    subcommand-subcommands))
-                                 ,subcommand-flags)))
+        (defun ,subcommand-fn ()
+          (while t
+            ,@(pcmpl-me--flag-inline-matchers flags)
+            ,(when inherit-global-flags
+               `(,global-inline-fn))
+            ,(if subcommands
+                 `(if (pcomplete-match "\\`-" 0)
+                      (pcomplete-here* (append
+                                        ,(cond
+                                          ((or (functionp subcommands) (functionp (car subcommands)))
+                                           `(funcall ,subcommands))
+                                          ((listp subcommands)
+                                           subcommand-subcommands))
+                                        ,@(when inherit-global-flags
+                                            `(,global-flags))))
+                    (pcomplete-here* (append
+                                      ,(cond
+                                        ((or (functionp subcommands) (functionp (car subcommands)))
+                                         `(funcall ,subcommands))
+                                        ((listp subcommands)
+                                         subcommand-subcommands))
+                                      ,subcommand-flags)))
+               `(pcomplete-here* (append
+                                  ,(cond
+                                    ((or (functionp subcommands) (functionp (car subcommands)))
+                                     `(funcall ,subcommands))
+                                    ((listp subcommands)
+                                     subcommand-subcommands))
+                                  ,@(when inherit-global-flags
+                                      `(,global-flags)))))
 
-           ,@(pcmpl-me--flag-post-matchers flags)
-           ,@(pcmpl-me--subcommand-matchers command-list subcommands-list)
-           ,(when inherit-global-flags
-              `(,global-post-fn))
-           ,@body)))))
+            ,@(pcmpl-me--flag-post-matchers flags)
+            ,@(pcmpl-me--subcommand-matchers command-list subcommands-list)
+            ,(when inherit-global-flags
+               `(,global-post-fn))
+            ,@body))))))
 
 (provide 'pcomplete-me)
 ;;; pcomplete-me.el ends here

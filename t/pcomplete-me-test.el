@@ -26,7 +26,29 @@
 
 (require 'pcomplete-me)
 
-(ert-deftest pcmpl-me--flag-matchers-test ()
+(ert-deftest pcmpl-me--flag-post-test ()
+  (should
+   (equal
+    (let ((pcmpl-me-completers (append pcmpl-me-completers '(:test (lambda () '("test"))))))
+     (pcmpl-me--flag-matchers '((("--verbose" "-v"))
+                                (("--profile" "--profile=") . (:files))
+                                (("--output" "--output=") . (:list "json" "yaml"))
+                                (("--filter" "--filter=") . (:test)))))
+    '((when
+          (pcomplete-match "^-" 1)
+        (cond
+         ((pcomplete-match "\\`--profile\\'" 1)
+          (pcomplete-here*
+           (pcomplete-entries)))
+         ((pcomplete-match "\\`--output\\'" 1)
+          (pcomplete-here*
+           (list "yaml" "json")))
+         ((pcomplete-match "\\`--filter\\'" 1)
+          (pcomplete-here*
+           ((lambda nil
+              '("test")))))))))))
+
+(ert-deftest pcmpl-me--flag-inline-test ()
   (should
    (equal
     (let ((pcmpl-me-completers (append pcmpl-me-completers '(:test (lambda () '("test"))))))
@@ -49,22 +71,9 @@
           (pcomplete-here*
            ((lambda nil
               '("test")))
-           (pcomplete-match-string 1 0)))))
-      (when
-          (pcomplete-match "^-" 1)
-        (cond
-         ((pcomplete-match "\\`--profile\\'" 1)
-          (pcomplete-here*
-           (pcomplete-entries)))
-         ((pcomplete-match "\\`--output\\'" 1)
-          (pcomplete-here*
-           (list "yaml" "json")))
-         ((pcomplete-match "\\`--filter\\'" 1)
-          (pcomplete-here*
-           ((lambda nil
-              '("test")))))))))))
+           (pcomplete-match-string 1 0)))))))))
 
-(ert-deftest pcmpl-me--flag-matcher-inline-test ()
+(ert-deftest pcmpl-me--flag-matcher-only-inline-test ()
   (should
    (equal
     (pcmpl-me--flag-matchers '((("--profile=") . (:files))

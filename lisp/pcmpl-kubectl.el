@@ -409,10 +409,6 @@
        "--field-manager="
        "--field-selector"
        "--field-selector="
-       "--filename"
-       "--filename="
-       "--kustomize"
-       "--kustomize="
        "--list"
        "--local"
        "--output"
@@ -428,10 +424,10 @@
        "--template"
        "--template="
        "-R"
-       "-f"
-       "-k"
        "-l"
-       "-o")))))
+       "-o"))
+     (("--kustomize" "--kustomize=" "-k") . (:dirs))
+     (("--filename" "--filename=" "-f") . (:files)))))
 
 (pcmpl-me-command (kubectl api-versions)
   (:inherit-global-flags
@@ -793,7 +789,10 @@
 ;;;###autoload
 (defun pcomplete/kubectl ()
   "Completion for kubectl."
-  (pcmpl-kubectl))
+  (let ((pcmpl-me--context nil))
+    (unwind-protect
+        (pcmpl-kubectl)
+      (message "context: %S" pcmpl-me--context))))
 
 (provide 'pcmpl-kubectl)
 ;;; pcmpl-kubectl.el ends here
