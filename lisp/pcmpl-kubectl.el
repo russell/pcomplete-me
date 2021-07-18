@@ -485,7 +485,7 @@
    ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl config delete-context" pcmpl-kubectl--global-flags))
    'nil
    :subcommands
-   (lambda () (pcmpl-kubectl--complete "context"))))
+   (lambda () (pcmpl-kubectl--complete "contexts"))))
 
 (pcmpl-me-command (kubectl config use-context)
   (:inherit-global-flags
