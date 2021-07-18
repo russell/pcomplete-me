@@ -28,7 +28,11 @@
 (require 'bash-completion-export-utils)
 
 (defconst pcmpl-kubectl-test-bashinit (format "%s/pcmpl-kubectl-test.sh"
-                                              (file-name-directory load-file-name)))
+                                              (cond
+                                               (buffer-file-name
+                                                (file-name-directory buffer-file-name))
+                                               (load-file-name
+                                                (file-name-directory load-file-name)))))
 
 (defun rs//bash-complete-kubectl-subcommand (command &optional global-flags)
   ""
@@ -64,12 +68,21 @@
            nil))))))
 
 (pcmpl-me-test (kubectl annotate) (:inherit-global-flags t))
-(pcmpl-me-test (kubectl api-versions) (:inherit-global-flags t))
 (pcmpl-me-test (kubectl api-resources) (:inherit-global-flags t))
-(pcmpl-me-test (kubectl apply) (:inherit-global-flags t))
-(pcmpl-me-test (kubectl apply set-last-applied) (:inherit-global-flags t))
+(pcmpl-me-test (kubectl api-versions) (:inherit-global-flags t))
 (pcmpl-me-test (kubectl apply edit-last-applied) (:inherit-global-flags t))
+(pcmpl-me-test (kubectl apply set-last-applied) (:inherit-global-flags t))
 (pcmpl-me-test (kubectl apply view-last-applied) (:inherit-global-flags t))
+(pcmpl-me-test (kubectl apply) (:inherit-global-flags t))
+(pcmpl-me-test (kubectl attach) (:inherit-global-flags t))
+(pcmpl-me-test (kubectl auth can-i) (:inherit-global-flags t))
+(pcmpl-me-test (kubectl auth reconcile) (:inherit-global-flags t))
+(pcmpl-me-test (kubectl auth) (:inherit-global-flags t))
+(pcmpl-me-test (kubectl config current-context) (:inherit-global-flags t))
+(pcmpl-me-test (kubectl config delete-cluster) (:inherit-global-flags t))
+(pcmpl-me-test (kubectl config delete-context) (:inherit-global-flags t))
+(pcmpl-me-test (kubectl config use-context) (:inherit-global-flags t))
+(pcmpl-me-test (kubectl config) (:inherit-global-flags t))
 
 
 (provide 'pcmpl-kubectl-test)

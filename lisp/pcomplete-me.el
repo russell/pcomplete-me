@@ -178,7 +178,8 @@
          (subcommand-subcommands (intern (mapconcat 'symbol-name `(pcmpl ,@command-list -subcommands) "-"))))
     `(progn
        (defconst ,subcommand-flags (quote ,(pcmpl-me--flags flags)))
-       (defconst ,subcommand-subcommands ,(when (listp subcommands) subcommands))
+       (defconst ,subcommand-subcommands ,(unless (or (functionp subcommands) (functionp (car subcommands)))
+                                            subcommands))
 
        (defun ,subcommand-fn ()
          (while t
