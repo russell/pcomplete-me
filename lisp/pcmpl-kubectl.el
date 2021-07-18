@@ -590,6 +590,15 @@
      (("-f" "--filename" "--filename=") . (:files))
      (("--output" "--output=" "-o") . (:list "json" "yaml" "name" "go-template" "go-template-file" "template" "templatefile" "jsonpath" "jsonpath-as-json" "jsonpath-file")))))
 
+(pcmpl-me-command (kubectl apply view-last-applied)
+  (:inherit-global-flags
+   t
+   :flags
+   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl apply view-last-applied" pcmpl-kubectl--global-flags))
+   '((("--all" "--recursive" "--selector" "--selector=" "-R" "-l"))
+     (("-f" "--filename" "--filename=") . (:files))
+     (("--output" "--output=" "-o") . (:list "json" "yaml" "name" "go-template" "go-template-file" "template" "templatefile" "jsonpath" "jsonpath-as-json" "jsonpath-file")))))
+
 (pcmpl-me-command (kubectl attach)
   (:inherit-global-flags
    t

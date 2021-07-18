@@ -67,6 +67,9 @@
 (pcmpl-me-test (kubectl api-versions) (:inherit-global-flags t))
 (pcmpl-me-test (kubectl api-resources) (:inherit-global-flags t))
 (pcmpl-me-test (kubectl apply) (:inherit-global-flags t))
+(pcmpl-me-test (kubectl apply set-last-applied) (:inherit-global-flags t))
+(pcmpl-me-test (kubectl apply edit-last-applied) (:inherit-global-flags t))
+(pcmpl-me-test (kubectl apply view-last-applied) (:inherit-global-flags t))
 
 
 (provide 'pcmpl-kubectl-test)
