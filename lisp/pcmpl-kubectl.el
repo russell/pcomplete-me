@@ -283,7 +283,7 @@
              (seq-filter (lambda (e) (member (car e)
                                              pcmpl-kubectl--override-flags)) context) " "))
 
-(defun pcmpl-kubectl--complete-resource (resource)
+(defun pcmpl-kubectl--complete-resource-of (resource)
   ""
   (split-string
    (shell-command-to-string
@@ -291,19 +291,33 @@
             (pcmpl-kubectl--override-args pcmpl-me--context)
             resource))))
 
+(defun pcmpl-kubectl--complete-resource-types ()
+  "Return all the resource types from the cluster."
+  (split-string
+   (shell-command-to-string
+    (format "kubectl api-resources %s -o name --cached --request-timeout=5s --verbs=get"
+            (pcmpl-kubectl--override-args pcmpl-me--context)))))
+
 (defun pcmpl-kubectl--complete (type)
   ""
   (split-string
    (shell-command-to-string
     (format "kubectl config view -o template --template=\"{{ range .%s}}{{ .name }}\n{{end}}\"" type))))
 
+(defun pcmpl-kubectl--complete-resource ()
+  "Return all the resource types from the cluster."
+  (if (pcmpl-me--context-get :kind)
+      (pcomplete-here* (pcmpl-kubectl--complete-resource-of (pcmpl-me--context-get :kind)))
+    (pcomplete-here* (pcmpl-kubectl--complete-resource-types))
+    (pcmpl-me--context-set :kind (pcomplete-arg 1))))
 
 (pcmpl-me-set-completion-widget :kubernetes-context (lambda () (pcmpl-kubectl--complete "contexts")))
 (pcmpl-me-set-completion-widget :kubernetes-user (lambda () (pcmpl-kubectl--complete "users")))
 (pcmpl-me-set-completion-widget :kubernetes-cluster (lambda () (pcmpl-kubectl--complete "clusters")))
-(pcmpl-me-set-completion-widget :kubernetes-namespaces (lambda () (pcmpl-kubectl--complete-resource "namespaces")))
-(pcmpl-me-set-completion-widget :kubernetes-pods (lambda () (pcmpl-kubectl--complete-resource "pods")))
-(pcmpl-me-set-completion-widget :kubernetes-nodes (lambda () (pcmpl-kubectl--complete-resource "nodes")))
+(pcmpl-me-set-completion-widget :kubernetes-namespaces (lambda () (pcmpl-kubectl--complete-resource-of "namespaces")))
+(pcmpl-me-set-completion-widget :kubernetes-resource (lambda () (pcmpl-kubectl--complete-resource)))
+(pcmpl-me-set-completion-widget :kubernetes-pods (lambda () (pcmpl-kubectl--complete-resource-of "pods")))
+(pcmpl-me-set-completion-widget :kubernetes-nodes (lambda () (pcmpl-kubectl--complete-resource-of "nodes")))
 
 (pcmpl-me-global-args kubectl
   :flags
@@ -768,6 +782,17 @@
              "--skip-wait-for-delete-timeout" "--skip-wait-for-delete-timeout="
              "--timeout" "--timeout=" "-l")))
   :subcommands (pcmpl-me-get-completion-widget :kubernetes-nodes))
+
+(pcmpl-me-command (kubectl describe)
+  :inherit-global-flags t
+  :flags
+  ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl describe" pcmpl-kubectl--global-flags))
+  '((("--all-namespaces" "--recursive"
+      "--selector" "--selector="
+      "--show-events" "-A" "-R" "-l"))
+    (("--kustomize" "--kustomize=" "-k") . (:dirs))
+    (("--filename" "--filename=" "-f") . (:files)))
+  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-resource))
 
 (pcmpl-me-command (kubectl top)
   :inherit-global-flags t

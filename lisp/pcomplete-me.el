@@ -37,7 +37,7 @@
 
 (defun pcmpl-me--context-get (key)
   ""
-  (assoc key pcmpl-me--context))
+  (cdr (assoc key pcmpl-me--context)))
 
 (defun pcmpl-me--context-set (key value)
   ""
@@ -179,6 +179,7 @@ COMMAND can be either a list with subcommands or a symbol.
     (let* ((inherit-global-flags (plist-get args :inherit-global-flags))
            (flags (eval (plist-get args :flags)))
            (subcommands (plist-get args :subcommands))
+           (subcommands-fn (plist-get args :subcommands-fn))
            (body (plist-get args :body))
            (command-list (if (listp command) command (cons command nil)))
            (global-command (car command-list))
@@ -189,7 +190,7 @@ COMMAND can be either a list with subcommands or a symbol.
            (global-inline-fn (intern-symbol `(pcmpl ,global-command -global-inline-matchers)))
            (global-post-fn (intern-symbol `(pcmpl ,global-command -global-post-matchers)))
            (global-flags (intern-symbol `(pcmpl ,global-command -global-flags)))
-           (subcommand-fn (intern-symbol `(pcmpl ,@command-list)))
+           (cmpl-command (intern-symbol `(pcmpl ,@command-list)))
            (subcommand-flags (intern-symbol `(pcmpl ,@command-list -flags)))
            (subcommand-subcommands (intern-symbol `(pcmpl ,@command-list -subcommands))))
       `(progn
@@ -198,12 +199,12 @@ COMMAND can be either a list with subcommands or a symbol.
                                                         (functionp (car subcommands)))
                                               subcommands))
 
-         (defun ,subcommand-fn ()
+         (defun ,cmpl-command ()
            (while t
              ,@(pcmpl-me--flag-inline-matchers flags)
              ,(when inherit-global-flags
                 `(,global-inline-fn))
-             ,(if subcommands
+             ,(if (or subcommands subcommands-fn)
                   `(if (pcomplete-match "\\`-" 0)
                        (pcomplete-here* (append
                                          ,(cond
@@ -214,11 +215,13 @@ COMMAND can be either a list with subcommands or a symbol.
                                          ,subcommand-flags
                                          ,@(when inherit-global-flags
                                              `(,global-flags))))
-                     (pcomplete-here* ,(cond
-                                        ((or (functionp subcommands) (functionp (car subcommands)))
-                                         `(funcall ,subcommands))
-                                        ((listp subcommands)
-                                         subcommand-subcommands))))
+                     ,(if subcommands-fn
+                          `(funcall ,subcommands-fn)
+                        `(pcomplete-here* ,(cond
+                                           ((or (functionp subcommands) (functionp (car subcommands)))
+                                            `(funcall ,subcommands))
+                                           ((listp subcommands)
+                                            subcommand-subcommands)))))
                 `(pcomplete-here* (append
                                    ,subcommand-flags
                                    ,@(when inherit-global-flags
