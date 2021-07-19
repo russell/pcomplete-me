@@ -130,6 +130,15 @@
 
            finally return (when conds `((cond ,@conds)))))
 
+
+(defun pcmpl-me-set-completion-widget (key widget)
+  ""
+  (plist-put pcmpl-me-completers key widget))
+
+(defun pcmpl-me-get-completion-widget (key)
+  ""
+  (plist-get pcmpl-me-completers key))
+
 (defmacro pcmpl-me-global-args (name &rest args)
   ""
   (declare (indent 1))
@@ -202,21 +211,16 @@ COMMAND can be either a list with subcommands or a symbol.
                                             `(funcall ,subcommands))
                                            ((listp subcommands)
                                             subcommand-subcommands))
+                                         ,subcommand-flags
                                          ,@(when inherit-global-flags
                                              `(,global-flags))))
-                     (pcomplete-here* (append
-                                       ,(cond
-                                         ((or (functionp subcommands) (functionp (car subcommands)))
-                                          `(funcall ,subcommands))
-                                         ((listp subcommands)
-                                          subcommand-subcommands))
-                                       ,subcommand-flags)))
+                     (pcomplete-here* ,(cond
+                                        ((or (functionp subcommands) (functionp (car subcommands)))
+                                         `(funcall ,subcommands))
+                                        ((listp subcommands)
+                                         subcommand-subcommands))))
                 `(pcomplete-here* (append
-                                   ,(cond
-                                     ((or (functionp subcommands) (functionp (car subcommands)))
-                                      `(funcall ,subcommands))
-                                     ((listp subcommands)
-                                      subcommand-subcommands))
+                                   ,subcommand-flags
                                    ,@(when inherit-global-flags
                                        `(,global-flags)))))
 

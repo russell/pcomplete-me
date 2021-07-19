@@ -297,11 +297,13 @@
    (shell-command-to-string
     (format "kubectl config view -o template --template=\"{{ range .%s}}{{ .name }}\n{{end}}\"" type))))
 
-(eval-when-compile
-  (plist-put pcmpl-me-completers :kubernetes-context (lambda () (pcmpl-kubectl--complete "contexts")))
-  (plist-put pcmpl-me-completers :kubernetes-user (lambda () (pcmpl-kubectl--complete "users")))
-  (plist-put pcmpl-me-completers :kubernetes-cluster (lambda () (pcmpl-kubectl--complete "clusters")))
-  (plist-put pcmpl-me-completers :kubernetes-namespaces (lambda () (pcmpl-kubectl--complete-resource "namespaces")))))
+
+(pcmpl-me-set-completion-widget :kubernetes-context (lambda () (pcmpl-kubectl--complete "contexts")))
+(pcmpl-me-set-completion-widget :kubernetes-user (lambda () (pcmpl-kubectl--complete "users")))
+(pcmpl-me-set-completion-widget :kubernetes-cluster (lambda () (pcmpl-kubectl--complete "clusters")))
+(pcmpl-me-set-completion-widget :kubernetes-namespaces (lambda () (pcmpl-kubectl--complete-resource "namespaces")))
+(pcmpl-me-set-completion-widget :kubernetes-pods (lambda () (pcmpl-kubectl--complete-resource "pods")))
+(pcmpl-me-set-completion-widget :kubernetes-nodes (lambda () (pcmpl-kubectl--complete-resource "nodes")))
 
 (pcmpl-me-global-args kubectl
   :flags
@@ -721,40 +723,40 @@
 
 (pcmpl-me-command (kubectl config delete-cluster)
   :inherit-global-flags t
-  :subcommands (lambda () (pcmpl-kubectl--complete "clusters")))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-clusters))
 
 (pcmpl-me-command (kubectl config delete-context)
   :inherit-global-flags t
-  :subcommands (lambda () (pcmpl-kubectl--complete "contexts")))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-contexts))
 
 (pcmpl-me-command (kubectl config delete-user)
   :inherit-global-flags t
-  :subcommands (lambda () (pcmpl-kubectl--complete "users")))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-users))
 
 (pcmpl-me-command (kubectl config get-clusters)
   :inherit-global-flags t
-  :subcommands (lambda () (pcmpl-kubectl--complete "clusters")))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-clusters))
 
 (pcmpl-me-command (kubectl config get-contexts)
   :inherit-global-flags t
-  :subcommands (lambda () (pcmpl-kubectl--complete "contexts")))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-contexts))
 
 (pcmpl-me-command (kubectl config get-users)
   :inherit-global-flags t
-  :subcommands (lambda () (pcmpl-kubectl--complete "users")))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-users))
 
 (pcmpl-me-command (kubectl config rename-context)
   :inherit-global-flags t
-  :subcommands (lambda () (pcmpl-kubectl--complete "contexts")))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-contexts))
 
 (pcmpl-me-command (kubectl config use-context)
   :inherit-global-flags t
-  :subcommands (lambda () (pcmpl-kubectl--complete "contexts")))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-contexts))
 
 (pcmpl-me-command (kubectl cordon)
   :inherit-global-flags t
   :flags '((("--dry-run" "--selector" "--selector=" "-l")))
-  :subcommands (lambda () (pcmpl-kubectl--complete-resource "nodes")))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-nodes))
 
 (pcmpl-me-command (kubectl drain)
   :inherit-global-flags t
@@ -765,7 +767,7 @@
              "--selector" "--selector="
              "--skip-wait-for-delete-timeout" "--skip-wait-for-delete-timeout="
              "--timeout" "--timeout=" "-l")))
-  :subcommands (lambda () (pcmpl-kubectl--complete-resource "nodes")))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-nodes))
 
 (pcmpl-me-command (kubectl top)
   :inherit-global-flags t
@@ -777,7 +779,7 @@
              "--selector" "--selector="
              "--sort-by" "--sort-by="
              "--use-protocol-buffers" "-A" "-l")))
-  :subcommands (lambda () (pcmpl-kubectl--complete-resource "pods")))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-pods))
 
 (pcmpl-me-command (kubectl top node)
   :inherit-global-flags t
@@ -785,12 +787,12 @@
              "--selector" "--selector="
              "--sort-by" "--sort-by="
              "--use-protocol-buffers" "-l")))
-  :subcommands (lambda () (pcmpl-kubectl--complete-resource "nodes")))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-nodes))
 
 (pcmpl-me-command (kubectl uncordon)
   :inherit-global-flags t
   :flags '((("--dry-run" "--selector" "--selector=" "-l")))
-  :subcommands (lambda () (pcmpl-kubectl--complete-resource "nodes")))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-nodes))
 
 ;;
 ;; PComplete kubectl
