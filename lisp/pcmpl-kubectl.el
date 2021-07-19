@@ -314,11 +314,21 @@
     (pcomplete-here* (pcmpl-kubectl--complete-resource-types))
     (pcmpl-me--context-set :kind (pcomplete-arg 1))))
 
+(defun pcmpl-kubectl--complete-resources ()
+  "Return all the resource types from the cluster."
+  (if (pcmpl-me--context-get :kind)
+      (pcomplete-here* (pcmpl-kubectl--complete-resource-of (pcmpl-me--context-get :kind)))
+    (if (pcomplete-match "\\`.*,\\([a-z9-0]*\\)" 0)
+        (pcomplete-here* (pcmpl-kubectl--complete-resource-types) (pcomplete-match-string 1 0))
+     (pcomplete-here* (pcmpl-kubectl--complete-resource-types)))
+    (pcmpl-me--context-set :kind (pcomplete-arg 1))))
+
 (pcmpl-me-set-completion-widget :kubernetes-context (lambda () (pcmpl-kubectl--complete "contexts")))
 (pcmpl-me-set-completion-widget :kubernetes-user (lambda () (pcmpl-kubectl--complete "users")))
 (pcmpl-me-set-completion-widget :kubernetes-cluster (lambda () (pcmpl-kubectl--complete "clusters")))
 (pcmpl-me-set-completion-widget :kubernetes-namespaces (lambda () (pcmpl-kubectl--complete-resource-of "namespaces")))
 (pcmpl-me-set-completion-widget :kubernetes-resource (lambda () (pcmpl-kubectl--complete-resource)))
+(pcmpl-me-set-completion-widget :kubernetes-resources (lambda () (pcmpl-kubectl--complete-resources)))
 (pcmpl-me-set-completion-widget :kubernetes-pods (lambda () (pcmpl-kubectl--complete-resource-of "pods")))
 (pcmpl-me-set-completion-widget :kubernetes-nodes (lambda () (pcmpl-kubectl--complete-resource-of "nodes")))
 
@@ -758,6 +768,11 @@
     (("--kustomize" "--kustomize=" "-k") . (:dirs))
     (("--filename" "--filename=" "-f") . (:files)))
   :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-resource))
+
+
+(pcmpl-me-command (kubectl get)
+  :inherit-global-flags t
+  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-resources))
 
 (pcmpl-me-command (kubectl top)
   :inherit-global-flags t
