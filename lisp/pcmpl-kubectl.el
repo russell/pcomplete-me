@@ -498,7 +498,7 @@
       "--windows-line-endings"))
     (("--kustomize" "--kustomize=" "-k") . (:dirs))
     (("--filename" "--filename=" "-f") . (:files))
-    (("--output" "--output=" "-o") . (:list "json" "yaml" "name" "go-template" "go-template-file" "template" "templatefile" "jsonpath" "jsonpath-as-json" "jsonpath-file"))))
+    (("--output" "--output=" "-o") . (:list kubectl-output-all))))
 
 (pcmpl-me-command (kubectl apply set-last-applied)
   :inherit-global-flags t
@@ -511,15 +511,18 @@
       "--template" "--template="
       "-f"))
     (("--filename" "--filename=" "-f") . (:files))
-    (("--output" "--output=" "-o") . (:list "json" "yaml" "name" "go-template" "go-template-file" "template" "templatefile" "jsonpath" "jsonpath-as-json" "jsonpath-file"))))
+    (("--output" "--output=" "-o") . (:list kubectl-output-all))))
 
 (pcmpl-me-command (kubectl apply view-last-applied)
   :inherit-global-flags t
   :flags
   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl apply view-last-applied" pcmpl-kubectl--global-flags))
-  '((("--all" "--recursive" "--selector" "--selector=" "-R" "-l"))
+  '((("--all"
+      "--recursive" "-R"
+      "--selector" "--selector="
+      "-l"))
     (("--filename" "--filename=" "-f") . (:files))
-    (("--output" "--output=" "-o") . (:list "json" "yaml" "name" "go-template" "go-template-file" "template" "templatefile" "jsonpath" "jsonpath-as-json" "jsonpath-file"))))
+    (("--output" "--output=" "-o") . (:list kubectl-output-all))))
 
 (pcmpl-me-command (kubectl attach)
   :inherit-global-flags t
@@ -528,11 +531,9 @@
   '((("--pod-running-timeout" "--pod-running-timeout="
       "--quiet" "-q"
       "--stdin" "-i"
-      "--tty" "-t"
-      "-c"))
+      "--tty" "-t"))
     ;; TODO support finding containers
-    (("--container" "--container="))))
-
+    (("--container" "--container=" "-c"))))
 
 (pcmpl-me-command (kubectl auth)
   :inherit-global-flags t
