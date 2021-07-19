@@ -30,10 +30,18 @@
 
 (defvar pcmpl-me--context nil)
 
+(defun pcmpl-me--complete-from-list (&rest things)
+  ""
+  (if (> (length things) 1)
+      things
+    (if (listp (car things))
+        (car things)
+      things)))
+
 (defvar pcmpl-me-completers
   '(:files pcomplete-entries
            :dirs pcomplete-dirs
-           :list list))
+           :list pcmpl-me--complete-from-list))
 
 (defun pcmpl-me--context-get (key)
   ""
@@ -129,7 +137,6 @@
            into conds
 
            finally return (when conds `((cond ,@conds)))))
-
 
 (defun pcmpl-me-set-completion-widget (key widget)
   ""
