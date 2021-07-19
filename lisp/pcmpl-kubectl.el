@@ -535,7 +535,8 @@
       "--stdin" "-i"
       "--tty" "-t"))
     ;; TODO support finding containers
-    (("--container" "--container=" "-c"))))
+    (("--container" "--container=" "-c")))
+  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-pod))
 
 (pcmpl-me-command (kubectl auth)
   :inherit-global-flags t
