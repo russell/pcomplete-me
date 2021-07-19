@@ -759,6 +759,17 @@
     (("--filename" "--filename=" "-f") . (:files)))
   :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-resource))
 
+(pcmpl-me-command (kubectl exec)
+  :inherit-global-flags t
+  :flags
+  ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl exec" pcmpl-kubectl--global-flags))
+  '((("--container" "--container=" "-c"))
+    (("--pod-running-timeout" "--pod-running-timeout=" "-t"))
+    (("--tty" "-t"))
+    (("--stdin" "-i"))
+    (("--quiet" "-q"))
+    (("--filename" "--filename=" "-f") . (:files)))
+  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-pod))
 
 (pcmpl-me-command (kubectl get)
   :inherit-global-flags t
