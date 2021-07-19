@@ -269,8 +269,6 @@
     ("wait"))
   "List of `kubectl' commands")
 
-(defconst pcmpl-kubectl-subcommand-flags nil)
-
 (defconst kubectl-output-all
   '("json" "yaml" "name" "go-template" "go-template-file" "template" "templatefile" "jsonpath" "jsonpath-as-json" "jsonpath-file"))
 
@@ -673,8 +671,7 @@
       "--template"
       "--template="
       "-A"
-      "-o")))
-  )
+      "-o"))))
 
 (pcmpl-me-command (kubectl completion)
   :inherit-global-flags t
@@ -743,9 +740,6 @@
 ;;
 ;; PComplete kubectl
 ;;
-
-(defvar pcmpl-kubectl--namespace nil)
-(defvar pcmpl-kubectl--context nil)
 
 ;;;###autoload
 (defun pcomplete/kubectl ()
