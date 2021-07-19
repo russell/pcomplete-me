@@ -275,6 +275,14 @@
 (defconst kubectl-output-name
   '("name"))
 
+(defun pcmpl-kubectl--complete-resource (resource)
+  ""
+  (split-string
+   (shell-command-to-string
+    (format "kubectl get %s -o template --template=\"{{ range .items  }}{{ .metadata.name }} {{ end }}\" \"%s\""
+            (pcmpl-kubectl--override-args pcmpl-me--context)
+            resource))))
+
 (defun pcmpl-kubectl--complete (type)
   ""
   (split-string
@@ -284,7 +292,8 @@
 (eval-when-compile
   (plist-put pcmpl-me-completers :kubernetes-context (lambda () (pcmpl-kubectl--complete "contexts")))
   (plist-put pcmpl-me-completers :kubernetes-user (lambda () (pcmpl-kubectl--complete "users")))
-  (plist-put pcmpl-me-completers :kubernetes-cluster (lambda () (pcmpl-kubectl--complete "clusters"))))
+  (plist-put pcmpl-me-completers :kubernetes-cluster (lambda () (pcmpl-kubectl--complete "clusters")))
+  (plist-put pcmpl-me-completers :kubernetes-namespaces (lambda () (pcmpl-kubectl--complete-resource "namespaces")))))
 
 (pcmpl-me-global-args kubectl
   :flags
@@ -310,9 +319,6 @@
       "--log-file-max-size="
       "--log-flush-frequency"
       "--log-flush-frequency="
-      "-n"
-      "--namespace"
-      "--namespace="
       "--password"
       "--password="
       "--profile-output"
@@ -339,6 +345,7 @@
     (("--cluster" "--cluster=") . (:kubernetes-cluster))
     (("--user" "--user=") . (:kubernetes-user))
     (("--context" "--context=") . (:kubernetes-context))
+    (("--namespace" "--namespace=" "-n") . (:kubernetes-namespaces))
     (("--log-file" "--log-file=") . (:files))
     (("--kubeconfig" "--kubeconfig=") . (:files))
     (("--certificate-authority" "--certificate-authority=") . (:files))
