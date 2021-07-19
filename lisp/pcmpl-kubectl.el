@@ -727,8 +727,8 @@
   :inherit-global-flags t
   :flags
   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl describe" pcmpl-kubectl--global-flags))
-  '((("--all-namespaces" "-A"
-      "--show-events"))
+  '((("--show-events"))
+    (("--all-namespaces" "-A"))
     (("--selector" "--selector=" "-l"))
     (("--recursive" "-R"))
     (("--kustomize" "--kustomize=" "-k") . (:dirs))
