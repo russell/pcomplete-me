@@ -275,6 +275,14 @@
 (defconst kubectl-output-name
   '("name"))
 
+(defconst pcmpl-kubectl--override-flags '(:kubeconfig :cluster :user :context :namespace :server))
+
+(defun pcmpl-kubectl--override-args (context)
+  ""
+  (mapconcat (lambda (e) (format "--%s=%s" (string-trim (symbol-name (car e)) ":") (cdr e)))
+             (seq-filter (lambda (e) (member (car e)
+                                             pcmpl-kubectl--override-flags)) context) " "))
+
 (defun pcmpl-kubectl--complete-resource (resource)
   ""
   (split-string
@@ -743,6 +751,46 @@
   :inherit-global-flags t
   :subcommands (lambda () (pcmpl-kubectl--complete "contexts")))
 
+(pcmpl-me-command (kubectl cordon)
+  :inherit-global-flags t
+  :flags '((("--dry-run" "--selector" "--selector=" "-l")))
+  :subcommands (lambda () (pcmpl-kubectl--complete-resource "nodes")))
+
+(pcmpl-me-command (kubectl drain)
+  :inherit-global-flags t
+  :flags '((("--delete-emptydir-data" "--disable-eviction" "--dry-run" "--force"
+             "--grace-period" "--grace-period="
+             "--ignore-daemonsets" "--ignore-errors"
+             "--pod-selector" "--pod-selector="
+             "--selector" "--selector="
+             "--skip-wait-for-delete-timeout" "--skip-wait-for-delete-timeout="
+             "--timeout" "--timeout=" "-l")))
+  :subcommands (lambda () (pcmpl-kubectl--complete-resource "nodes")))
+
+(pcmpl-me-command (kubectl top)
+  :inherit-global-flags t
+  :subcommands '("pod" "node"))
+
+(pcmpl-me-command (kubectl top pod)
+  :inherit-global-flags t
+  :flags '((("--all-namespaces" "--containers" "--no-headers"
+             "--selector" "--selector="
+             "--sort-by" "--sort-by="
+             "--use-protocol-buffers" "-A" "-l")))
+  :subcommands (lambda () (pcmpl-kubectl--complete-resource "pods")))
+
+(pcmpl-me-command (kubectl top node)
+  :inherit-global-flags t
+  :flags '((("--no-headers"
+             "--selector" "--selector="
+             "--sort-by" "--sort-by="
+             "--use-protocol-buffers" "-l")))
+  :subcommands (lambda () (pcmpl-kubectl--complete-resource "nodes")))
+
+(pcmpl-me-command (kubectl uncordon)
+  :inherit-global-flags t
+  :flags '((("--dry-run" "--selector" "--selector=" "-l")))
+  :subcommands (lambda () (pcmpl-kubectl--complete-resource "nodes")))
 
 ;;
 ;; PComplete kubectl
