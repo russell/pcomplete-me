@@ -130,11 +130,12 @@
 
            finally return (when conds `((cond ,@conds)))))
 
-(cl-defmacro pcmpl-me-global-args (name (&key flags) &rest body)
+(defmacro pcmpl-me-global-args (name &rest args)
   ""
   (declare (indent 1))
   (cl-flet ((intern-symbol (args) (intern (mapconcat 'symbol-name args "-"))))
-    (let* ((flags (eval flags))
+    (let* ((flags (eval (plist-get args :flags)))
+           (body (plist-get args :body))
            (global-inline-fn (intern-symbol `(pcmpl ,name -global-inline-matchers)))
            (global-post-fn (intern-symbol `(pcmpl ,name -global-post-matchers)))
            (global-flags (intern-symbol `(pcmpl ,name -global-flags))))
@@ -149,65 +150,81 @@
            ,@(pcmpl-me--flag-post-matchers flags)
            ,@body)))))
 
-(cl-defmacro pcmpl-me-command (command (&key inherit-global-flags flags subcommands) &rest body)
-  ""
+(defmacro pcmpl-me-command (command &rest args)
+  "Declare PCompletion for a command by specifying configuration options.
+
+For full documentation, please see the README file that came with
+this file.  Usage:
+
+  (pcompl-me-command command
+     [:keyword [option]]...)
+
+COMMAND can be either a list with subcommands or a symbol.
+
+:inherit-global-flags Should the command inherit commands from a global set.
+:flags                A list of flags
+:subcommands          A list of subcommands or a function that returns
+                      subcommands."
   (declare (indent 1))
   (cl-flet ((intern-symbol (args) (intern (mapconcat 'symbol-name args "-"))))
-   (let* ((flags (eval flags))
-          (command-list (if (listp command) command (cons command nil)))
-          (global-command (car command-list))
-          (subcommands-list (when (and (listp subcommands)
-                                       (not (functionp (car subcommands)))
-                                       (not (eq (car subcommands) 'lambda)))
-                              (eval subcommands)))
-          (global-inline-fn (intern-symbol `(pcmpl ,global-command -global-inline-matchers)))
-          (global-post-fn (intern-symbol `(pcmpl ,global-command -global-post-matchers)))
-          (global-flags (intern-symbol `(pcmpl ,global-command -global-flags)))
-          (subcommand-fn (intern-symbol `(pcmpl ,@command-list)))
-          (subcommand-flags (intern-symbol `(pcmpl ,@command-list -flags)))
-          (subcommand-subcommands (intern-symbol `(pcmpl ,@command-list -subcommands))))
-     `(progn
-        (defconst ,subcommand-flags (quote ,(pcmpl-me--flags flags)))
-        (defconst ,subcommand-subcommands ,(unless (or (functionp subcommands)
-                                                       (functionp (car subcommands)))
-                                             subcommands))
+    (let* ((inherit-global-flags (plist-get args :inherit-global-flags))
+           (flags (eval (plist-get args :flags)))
+           (subcommands (plist-get args :subcommands))
+           (body (plist-get args :body))
+           (command-list (if (listp command) command (cons command nil)))
+           (global-command (car command-list))
+           (subcommands-list (when (and (listp subcommands)
+                                        (not (functionp (car subcommands)))
+                                        (not (eq (car subcommands) 'lambda)))
+                               (eval subcommands)))
+           (global-inline-fn (intern-symbol `(pcmpl ,global-command -global-inline-matchers)))
+           (global-post-fn (intern-symbol `(pcmpl ,global-command -global-post-matchers)))
+           (global-flags (intern-symbol `(pcmpl ,global-command -global-flags)))
+           (subcommand-fn (intern-symbol `(pcmpl ,@command-list)))
+           (subcommand-flags (intern-symbol `(pcmpl ,@command-list -flags)))
+           (subcommand-subcommands (intern-symbol `(pcmpl ,@command-list -subcommands))))
+      `(progn
+         (defconst ,subcommand-flags (quote ,(pcmpl-me--flags flags)))
+         (defconst ,subcommand-subcommands ,(unless (or (functionp subcommands)
+                                                        (functionp (car subcommands)))
+                                              subcommands))
 
-        (defun ,subcommand-fn ()
-          (while t
-            ,@(pcmpl-me--flag-inline-matchers flags)
-            ,(when inherit-global-flags
-               `(,global-inline-fn))
-            ,(if subcommands
-                 `(if (pcomplete-match "\\`-" 0)
-                      (pcomplete-here* (append
-                                        ,(cond
-                                          ((or (functionp subcommands) (functionp (car subcommands)))
-                                           `(funcall ,subcommands))
-                                          ((listp subcommands)
-                                           subcommand-subcommands))
-                                        ,@(when inherit-global-flags
-                                            `(,global-flags))))
-                    (pcomplete-here* (append
-                                      ,(cond
-                                        ((or (functionp subcommands) (functionp (car subcommands)))
-                                         `(funcall ,subcommands))
-                                        ((listp subcommands)
-                                         subcommand-subcommands))
-                                      ,subcommand-flags)))
-               `(pcomplete-here* (append
-                                  ,(cond
-                                    ((or (functionp subcommands) (functionp (car subcommands)))
-                                     `(funcall ,subcommands))
-                                    ((listp subcommands)
-                                     subcommand-subcommands))
-                                  ,@(when inherit-global-flags
-                                      `(,global-flags)))))
+         (defun ,subcommand-fn ()
+           (while t
+             ,@(pcmpl-me--flag-inline-matchers flags)
+             ,(when inherit-global-flags
+                `(,global-inline-fn))
+             ,(if subcommands
+                  `(if (pcomplete-match "\\`-" 0)
+                       (pcomplete-here* (append
+                                         ,(cond
+                                           ((or (functionp subcommands) (functionp (car subcommands)))
+                                            `(funcall ,subcommands))
+                                           ((listp subcommands)
+                                            subcommand-subcommands))
+                                         ,@(when inherit-global-flags
+                                             `(,global-flags))))
+                     (pcomplete-here* (append
+                                       ,(cond
+                                         ((or (functionp subcommands) (functionp (car subcommands)))
+                                          `(funcall ,subcommands))
+                                         ((listp subcommands)
+                                          subcommand-subcommands))
+                                       ,subcommand-flags)))
+                `(pcomplete-here* (append
+                                   ,(cond
+                                     ((or (functionp subcommands) (functionp (car subcommands)))
+                                      `(funcall ,subcommands))
+                                     ((listp subcommands)
+                                      subcommand-subcommands))
+                                   ,@(when inherit-global-flags
+                                       `(,global-flags)))))
 
-            ,@(pcmpl-me--flag-post-matchers flags)
-            ,@(pcmpl-me--subcommand-matchers command-list subcommands-list)
-            ,(when inherit-global-flags
-               `(,global-post-fn))
-            ,@body))))))
+             ,@(pcmpl-me--flag-post-matchers flags)
+             ,@(pcmpl-me--subcommand-matchers command-list subcommands-list)
+             ,(when inherit-global-flags
+                `(,global-post-fn))
+             ,@body))))))
 
 (provide 'pcomplete-me)
 ;;; pcomplete-me.el ends here
