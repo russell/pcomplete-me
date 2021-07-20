@@ -350,7 +350,7 @@ CONTEXT is a context alist."
      (lambda (e) (not (equal e "")))
      (split-string
       (apply #'pcmpl-kubectl--call
-             `("kubectl" "api-resources" ,@context-args "--verbs" "get" "--output=wide" "--no-headers"))
+             `("kubectl" "api-resources" ,@context-args "--verbs" "get" "--output=wide" "--cached" "--request-timeout=5s" "--no-headers"))
       "\n")))))
 
 (defun pcmpl-kubectl--complete-resource-types-full (&optional context)
