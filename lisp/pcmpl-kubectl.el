@@ -453,8 +453,8 @@
       "--cached"
       "--namespaced"
       "--no-headers"
-      "--sort-by" "--sort-by="
       "--verbs" "--verbs="))
+    (("--sort-by" "--sort-by=") . (:list "name" "kind"))
     (("--output" "--output=" "-o") . (:list kubectl-output-name-or-wide))))
 
 (pcmpl-me-command (kubectl apply)
