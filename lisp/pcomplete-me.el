@@ -43,13 +43,15 @@
            :dirs pcomplete-dirs
            :list pcmpl-me--complete-from-list))
 
-(defun pcmpl-me--context-get (key)
+(defun pcmpl-me--context-get (key &optional context)
   ""
-  (cdr (assoc key pcmpl-me--context)))
+  (cdr (assoc key (or context pcmpl-me--context))))
 
-(defun pcmpl-me--context-set (key value)
+(defun pcmpl-me--context-set (key value &optional context)
   ""
-  (push (cons key value) pcmpl-me--context))
+  (if context
+      (push (cons key value) context)
+    (push (cons key value) pcmpl-me--context)))
 
 (defun pcmpl-me--flags (pflags)
   "Return the combine all the flags from `PFLAGS'."

@@ -281,62 +281,140 @@
 (defconst pcmpl-kubectl--override-flags '(:kubeconfig :cluster :user :context :namespace :server))
 
 (defun pcmpl-kubectl--override-args (context)
-  ""
+  "Convert an alist of overrides into CLI flags.
+
+CONTEXT is a context alist."
   (mapconcat (lambda (e) (format "--%s=%s" (string-trim (symbol-name (car e)) ":") (cdr e)))
              (seq-filter (lambda (e) (member (car e)
                                              pcmpl-kubectl--override-flags)) context) " "))
 
-(defun pcmpl-kubectl--complete-resource-of (resource)
-  ""
-  (split-string
-   (shell-command-to-string
-    (format "kubectl get %s -o template --template=\"{{ range .items  }}{{ .metadata.name }} {{ end }}\" \"%s\""
-            (pcmpl-kubectl--override-args pcmpl-me--context)
-            resource))))
+(defun pcmpl-kubectl--complete-resource-of (kind &optional context)
+  "Return a list of all resources of a type.
 
-(defun pcmpl-kubectl--complete-resource-types ()
-  "Return all the resource short names from the cluster."
-  (mapcar
-   (lambda(e)
-     (string-match "\\`\\([a-z]+\\)" e)
-     (match-string 0 e))
-   (seq-filter
-    (lambda (e) (not (equal e "")))
-    (split-string
-     (shell-command-to-string
-      (format "kubectl api-resources %s --verbs get -o wide --no-headers"
-              (pcmpl-kubectl--override-args pcmpl-me--context))) "\n"))))
+KIND is the type of resorce to complete.  CONTEXT is context
+alist."
+  (let ((context-args (pcmpl-kubectl--override-args (or context pcmpl-me--context)))
+        (template "{{ range .items  }}{{ .metadata.name }} {{ end }}"))
+   (split-string
+    (shell-command-to-string
+     (format "kubectl get %s -o template --template=\"%s\" \"%s\"" context-args template kind)))))
 
-(defun pcmpl-kubectl--complete-resource-types-full ()
-  "Return all the resource types fully qualified names from the cluster."
-  (split-string
-   (shell-command-to-string
-    (format "kubectl api-resources %s -o name --cached --request-timeout=5s --verbs=get"
-            (pcmpl-kubectl--override-args pcmpl-me--context)))))
+
+(defun pcmpl-kubectl--complete-containers (&optional context)
+  "Return containers from a pod.
+
+Take a KIND like `pod/my-pod' or `pod my-pod'.  CONTEXT is a
+context alist."
+  (let ((context-args (pcmpl-kubectl--override-args (or context pcmpl-me--context)))
+        (template (mapconcat
+                   #'identity
+                   '( ;; Pod like
+                     "{{ range .spec.initContainers }}{{ .name }} {{end}}"
+                     "{{ range .spec.containers  }}{{ .name }}{{ end }}"
+                     ;; Deployments
+                     "{{ range .spec.template.spec.initContainers }}{{ .name }} {{end}}"
+                     "{{ range .spec.template.spec.containers}}{{ .name }} {{end}}")
+                   " "))
+        (resource (format "%s/%s"
+                          (pcmpl-me--context-get :resource-kind context)
+                          (pcmpl-me--context-get :resource-name context))))
+   (split-string
+    (shell-command-to-string
+     (format "kubectl get %s -o template --template=\"%s\" %s" context-args template resource)))))
+
+
+(defun pcmpl-kubectl--complete-resource-types (&optional plural context)
+  "Return all the resource short names from the cluster.
+
+CONTEXT is a context alist."
+  (let ((context-args (pcmpl-kubectl--override-args (or context pcmpl-me--context)))
+        (matcher (if plural
+                     "\\`\\([a-z]+\\)"
+                   "\\`\\([a-z]+\\)s")))
+   (mapcar
+    (lambda(e)
+      (string-match matcher e)
+      (match-string 1 e))
+    (seq-filter
+     (lambda (e) (not (equal e "")))
+     (split-string
+      (shell-command-to-string
+       (format "kubectl api-resources %s --verbs get -o wide --no-headers"
+               context-args)) "\n")))))
+
+(defun pcmpl-kubectl--complete-resource-types-full (&optional context)
+  "Return all the resource types fully qualified names from the cluster.
+
+CONTEXT is a context alist."
+  (let ((context-args (pcmpl-kubectl--override-args (or context pcmpl-me--context))))
+   (split-string
+    (shell-command-to-string
+     (format "kubectl api-resources %s -o name --cached --request-timeout=5s --verbs=get"
+             context-args)))))
 
 (defun pcmpl-kubectl--complete (type)
   "Return names of available entries in a kubeconfig file.
 
-`TYPE' is used to specify the scope of the returned names."
+TYPE is used to specify the scope of the returned names."
   (split-string
    (shell-command-to-string
     (format "kubectl config view -o template --template=\"{{ range .%s}}{{ .name }}\n{{end}}\"" type))))
 
 (defun pcmpl-kubectl--complete-resource ()
-  "Complete resources by name of a single kind."
-  (if (pcmpl-me--context-get :kind)
-      (pcomplete-here* (pcmpl-kubectl--complete-resource-of (pcmpl-me--context-get :kind)))
+  "Complete a single resources by name of a single kind.
+
+Support completion in the for \"kind name\" and  \"kind/name\"."
+  (cond
+   ;; Complete resources
+   ((pcmpl-me--context-get :resource-kind)
+    (pcomplete-here* (pcmpl-kubectl--complete-resource-of (pcmpl-me--context-get :resource-kind)))
+    (pcmpl-me--context-set :resource-name (pcomplete-arg 1)))
+
+   ;; Detect resources like pod/my-pod
+   ((pcomplete-match "\\`\\(.*\\)/\\([a-z9-0]*\\)" 0)
+    (pcomplete-here* (pcmpl-kubectl--complete-resource-of (pcomplete-match-string 1 0))
+                     (pcomplete-match-string 2 0))
+    (pcomplete-match "\\`\\(.*\\)/\\([a-z9-0]*\\)\\'" 1)
+    (pcmpl-me--context-set :resource-kind (pcomplete-match-string 1 0))
+    (pcmpl-me--context-set :resource-name (pcomplete-match-string 2 0)))
+   ;; Complete kinds
+   (t
     (pcomplete-here* (pcmpl-kubectl--complete-resource-types))
-    (pcmpl-me--context-set :kind (pcomplete-arg 1))))
+    (pcmpl-me--context-set :resource-kind (pcomplete-arg 1)))))
+
+
+;;   kubectl logs [-f] [-p] (POD | TYPE/NAME) [-c CONTAINER] [options]
+;;   kubectl port-forward TYPE/NAME [options] [LOCAL_PORT:]REMOTE_PORT [...[LOCAL_PORT_N:]REMOTE_PORT_N]
+;;   kubectl exec (POD | TYPE/NAME) [-c CONTAINER] [flags] -- COMMAND [args...] [options]
+;;   kubectl attach (POD | TYPE/NAME) -c CONTAINER [options]
+
+;;   kubectl describe (-f FILENAME | TYPE [NAME_PREFIX | -l label] | TYPE/NAME) [options]
+;;   kubectl delete ([-f FILENAME] | [-k DIRECTORY] | TYPE [(NAME | -l label | --all)]) [options]
+;;   kubectl label [--overwrite] (-f FILENAME | TYPE NAME) KEY_1=VAL_1 ... KEY_N=VAL_N [--resource-version=version] [options]
+
 
 (defun pcmpl-kubectl--complete-resources ()
-  "Complete resources by name of multiple kinds."
-  (if (pcmpl-me--context-get :kind)
-      (pcomplete-here* (pcmpl-kubectl--complete-resource-of (pcmpl-me--context-get :kind)))
-    (if (pcomplete-match "\\`.*,\\([a-z9-0]*\\)" 0)
-        (pcomplete-here* (pcmpl-kubectl--complete-resource-types) (pcomplete-match-string 1 0))
-     (pcomplete-here* (pcmpl-kubectl--complete-resource-types)))
-    (pcmpl-me--context-set :kind (pcomplete-arg 1))))
+  "Complete resources by name of multiple kinds.
+
+Supports comma separated resource types like \"pod,deployment\"
+or slash based resources like \"pod/my-pod\"
+\"deployment/my-deployment\" on the same line."
+  (cond
+   ;; Kinds like pod,deployment
+   ((pcomplete-match "\\`.*,\\([a-z9-0]*\\)" 0)
+    (pcomplete-here* (pcmpl-kubectl--complete-resource-types) (pcomplete-match-string 1 0))
+    (pcmpl-me--context-set :resource-kind (pcomplete-arg 1)))
+   ;; Resources based where the kind was already specified
+   ((pcmpl-me--context-get :resource-kind)
+    (pcomplete-here* (pcmpl-kubectl--complete-resource-of (pcmpl-me--context-get :resource-kind))))
+   ;; Resources like kind/name
+   ((pcomplete-match "\\`\\(.*\\)/\\([a-z9-0]*\\)" 0)
+    (pcomplete-here* (pcmpl-kubectl--complete-resource-of (pcomplete-match-string 1 0))
+                     (pcomplete-match-string 2 0)))
+   ;; Complete resource kinds
+   (t
+    (pcomplete-here* (pcmpl-kubectl--complete-resource-types))
+    (pcmpl-me--context-set :resource-kind (pcomplete-arg 1)))))
 
 (pcmpl-me-set-completion-widget :kubernetes-context (lambda () (pcmpl-kubectl--complete "contexts")))
 (pcmpl-me-set-completion-widget :kubernetes-user (lambda () (pcmpl-kubectl--complete "users")))
@@ -344,6 +422,7 @@
 (pcmpl-me-set-completion-widget :kubernetes-namespace (lambda () (pcmpl-kubectl--complete-resource-of "namespaces")))
 (pcmpl-me-set-completion-widget :kubernetes-resource (lambda () (pcmpl-kubectl--complete-resource)))
 (pcmpl-me-set-completion-widget :kubernetes-resources (lambda () (pcmpl-kubectl--complete-resources)))
+(pcmpl-me-set-completion-widget :kubernetes-resource-container (lambda () (pcmpl-kubectl--complete-containers)))
 (pcmpl-me-set-completion-widget :kubernetes-pod (lambda () (pcmpl-kubectl--complete-resource-of "pods")))
 (pcmpl-me-set-completion-widget :kubernetes-node (lambda () (pcmpl-kubectl--complete-resource-of "nodes")))
 
@@ -812,6 +891,27 @@
     (("--kustomize" "--kustomize=" "-k") . (:dirs))
     (("--filename" "--filename=" "-f") . (:files)))
   :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-resources))
+
+(pcmpl-me-command (kubectl logs)
+  :inherit-global-flags t
+  :flags
+  ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl logs" pcmpl-kubectl--global-flags))
+  '((("--all-containers"
+      "--ignore-errors"
+      "--insecure-skip-tls-verify-backend"
+      "--prefix"
+      "--timestamps"))
+    (("--limit-bytes" "--limit-bytes="))
+    (("--max-log-requests" "--max-log-requests="))
+    (("--pod-running-timeout" "--pod-running-timeout="))
+    (("--previous" "-p"))
+    (("--selector" "--selector=" "-l"))
+    (("--since" "--since="))
+    (("--since-time" "--since-time="))
+    (("--tail" "--tail="))
+    (("--follow" "-f"))
+    (("--container" "--container=" "-c") . (:kubernetes-resource-container)))
+  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-resource))
 
 (pcmpl-me-command (kubectl top)
   :inherit-global-flags t
