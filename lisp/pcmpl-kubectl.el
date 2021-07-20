@@ -295,27 +295,42 @@
             resource))))
 
 (defun pcmpl-kubectl--complete-resource-types ()
-  "Return all the resource types from the cluster."
+  "Return all the resource short names from the cluster."
+  (mapcar
+   (lambda(e)
+     (string-match "\\`\\([a-z]+\\)" e)
+     (match-string 0 e))
+   (seq-filter
+    (lambda (e) (not (equal e "")))
+    (split-string
+     (shell-command-to-string
+      (format "kubectl api-resources %s --verbs get -o wide --no-headers"
+              (pcmpl-kubectl--override-args pcmpl-me--context))) "\n"))))
+
+(defun pcmpl-kubectl--complete-resource-types-full ()
+  "Return all the resource types fully qualified names from the cluster."
   (split-string
    (shell-command-to-string
     (format "kubectl api-resources %s -o name --cached --request-timeout=5s --verbs=get"
             (pcmpl-kubectl--override-args pcmpl-me--context)))))
 
 (defun pcmpl-kubectl--complete (type)
-  ""
+  "Return names of available entries in a kubeconfig file.
+
+`TYPE' is used to specify the scope of the returned names."
   (split-string
    (shell-command-to-string
     (format "kubectl config view -o template --template=\"{{ range .%s}}{{ .name }}\n{{end}}\"" type))))
 
 (defun pcmpl-kubectl--complete-resource ()
-  "Return all the resource types from the cluster."
+  "Complete resources by name of a single kind."
   (if (pcmpl-me--context-get :kind)
       (pcomplete-here* (pcmpl-kubectl--complete-resource-of (pcmpl-me--context-get :kind)))
     (pcomplete-here* (pcmpl-kubectl--complete-resource-types))
     (pcmpl-me--context-set :kind (pcomplete-arg 1))))
 
 (defun pcmpl-kubectl--complete-resources ()
-  "Return all the resource types from the cluster."
+  "Complete resources by name of multiple kinds."
   (if (pcmpl-me--context-get :kind)
       (pcomplete-here* (pcmpl-kubectl--complete-resource-of (pcmpl-me--context-get :kind)))
     (if (pcomplete-match "\\`.*,\\([a-z9-0]*\\)" 0)
