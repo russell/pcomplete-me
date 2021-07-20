@@ -323,17 +323,14 @@ context alist."
      (format "kubectl get %s -o template --template=\"%s\" %s" context-args template resource)))))
 
 
-(defun pcmpl-kubectl--complete-resource-types (&optional plural context)
+(defun pcmpl-kubectl--complete-resource-types (&optional context)
   "Return all the resource short names from the cluster.
 
 CONTEXT is a context alist."
-  (let ((context-args (pcmpl-kubectl--override-args (or context pcmpl-me--context)))
-        (matcher (if plural
-                     "\\`\\([a-z]+\\)"
-                   "\\`\\([a-z]+\\)s")))
+  (let ((context-args (pcmpl-kubectl--override-args (or context pcmpl-me--context))))
    (mapcar
     (lambda(e)
-      (string-match matcher e)
+      (string-match "\\`\\([a-z]+\\)" e)
       (match-string 1 e))
     (seq-filter
      (lambda (e) (not (equal e "")))
@@ -365,22 +362,23 @@ TYPE is used to specify the scope of the returned names."
 
 Support completion in the for \"kind name\" and  \"kind/name\"."
   (cond
-   ;; Complete resources
-   ((pcmpl-me--context-get :resource-kind)
-    (pcomplete-here* (pcmpl-kubectl--complete-resource-of (pcmpl-me--context-get :resource-kind)))
-    (pcmpl-me--context-set :resource-name (pcomplete-arg 1)))
-
    ;; Detect resources like pod/my-pod
-   ((pcomplete-match "\\`\\(.*\\)/\\([a-z9-0]*\\)" 0)
+   ((pcomplete-match "\\`\\(.*\\)/\\(.*\\)\\'" 0)
     (pcomplete-here* (pcmpl-kubectl--complete-resource-of (pcomplete-match-string 1 0))
                      (pcomplete-match-string 2 0))
-    (pcomplete-match "\\`\\(.*\\)/\\([a-z9-0]*\\)\\'" 1)
-    (pcmpl-me--context-set :resource-kind (pcomplete-match-string 1 0))
-    (pcmpl-me--context-set :resource-name (pcomplete-match-string 2 0)))
+    (pcomplete-match "\\`\\(.*\\)/\\(.*\\)\\'" 1)
+    (pcmpl-me--context-set :resource-kind (pcomplete-match-string 1 1))
+    (pcmpl-me--context-set :resource-name (pcomplete-match-string 2 1)))
+
    ;; Complete kinds
-   (t
-    (pcomplete-here* (pcmpl-kubectl--complete-resource-types))
-    (pcmpl-me--context-set :resource-kind (pcomplete-arg 1)))))
+   ((not (pcmpl-me--context-get :resource-kind))
+    (pcomplete-here* (mapcar (lambda (e) (format "%s/" e))
+                             (pcmpl-kubectl--complete-resource-types)))
+    (pcomplete-match "\\`\\(.*\\)/\\([a-z9-0]*\\)/\\'" 1)
+    (pcmpl-me--context-set :resource-kind (pcomplete-match-string 1 1)))
+   ((and (pcmpl-me--context-get :resource-kind)
+         (pcmpl-me--context-get :resource-name))
+    (pcomplete-here*))))
 
 
 ;;   kubectl logs [-f] [-p] (POD | TYPE/NAME) [-c CONTAINER] [options]
@@ -408,7 +406,7 @@ or slash based resources like \"pod/my-pod\"
    ((pcmpl-me--context-get :resource-kind)
     (pcomplete-here* (pcmpl-kubectl--complete-resource-of (pcmpl-me--context-get :resource-kind))))
    ;; Resources like kind/name
-   ((pcomplete-match "\\`\\(.*\\)/\\([a-z9-0]*\\)" 0)
+   ((pcomplete-match "\\`\\(.*\\)/\\(.*\\)\\'" 0)
     (pcomplete-here* (pcmpl-kubectl--complete-resource-of (pcomplete-match-string 1 0))
                      (pcomplete-match-string 2 0)))
    ;; Complete resource kinds
