@@ -63,7 +63,7 @@
                          (append subcommand (list command)) env)))
        (if (null subcommands)
            (cons command nil)
-         (list command subcommands))))))
+         (cons command subcommands))))))
 
 (defun rs//bash-complete-recursive-subcommands (subcommand &optional env)
   ""
