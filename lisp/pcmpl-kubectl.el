@@ -380,16 +380,16 @@ Support completion in the for \"kind name\" and  \"kind/name\"."
    ((pcomplete-match "\\`\\(.*\\)/\\(.*\\)\\'" 0)
     (pcomplete-here* (pcmpl-kubectl--complete-resource-of (pcomplete-match-string 1 0))
                      (pcomplete-match-string 2 0))
-    (pcomplete-match "\\`\\(.*\\)/\\(.*\\)\\'" 1)
-    (pcmpl-me--context-set :resource-kind (pcomplete-match-string 1 1))
-    (pcmpl-me--context-set :resource-name (pcomplete-match-string 2 1)))
+    (pcomplete-match "\\`\\(.*\\)/\\(.*\\)\\'")
+    (pcmpl-me--context-set :resource-kind (pcomplete-match-string 1))
+    (pcmpl-me--context-set :resource-name (pcomplete-match-string 2)))
 
    ;; Complete kinds
    ((not (pcmpl-me--context-get :resource-kind))
     (pcomplete-here* (mapcar (lambda (e) (format "%s/" e))
                              (pcmpl-kubectl--complete-resource-types)))
-    (pcomplete-match "\\`\\(.*\\)/\\([a-z9-0]*\\)/\\'" 1)
-    (pcmpl-me--context-set :resource-kind (pcomplete-match-string 1 1)))
+    (pcomplete-match "\\`\\(.*\\)/\\([a-z9-0]*\\)/\\'")
+    (pcmpl-me--context-set :resource-kind (pcomplete-match-string 1)))
 
    ;; Handle the case where we have already found a kind/name
    ((and (pcmpl-me--context-get :resource-kind)
