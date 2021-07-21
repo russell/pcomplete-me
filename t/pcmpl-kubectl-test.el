@@ -34,10 +34,24 @@
                                                (load-file-name
                                                 (file-name-directory load-file-name)))))
 
+
+(defun rs//bash-complete-kubectl-subcommands (command)
+  ""
+  (let ((bash-completion-start-files `(,pcmpl-kubectl-test-bashinit)))
+    (rs//bash-complete-recursive-subcommands command)))
+
+
 (defun rs//bash-complete-kubectl-subcommand (command &optional global-flags)
   ""
-  (rs//bash-complete-subcommand command '("KUBECONFIG=/dev/null")))
+  (let ((bash-completion-start-files `(,pcmpl-kubectl-test-bashinit)))
+    (rs//bash-complete-isolated
+     (rs//bash-complete-subcommand command))))
 
+(defun rs//bash-complete-kubectl-flags (command)
+  ""
+  (let ((bash-completion-start-files `(,pcmpl-kubectl-test-bashinit)))
+    (rs//bash-complete-isolated
+     (rs//bash-complete-flags command))))
 
 (cl-defmacro pcmpl-me-test (command (&key inherit-global-flags))
   (let* ((command-list (if (listp command) command (cons command nil)))
@@ -62,8 +76,7 @@
           (equal
            (cl-set-difference
             ,subcommand-subcommands
-            (let ((bash-completion-start-files `(,pcmpl-kubectl-test-bashinit)))
-             (rs//bash-complete-kubectl-subcommand ,(mapconcat 'symbol-name command-list " ")))
+            (rs//bash-complete-kubectl-subcommand ,(mapconcat 'symbol-name command-list " "))
             :test #'string-equal)
            nil))))))
 

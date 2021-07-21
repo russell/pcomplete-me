@@ -36,39 +36,40 @@
           (bash-completion-use-separate-processes t)
           (default-directory temp-dir))
      (unwind-protect
-         ,@body
+         (progn
+          (bash-completion-reset-all)
+          ,@body)
        (delete-directory temp-dir))))
 
-(defun rs//bash-complete-subcommand (subcommand &optional env)
+(defun rs//bash-complete-subcommand (subcommand)
   ""
-  (cl-letf* ((process-environment (append env process-environment)))
-    (cl-sort
-     (seq-filter
-      (lambda (e) (string-match "^[^-]" e))
-      (mapcar #'string-trim
-              (caddr
-               (with-temp-buffer
-                 (insert (format "%s " subcommand))
-                 (bash-completion-dynamic-complete-nocomint (line-beginning-position) (point))))))
-     'string-lessp)))
+  (cl-sort
+   (seq-filter
+    (lambda (e) (string-match "^[^-]" e))
+    (mapcar #'string-trim
+            (caddr
+             (with-temp-buffer
+               (insert (format "%s " subcommand))
+               (bash-completion-dynamic-complete-nocomint (line-beginning-position) (point))))))
+   'string-lessp))
 
-(defun rs//bash-complete-recursive-subcommand (subcommand &optional env)
+(defun rs//bash-complete-recursive-subcommand (subcommand)
   ""
   (if (> (length subcommand) 5)
       nil
     (cl-loop
-     for command in (rs//bash-complete-subcommand (mapconcat #'identity subcommand " ") env)
+     for command in (rs//bash-complete-subcommand (mapconcat #'identity subcommand " "))
      collect
      (let ((subcommands (rs//bash-complete-recursive-subcommand
-                         (append subcommand (list command)) env)))
+                         (append subcommand (list command)))))
        (if (null subcommands)
            (cons command nil)
          (cons command subcommands))))))
 
-(defun rs//bash-complete-recursive-subcommands (subcommand &optional env)
+(defun rs//bash-complete-recursive-subcommands (subcommand)
   ""
   (rs//bash-complete-isolated
-   (rs//bash-complete-recursive-subcommand (if (listp subcommand) subcommand (list subcommand)) env)))
+   (rs//bash-complete-recursive-subcommand (if (listp subcommand) subcommand (list subcommand)))))
 
 (defun rs//bash-complete-recursive-subcommand-flags (subcommand)
   ""
@@ -82,19 +83,18 @@
         (list command subcommands))))))
 
 
-(defun rs//bash-complete-flags (command-or-subcommand &optional global-flags env)
+(defun rs//bash-complete-flags (command-or-subcommand &optional global-flags)
   ""
-  (cl-letf* ((process-environment (append env process-environment)))
-    (rs//bash-complete-isolated
-     (cl-sort
-      (cl-set-difference
-       (caddr
-        (with-temp-buffer
-          (insert (format "%s -" command-or-subcommand))
-          (bash-completion-dynamic-complete-nocomint (line-beginning-position) (point))))
-       global-flags
-       :test #'string-equal)
-      'string-lessp))))
+  (rs//bash-complete-isolated
+   (cl-sort
+    (cl-set-difference
+     (caddr
+      (with-temp-buffer
+        (insert (format "%s -" command-or-subcommand))
+        (bash-completion-dynamic-complete-nocomint (line-beginning-position) (point))))
+     global-flags
+     :test #'string-equal)
+    'string-lessp)))
 
 (defun rs//replace-sexp (options)
   ""
@@ -104,13 +104,43 @@
     (insert (string-trim (format "'%s" (pp-to-string options)))))
   (indent-pp-sexp))
 
+(defun rs//subcommand-tree-to-commands (tree path)
+  ;; TODO this doesn't correctly capture all subcommand's it misses
+  ;; the intermediate ones.
+  (if (null tree)
+      path
+    (cl-loop
+     for p in tree
+     for key = (car p)
+
+     do (message "path %S" path)
+
+     if (null tree)
+     do (message "null tree")
+
+     if (null (assoc-default key tree #'string-equal))
+     collect (format "(pcmpl-me-test (%s) (:inherit-global-flags t))"
+                     (mapconcat #'identity (reverse (cons key path)) " "))
+     else
+     collect (mapcar
+              (lambda (e) (command-things-now e (cons key path)))
+              (assoc-default key tree #'string-equal)))))
+
+(defmacro rs//generate-pcmpl-me-command (command &optional global-flags)
+  (let ((subcommands (rs//bash-complete-kubectl-subcommand command))
+        (flags (rs//bash-complete-flags command global-flags)))
+   `(pcmpl-me-command
+        :inherit-global-flags ,(when pcmpl-kubectl--global-flags t)
+        :flags ,flags
+        :subcommands ,subcommands)))
+
 (defun rs//bash-complete-kubectl-subcommands (command)
   ""
-  (rs//bash-complete-recursive-subcommands command '("KUBECONFIG=/dev/null")))
+  (rs//bash-complete-recursive-subcommands command))
 
 (defun rs//bash-complete-kubectl-flags (command &optional global-flags)
   ""
-  (rs//bash-complete-flags command global-flags '("KUBECONFIG=/dev/null")))
+  (rs//bash-complete-flags command global-flags))
 
 (provide 'bash-completion-export-utils)
 ;;; bash-completion-export-utils.el ends here
