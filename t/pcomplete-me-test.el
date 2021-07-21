@@ -30,65 +30,91 @@
   (should
    (equal
     (let ((pcmpl-me-completers (append pcmpl-me-completers '(:test (lambda () '("test"))))))
-     (pcmpl-me--flag-matchers '((("--verbose" "-v"))
-                                (("--profile" "--profile=") . (:files))
-                                (("--output" "--output=") . (:list "json" "yaml"))
-                                (("--filter" "--filter=") . (:test)))))
+      (pcmpl-me--flag-post-matchers '((("--verbose" "-v"))
+                                      (("--profile" "--profile=") . (:files))
+                                      (("--output" "--output=") . (:list "json" "yaml"))
+                                      (("--filter" "--filter=") . (:test)))))
     '((when
-          (pcomplete-match "^-" 1)
+          (pcomplete-match "\\`-" 1)
         (cond
          ((pcomplete-match "\\`--profile\\'" 1)
           (pcomplete-here*
-           (pcomplete-entries)))
+           (pcomplete-entries))
+          (pcmpl-me--context-set :profile
+                                 (pcomplete-arg 1)))
          ((pcomplete-match "\\`--output\\'" 1)
           (pcomplete-here*
-           (list "yaml" "json")))
+           (pcmpl-me--complete-from-list "yaml" "json"))
+          (pcmpl-me--context-set :output
+                                 (pcomplete-arg 1)))
          ((pcomplete-match "\\`--filter\\'" 1)
           (pcomplete-here*
            ((lambda nil
-              '("test")))))))))))
+              '("test"))))
+          (pcmpl-me--context-set :filter
+                                 (pcomplete-arg 1))))))))))
 
 (ert-deftest pcmpl-me--flag-inline-test ()
   (should
    (equal
     (let ((pcmpl-me-completers (append pcmpl-me-completers '(:test (lambda () '("test"))))))
-     (pcmpl-me--flag-matchers '((("--verbose" "-v"))
-                                (("--profile" "--profile=") . (:files))
-                                (("--output" "--output=") . (:list "json" "yaml"))
-                                (("--filter" "--filter=") . (:test)))))
+      (pcmpl-me--flag-inline-matchers '((("--verbose" "-v"))
+                                        (("--profile" "--profile=") . (:files))
+                                        (("--output" "--output=") . (:list "json" "yaml"))
+                                        (("--filter" "--filter=") . (:test)))))
     '((when
-          (pcomplete-match "^-" 0)
+          (pcomplete-match "\\`-" 0)
         (cond
          ((pcomplete-match "\\`--profile=\\(.*\\)" 0)
           (pcomplete-here*
            (pcomplete-entries)
-           (pcomplete-match-string 1 0)))
+           (pcomplete-match-string 1 0)
+           t)
+          (pcomplete-match "\\`--profile=\\(.*\\)" 1)
+          (pcmpl-me--context-set :profile
+                                 (pcomplete-match-string 1)))
          ((pcomplete-match "\\`--output=\\(.*\\)" 0)
           (pcomplete-here*
-           (list "yaml" "json")
-           (pcomplete-match-string 1 0)))
+           (pcmpl-me--complete-from-list "yaml" "json")
+           (pcomplete-match-string 1 0)
+           t)
+          (pcomplete-match "\\`--output=\\(.*\\)" 1)
+          (pcmpl-me--context-set :output
+                                 (pcomplete-match-string 1)))
          ((pcomplete-match "\\`--filter=\\(.*\\)" 0)
           (pcomplete-here*
            ((lambda nil
               '("test")))
-           (pcomplete-match-string 1 0)))))))))
+           (pcomplete-match-string 1 0)
+           t)
+          (pcomplete-match "\\`--filter=\\(.*\\)" 1)
+          (pcmpl-me--context-set :filter
+                                 (pcomplete-match-string 1)))))))))
 
 (ert-deftest pcmpl-me--flag-matcher-only-inline-test ()
   (should
    (equal
-    (pcmpl-me--flag-matchers '((("--profile=") . (:files))
-                               (("--output=") . (:list "json" "yaml"))))
+    (pcmpl-me--flag-inline-matchers '((("--profile=") . (:files))
+                                      (("--output=") . (:list "json" "yaml"))))
     '((when
-          (pcomplete-match "^-" 0)
+          (pcomplete-match "\\`-" 0)
         (cond
          ((pcomplete-match "\\`--profile=\\(.*\\)" 0)
           (pcomplete-here*
            (pcomplete-entries)
-           (pcomplete-match-string 1 0)))
+           (pcomplete-match-string 1 0)
+           t)
+          (pcomplete-match "\\`--profile=\\(.*\\)" 1)
+          (pcmpl-me--context-set :profile
+                                 (pcomplete-match-string 1)))
          ((pcomplete-match "\\`--output=\\(.*\\)" 0)
           (pcomplete-here*
-           (list "yaml" "json")
-           (pcomplete-match-string 1 0)))))))))
+           (pcmpl-me--complete-from-list "yaml" "json")
+           (pcomplete-match-string 1 0)
+           t)
+          (pcomplete-match "\\`--output=\\(.*\\)" 1)
+          (pcmpl-me--context-set :output
+                                 (pcomplete-match-string 1)))))))))
 
 (provide 'pcomplete-me-test)
 ;;; pcomplete-me-test.el ends here

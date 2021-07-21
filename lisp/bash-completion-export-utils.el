@@ -126,9 +126,16 @@
               (lambda (e) (command-things-now e (cons key path)))
               (assoc-default key tree #'string-equal)))))
 
+(defun rs//group-flags (flags)
+  ""
+  (mapcar
+   #'cdr
+   (seq-group-by (lambda (e) (string-trim e nil "=")) flags)))
+
 (defmacro rs//generate-pcmpl-me-command (command &optional global-flags)
+  ""
   (let ((subcommands (rs//bash-complete-kubectl-subcommand command))
-        (flags (rs//bash-complete-flags command global-flags)))
+        (flags (rs//group-flags (rs//bash-complete-flags command global-flags))))
    `(pcmpl-me-command
         :inherit-global-flags ,(when pcmpl-kubectl--global-flags t)
         :flags ,flags
