@@ -132,14 +132,23 @@
    #'cdr
    (seq-group-by (lambda (e) (string-trim e nil "=")) flags)))
 
+(defun rs//add-null-completers (flags)
+  ""
+  (mapcar
+   (lambda (e)
+     (if (seq-some (lambda(str) (string-match "[=]" str)) e)
+         (append e '(:null))
+       e))
+   flags))
+
 (defmacro rs//generate-pcmpl-me-command (command &optional global-flags)
   ""
   (let ((subcommands (rs//bash-complete-kubectl-subcommand command))
-        (flags (rs//group-flags (rs//bash-complete-flags command global-flags))))
+        (flags (rs//add-null-completers (rs//group-flags (rs//bash-complete-flags command global-flags)))))
    `(pcmpl-me-command
         :inherit-global-flags ,(when pcmpl-kubectl--global-flags t)
-        :flags ,flags
-        :subcommands ,subcommands)))
+        :flags (quote ,flags)
+        :subcommands (quote ,subcommands))))
 
 (defun rs//bash-complete-kubectl-subcommands (command)
   ""

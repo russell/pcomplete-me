@@ -199,44 +199,42 @@ or slash based resources like \"pod/my-pod\"
 
 (pcmpl-me-global-args kubectl
   :flags
-  ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl"))
-  '(("--add-dir-header"
-     "--alsologtostderr"
-     "--one-output"
-     "--logtostderr"
-     "--match-server-version"
-     "--skip-headers"
-     "--skip-log-headers"
-     "--warnings-as-errors")
-    ("--as" "--as="
-     "--as-group" "--as-group="
-     "--help" "-h"
-     "--insecure-skip-tls-verify"
-     "--log-backtrace-at" "--log-backtrace-at="
-     "--log-file-max-size" "--log-file-max-size="
-     "--log-flush-frequency" "--log-flush-frequency="
-     "--password" "--password="
-     "--profile-output" "--profile-output="
-     "--request-timeout" "--request-timeout="
-     "--server" "--server=" "-s"
-     "--stderrthreshold" "--stderrthreshold="
-     "--tls-server-name" "--tls-server-name="
-     "--token" "--token="
-     "--username" "--username="
-     "--vmodule" "--vmodule="
-     "--v" "--v=" "-v")
-    ("--profile" "--profile=" :list "none" "cpu" "heap" "goroutine" "threadcreate" "block" "mutex")
-    ("--cluster" "--cluster=" :kubernetes-cluster)
-    ("--user" "--user=" :kubernetes-user)
-    ("--context" "--context=" :kubernetes-context)
-    ("--namespace" "--namespace=" "-n" :kubernetes-namespaces)
-    ("--log-file" "--log-file=" :files)
-    ("--kubeconfig" "--kubeconfig=" :files)
+  '(("--add-dir-header")
+    ("--alsologtostderr")
+    ("--as" "--as=" :null)
+    ("--as-group" "--as-group=" :null)
+    ("--cache-dir" "--cache-dir=" :dirs)
     ("--certificate-authority" "--certificate-authority=" :files)
     ("--client-certificate" "--client-certificate=" :files)
     ("--client-key" "--client-key=" :files)
+    ("--cluster" "--cluster=" :kubernetes-cluster)
+    ("--context" "--context=" :kubernetes-context)
+    ("--insecure-skip-tls-verify")
+    ("--kubeconfig" "--kubeconfig=" :files)
+    ("--log-backtrace-at" "--log-backtrace-at=" :null)
     ("--log-dir" "--log-dir=" :dirs)
-    ("--cache-dir" "--cache-dir=" :dirs)))
+    ("--log-file" "--log-file=" :files)
+    ("--log-file-max-size" "--log-file-max-size=" :null)
+    ("--log-flush-frequency" "--log-flush-frequency=" :null)
+    ("--logtostderr")
+    ("--match-server-version")
+    ("--namespace" "--namespace=" "-n" :kubernetes-namespaces)
+    ("--one-output")
+    ("--password" "--password=" :null)
+    ("--profile" "--profile=" :list "none" "cpu" "heap" "goroutine" "threadcreate" "block" "mutex")
+    ("--profile-output" "--profile-output=" :null)
+    ("--request-timeout" "--request-timeout=" :null)
+    ("--server" "--server=" "-s" :null)
+    ("--skip-headers")
+    ("--skip-log-headers")
+    ("--stderrthreshold" "--stderrthreshold=" :null)
+    ("--tls-server-name" "--tls-server-name=" :null)
+    ("--token" "--token=" :null)
+    ("--user" "--user=" :kubernetes-user)
+    ("--username" "--username=" :null)
+    ("--v" "--v=" "-v" :null)
+    ("--vmodule" "--vmodule=" :null)
+    ("--warnings-as-errors")))
 
 (pcmpl-me-command kubectl
   :inherit-global-flags t
