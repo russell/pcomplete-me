@@ -29,11 +29,19 @@
 (ert-deftest pcmpl-me--flag-post-test ()
   (should
    (equal
+    (pcmpl-me--arg-list '("--verbose" "--verbose=" :foobar "barfoo" :no-args))
+    '((:no-args)
+      (:foobar "barfoo")
+      (:args "--verbose=" "--verbose")))))
+
+(ert-deftest pcmpl-me--flag-post-test ()
+  (should
+   (equal
     (let ((pcmpl-me-completers (append pcmpl-me-completers '(:test (lambda () '("test"))))))
-      (pcmpl-me--flag-post-matchers '((("--verbose" "-v"))
-                                      (("--profile" "--profile=") . (:files))
-                                      (("--output" "--output=") . (:list "json" "yaml"))
-                                      (("--filter" "--filter=") . (:test)))))
+      (pcmpl-me--flag-post-matchers '(("--verbose" "-v")
+                                      ("--profile" "--profile=" :files)
+                                      ("--output" "--output=" :list "json" "yaml")
+                                      ("--filter" "--filter=" :test))))
     '((when
           (pcomplete-match "\\`-" 1)
         (cond

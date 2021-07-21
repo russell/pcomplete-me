@@ -77,6 +77,26 @@
       `(append ,@matchers))
      (t (car matchers)))))
 
+(defun pcmpl-me--arg-list (args)
+  "Take pseudo plist as ARGS and return an alist.
+
+For example:
+  (pcmpl-me--arg-list '(\"--verbose\" \"--verbose=\" :foobar \"barfoo\"))
+  -> '((:foobar \"barfoo\")
+       (:args \"--verbose=\" \"--verbose\"))"
+  (let (args-alist)
+   (cl-loop for element in `(:args ,@args)
+            when (keywordp element)
+            for key = element
+            else
+            do (if (alist-get key args-alist)
+                     (push element (alist-get key args-alist))
+                 (push (cons key (cons element nil)) args-alist))
+            finally
+            do (unless (alist-get key args-alist)
+                 (push (cons key nil) args-alist)))
+   args-alist))
+
 (defun pcmpl-me--flag-post-matchers (pflags)
   "Take `PFLAGS' and return post matcher form."
   (cl-loop for (flags . matchers) in pflags
