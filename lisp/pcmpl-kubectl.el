@@ -286,24 +286,23 @@ or slash based resources like \"pod/my-pod\"
 (pcmpl-me-command (kubectl annotate)
   :inherit-global-flags t
   :flags
-  ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl annotate" pcmpl-kubectl--global-flags))
-  '(("--all"
-     "--allow-missing-template-keys"
-     "--dry-run"
-     "--field-manager" "--field-manager="
-     "--field-selector" "--field-selector="
-     "--list"
-     "--local"
-     "--overwrite"
-     "--record"
-     "--recursive" "-R"
-     "--show-managed-fields"
-     "--template" "--template=")
-    ("--output" "--output=" "-o" :list kubectl-output-all)
-    ("--resource-version" "--resource-version=")
-    ("--selector" "--selector=" "-l")
+  '(("--all")
+    ("--allow-missing-template-keys")
+    ("--dry-run")
+    ("--field-manager" "--field-manager=" :null)
+    ("--field-selector" "--field-selector=" :null)
+    ("--filename" "--filename=" "-f" :files))
     ("--kustomize" "--kustomize=" "-k" :dirs)
-    ("--filename" "--filename=" "-f" :files)))
+    ("--list")
+    ("--local")
+    ("--output" "--output=" "-o" :list kubectl-output-all)
+    ("--overwrite")
+    ("--record")
+    ("--recursive" "-R")
+    ("--resource-version" "--resource-version=" :null)
+    ("--selector" "--selector=" "-l" :null)
+    ("--show-managed-fields")
+    ("--template" "--template=" :null))
 
 (pcmpl-me-command (kubectl api-versions)
   :inherit-global-flags t)
@@ -311,43 +310,43 @@ or slash based resources like \"pod/my-pod\"
 (pcmpl-me-command (kubectl api-resources)
   :inherit-global-flags t
   :flags
-  ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl api-resources" pcmpl-kubectl--global-flags))
-  '(("--api-group" "--api-group="
-     "--cached"
-     "--namespaced"
-     "--no-headers"
-     "--verbs" "--verbs=")
+  '(("--api-group" "--api-group=" :null)
+    ("--cached")
+    ("--namespaced")
+    ("--no-headers")
+    ("--output" "--output=" "-o" :list kubectl-output-name-or-wide)
     ("--sort-by" "--sort-by=" :list "name" "kind")
-    ("--output" "--output=" "-o" :list kubectl-output-name-or-wide)))
+    ("--verbs" "--verbs=" :null)))
 
 (pcmpl-me-command (kubectl apply)
   :inherit-global-flags t
   :flags
-  ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl apply" pcmpl-kubectl--global-flags))
-  '(("--all"
-     "--allow-missing-template-keys"
-     "--field-manager" "--field-manager="
-     "--force"
-     "--force-conflicts"
-     "--grace-period" "--grace-period="
-     "--openapi-patch"
-     "--overwrite"
-     "--prune"
-     "--prune-whitelist" "--prune-whitelist="
-     "--record"
-     "--recursive" "-R"
-     "--selector" "--selector=" "-l"
-     "--server-side"
-     "--show-managed-fields"
-     "--template" "--template="
-     "--timeout" "--timeout="
-     "--validate"
-     "--wait")
-    ("--kustomize" "--kustomize=" "-k" :dirs)
-    ("--filename" "--filename=" "-f" :files)
-    ("--output" "--output=" "-o" :list "json" "yaml" "name" "go-template" "go-template-file" "template" "templatefile" "jsonpath" "jsonpath-as-json" "jsonpath-file")
+  '(("--all")
+    ("--allow-missing-template-keys")
     ("--cascade" :list "background" "orphan" "foreground")
-    ("--dry-run" :list "none" "server" "client"))
+    ("--dry-run" :list "none" "server" "client")
+    ("--field-manager" "--field-manager=" :null)
+    ("--filename" "--filename=" "-f" :files)
+    ("--filename" "--filename=" :null)
+    ("--force")
+    ("--force-conflicts")
+    ("--grace-period" "--grace-period=" :null)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--kustomize" "--kustomize=" :null)
+    ("--openapi-patch")
+    ("--output" "--output=" "-o" :list kubectl-output-all)
+    ("--overwrite")
+    ("--prune")
+    ("--prune-whitelist" "--prune-whitelist=" :null)
+    ("--record")
+    ("--recursive" "-R")
+    ("--selector" "--selector=" "-l" :null)
+    ("--server-side")
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)
+    ("--timeout" "--timeout=" :null)
+    ("--validate")
+    ("--wait"))
   :subcommands
   '("edit-last-applied" "set-last-applied" "view-last-applied"))
 
@@ -355,50 +354,45 @@ or slash based resources like \"pod/my-pod\"
 (pcmpl-me-command (kubectl apply edit-last-applied)
   :inherit-global-flags t
   :flags
-  ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl apply edit-last-applied" pcmpl-kubectl--global-flags))
-  '(("--allow-missing-template-keys"
-     "--field-manager" "--field-manager="
-     "--record"
-     "--recursive" "-R"
-     "--show-managed-fields"
-     "--template" "--template="
-     "--windows-line-endings")
-    ("--kustomize" "--kustomize=" "-k" :dirs)
+  '(("--allow-missing-template-keys")
+    ("--field-manager" "--field-manager=" :null)
     ("--filename" "--filename=" "-f" :files)
-    ("--output" "--output=" "-o" :list kubectl-output-all)))
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--output" "--output=" "-o" :list kubectl-output-all)
+    ("--record")
+    ("--recursive" "-R")
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)
+    ("--windows-line-endings")))
 
 (pcmpl-me-command (kubectl apply set-last-applied)
   :inherit-global-flags t
   :flags
-  ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl apply set-last-applied" pcmpl-kubectl--global-flags))
-  '(("--allow-missing-template-keys"
-     "--create-annotation"
-     "--dry-run"
-     "--show-managed-fields"
-     "--template" "--template=")
+  '(("--allow-missing-template-keys")
+    ("--create-annotation")
+    ("--dry-run")
     ("--filename" "--filename=" "-f" :files)
-    ("--output" "--output=" "-o" :list kubectl-output-all)))
+    ("--output" "--output=" "-o" :list kubectl-output-all)
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)))
 
 (pcmpl-me-command (kubectl apply view-last-applied)
   :inherit-global-flags t
   :flags
-  ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl apply view-last-applied" pcmpl-kubectl--global-flags))
   '(("--all")
     ("--recursive" "-R")
-    ("--selector" "--selector=" "-l")
+    ("--selector" "--selector=" "-l" :null)
     ("--filename" "--filename=" "-f" :files)
     ("--output" "--output=" "-o" :list kubectl-output-all)))
 
 (pcmpl-me-command (kubectl attach)
   :inherit-global-flags t
   :flags
-  ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl attach" pcmpl-kubectl--global-flags))
-  '(("--pod-running-timeout" "--pod-running-timeout="
-     "--quiet" "-q"
-     "--stdin" "-i"
-     "--tty" "-t")
-    ;; TODO support finding containers
-    ("--container" "--container=" "-c"))
+  '(("--pod-running-timeout" "--pod-running-timeout=" :null)
+    ("--quiet" "-q")
+    ("--stdin" "-i")
+    ("--tty" "-t")
+    ("--container" "--container=" "-c" :kubernetes-resource-container))
   :subcommands (pcmpl-me-get-completion-widget :kubernetes-pod))
 
 (pcmpl-me-command (kubectl auth)
@@ -410,58 +404,52 @@ or slash based resources like \"pod/my-pod\"
 (pcmpl-me-command (kubectl auth can-i)
   :inherit-global-flags t
   :flags
-  ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl auth can-i" pcmpl-kubectl--global-flags))
-  '(("--all-namespaces" "-A"
-     "--list"
-     "--no-headers"
-     "--quiet" "-q"
-     "--subresource" "--subresource=")))
+  '(("--all-namespaces" "-A")
+    ("--list")
+    ("--no-headers")
+    ("--quiet" "-q")
+    ("--subresource" "--subresource=" :null)))
 
 (pcmpl-me-command (kubectl auth reconcile)
   :inherit-global-flags t
   :flags
   ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl auth reconcile" pcmpl-kubectl--global-flags))
-  '(("--allow-missing-template-keys"
-     "--dry-run"
-     "--recursive" "-R"
-     "--remove-extra-permissions"
-     "--remove-extra-subjects"
-     "--show-managed-fields"
-     "--template" "--template=")
-    ("--output" "--output=" "-o" :list kubectl-output-all)
+  '(("--allow-missing-template-keys")
+    ("--dry-run")
+    ("--filename" "--filename=" "-f" :files)
     ("--kustomize" "--kustomize=" "-k" :dirs)
-    ("--filename" "--filename=" "-f" :files)))
+    ("--output" "--output=" "-o" :list kubectl-output-all)
+    ("--recursive" "-R")
+    ("--remove-extra-permissions")
+    ("--remove-extra-subjects")
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)))
 
 (pcmpl-me-command (kubectl autoscale)
   :inherit-global-flags t
   :flags
-  ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl autoscale" pcmpl-kubectl--global-flags))
-  '(("--max="))
+  '(("--max=" :null))
   :subcommands '("deployment" "replicaset" "replicationcontroller" "statefulset"))
 
 (pcmpl-me-command (kubectl autoscale deployment)
   :inherit-global-flags t
   :flags
-  ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl autoscale deployment" pcmpl-kubectl--global-flags))
-  '(("--max=")))
+  '(("--max=" :null)))
 
 (pcmpl-me-command (kubectl autoscale replicaset)
   :inherit-global-flags t
   :flags
-  ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl autoscale replicaset" pcmpl-kubectl--global-flags))
-  '(("--max=")))
+  '(("--max=" :null)))
 
 (pcmpl-me-command (kubectl autoscale replicationcontroller)
   :inherit-global-flags t
   :flags
-  ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl autoscale replicationcontroller" pcmpl-kubectl--global-flags))
-  '(("--max=")))
+  '(("--max=" :null)))
 
 (pcmpl-me-command (kubectl autoscale statefulset)
   :inherit-global-flags t
   :flags
-  ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl autoscale statefulset" pcmpl-kubectl--global-flags))
-  '(("--max=")))
+  '(("--max=" :null)))
 
 (pcmpl-me-command (kubectl certificate)
   :inherit-global-flags t)
@@ -469,28 +457,26 @@ or slash based resources like \"pod/my-pod\"
 (pcmpl-me-command (kubectl certificate approve)
   :inherit-global-flags t
   :flags
-  ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl certificate approve" pcmpl-kubectl--global-flags))
-  '(("--allow-missing-template-keys"
-     "--force"
-     "--show-managed-fields"
-     "--template" "--template=")
+  '(("--allow-missing-template-keys")
+    ("--filename" "--filename=" "-f" :files)
+    ("--force")
+    ("--kustomize" "--kustomize=" "-k" :dirs)
     ("--output" "--output=" "-o" :list kubectl-output-all)
     ("--recursive" "-R")
-    ("--kustomize" "--kustomize=" "-k" :dirs)
-    ("--filename" "--filename=" "-f" :files)))
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)))
 
 (pcmpl-me-command (kubectl certificate deny)
   :inherit-global-flags t
   :flags
-  ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl certificate deny" pcmpl-kubectl--global-flags))
-  '(("--allow-missing-template-keys"
-     "--force"
-     "--recursive" "-R"
-     "--show-managed-fields"
-     "--template" "--template=")
-    ("--output" "--output=" "-o" :list kubectl-output-all)
+  '(("--allow-missing-template-keys")
+    ("--filename" "--filename=" "-f" :files)
+    ("--force")
     ("--kustomize" "--kustomize=" "-k" :dirs)
-    ("--filename" "--filename=" "-f" :files)))
+    ("--output" "--output=" "-o" :list kubectl-output-all)
+    ("--recursive" "-R")
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)))
 
 (pcmpl-me-command (kubectl cluster-info)
   :inherit-global-flags t)
@@ -498,15 +484,14 @@ or slash based resources like \"pod/my-pod\"
 (pcmpl-me-command (kubectl cluster-info dump)
   :inherit-global-flags t
   :flags
-  ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl cluster-info dump" pcmpl-kubectl--global-flags))
-  '(("--all-namespaces" "-A"
-     "--allow-missing-template-keys"
-     "--namespaces" "--namespaces="
-     "--output-directory" "--output-directory="
-     "--pod-running-timeout" "--pod-running-timeout="
-     "--show-managed-fields"
-     "--template" "--template=")
-    ("--output" "--output=" "-o" :list kubectl-output-all)))
+  '(("--all-namespaces" "-A")
+    ("--allow-missing-template-keys")
+    ("--namespaces" "--namespaces=" :null)
+    ("--output" "--output=" "-o" :list kubectl-output-all)
+    ("--output-directory" "--output-directory=" :null)
+    ("--pod-running-timeout" "--pod-running-timeout=" :null)
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)))
 
 (pcmpl-me-command (kubectl completion)
   :inherit-global-flags t
@@ -573,61 +558,62 @@ or slash based resources like \"pod/my-pod\"
 (pcmpl-me-command (kubectl cordon)
   :inherit-global-flags t
   :flags '(("--dry-run")
-           ("--selector" "--selector=" "-l"))
+           ("--selector" "--selector=" "-l" :null))
   :subcommands (pcmpl-me-get-completion-widget :kubernetes-node))
 
 (pcmpl-me-command (kubectl drain)
   :inherit-global-flags t
-  :flags '(("--delete-emptydir-data" "--disable-eviction" "--dry-run" "--force"
-            "--grace-period" "--grace-period="
-            "--ignore-daemonsets" "--ignore-errors"
-            "--pod-selector" "--pod-selector="
-            "--skip-wait-for-delete-timeout" "--skip-wait-for-delete-timeout="
-            "--timeout" "--timeout=")
-           ("--selector" "--selector=" "-l"))
+  :flags '(("--delete-emptydir-data")
+           ("--disable-eviction")
+           ("--dry-run")
+           ("--force")
+           ("--grace-period" "--grace-period=" :null)
+           ("--ignore-daemonsets")
+           ("--ignore-errors")
+           ("--pod-selector" "--pod-selector=" :null)
+           ("--selector" "--selector=" "-l" :null)
+           ("--skip-wait-for-delete-timeout" "--skip-wait-for-delete-timeout=" :null)
+           ("--timeout" "--timeout=" :null))
   :subcommands (pcmpl-me-get-completion-widget :kubernetes-node))
 
 (pcmpl-me-command (kubectl describe)
   :inherit-global-flags t
   :flags
-  ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl describe" pcmpl-kubectl--global-flags))
-  '(("--show-events")
-    ("--all-namespaces" "-A")
-    ("--selector" "--selector=" "-l")
-    ("--recursive" "-R")
+  '(("--all-namespaces" "-A")
+    ("--filename" "--filename=" "-f" :files)
     ("--kustomize" "--kustomize=" "-k" :dirs)
-    ("--filename" "--filename=" "-f" :files))
+    ("--recursive" "-R")
+    ("--selector" "--selector=" "-l")
+    ("--show-events"))
   :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-resource))
 
 (pcmpl-me-command (kubectl delete)
   :inherit-global-flags t
   :flags
-  ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl delete" pcmpl-kubectl--global-flags))
-  '(("--all"
-     "--all-namespaces" "-A"
-     "--cascade"
-     "--dry-run"
-     "--force"
-     "--ignore-not-found"
-     "--now"
-     "--wait")
-    ("--recursive" "-R")
-    ("--field-selector" "--field-selector=")
-    ("--grace-period" "--grace-period=")
-    ("--raw" "--raw=")
-    ("--selector" "--selector=" "-l")
-    ("--timeout" "--timeout=")
-    ("--output" "--output=" "-o" :list kubectl-output-name)
+  '(("--all")
+    ("--all-namespaces" "-A")
+    ("--cascade")
+    ("--dry-run")
+    ("--field-selector" "--field-selector=" :null)
+    ("--filename" "--filename=" "-f" :files)
+    ("--force")
+    ("--grace-period" "--grace-period=" :null)
+    ("--ignore-not-found")
     ("--kustomize" "--kustomize=" "-k" :dirs)
-    ("--filename" "--filename=" "-f" :files))
+    ("--now")
+    ("--output" "--output=" "-o" :list kubectl-output-name)
+    ("--raw" "--raw=" :null)
+    ("--recursive" "-R")
+    ("--selector" "--selector=" "-l" :null)
+    ("--timeout" "--timeout=" :null)
+    ("--wait"))
   :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-resources))
 
 (pcmpl-me-command (kubectl exec)
   :inherit-global-flags t
   :flags
-  ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl exec" pcmpl-kubectl--global-flags))
-  '(("--container" "--container=" "-c")
-    ("--pod-running-timeout" "--pod-running-timeout=" "-t")
+  '(("--container" "--container=" "-c" :kubernetes-resource-container)
+    ("--pod-running-timeout" "--pod-running-timeout=" "-t" :null)
     ("--tty" "-t")
     ("--stdin" "-i")
     ("--quiet" "-q")
@@ -637,49 +623,49 @@ or slash based resources like \"pod/my-pod\"
 (pcmpl-me-command (kubectl get)
   :inherit-global-flags t
   :flags
-  '(("--all-namespaces" "-A"
-     "--allow-missing-template-keys"
-     "--chunk-size" "--chunk-size="
-     "--field-selector" "--field-selector="
-     "--ignore-not-found"
-     "--label-columns" "--label-columns=" "-L"
-     "--no-headers"
-     "--output-watch-events"
-     "--output" "--output=" "-o"
-     "--raw" "--raw="
-     "--selector" "--selector=" "-l"
-     "--server-print"
-     "--show-kind"
-     "--show-labels"
-     "--show-managed-fields"
-     "--sort-by" "--sort-by="
-     "--template" "--template="
-     "--watch" "-w"
-     "--watch-only")
-    ("--recursive" "-R")
+  '(("--all-namespaces" "-A")
+    ("--allow-missing-template-keys")
+    ("--chunk-size" "--chunk-size=" :null)
+    ("--field-selector" "--field-selector=" :null)
+    ("--filename" "--filename=" "-f" :files)
+    ("--ignore-not-found")
     ("--kustomize" "--kustomize=" "-k" :dirs)
-    ("--filename" "--filename=" "-f" :files))
+    ("--label-columns" "--label-columns=" "-L" :null)
+    ("--no-headers")
+    ("--output" "--output=" "-o" :null)
+    ("--output-watch-events")
+    ("--raw" "--raw=" :null)
+    ("--recursive" "-R")
+    ("--selector" "--selector=" "-l" :null)
+    ("--server-print")
+    ("--show-kind")
+    ("--show-labels")
+    ("--show-managed-fields")
+    ("--sort-by" "--sort-by=" :null)
+    ("--template" "--template=" :null)
+    ("--watch" "-w")
+    ("--watch-only"))
   :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-resources))
 
 (pcmpl-me-command (kubectl logs)
   :inherit-global-flags t
   :flags
-  ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl logs" pcmpl-kubectl--global-flags))
-  '(("--all-containers"
-     "--ignore-errors"
-     "--insecure-skip-tls-verify-backend"
-     "--prefix"
-     "--timestamps")
-    ("--limit-bytes" "--limit-bytes=")
-    ("--max-log-requests" "--max-log-requests=")
-    ("--pod-running-timeout" "--pod-running-timeout=")
-    ("--previous" "-p")
-    ("--selector" "--selector=" "-l")
-    ("--since" "--since=")
-    ("--since-time" "--since-time=")
-    ("--tail" "--tail=")
+
+  '(("--all-containers")
+    ("--container" "--container=" "-c" :kubernetes-resource-container)
     ("--follow" "-f")
-    ("--container" "--container=" "-c" :kubernetes-resource-container))
+    ("--ignore-errors")
+    ("--insecure-skip-tls-verify-backend")
+    ("--limit-bytes" "--limit-bytes=" :null)
+    ("--max-log-requests" "--max-log-requests=" :null)
+    ("--pod-running-timeout" "--pod-running-timeout=" :null)
+    ("--prefix")
+    ("--previous" "-p")
+    ("--selector" "--selector=" "-l" :null)
+    ("--since" "--since=" :null)
+    ("--since-time" "--since-time=" :null)
+    ("--tail" "--tail=" :null)
+    ("--timestamps"))
   :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-resource))
 
 (pcmpl-me-command (kubectl top)
@@ -688,25 +674,26 @@ or slash based resources like \"pod/my-pod\"
 
 (pcmpl-me-command (kubectl top pod)
   :inherit-global-flags t
-  :flags '(("--all-namespaces" "-A"
-            "--containers" "--no-headers"
-            "--selector" "--selector=" "-l"
-            "--sort-by" "--sort-by="
-            "--use-protocol-buffers"))
+  :flags '(("--all-namespaces" "-A")
+           ("--containers")
+           ("--no-headers")
+           ("--selector" "--selector=" "-l" :null)
+           ("--sort-by" "--sort-by=" :null)
+           ("--use-protocol-buffers"))
   :subcommands (pcmpl-me-get-completion-widget :kubernetes-pod))
 
 (pcmpl-me-command (kubectl top node)
   :inherit-global-flags t
-  :flags '(("--no-headers"
-            "--selector" "--selector=" "-l"
-            "--sort-by" "--sort-by="
-            "--use-protocol-buffers"))
+  :flags '(("--no-headers")
+           ("--selector" "--selector=" "-l" :null)
+           ("--sort-by" "--sort-by=" :null)
+           ("--use-protocol-buffers"))
   :subcommands (pcmpl-me-get-completion-widget :kubernetes-node))
 
 (pcmpl-me-command (kubectl uncordon)
   :inherit-global-flags t
   :flags '(("--dry-run")
-           ("--selector" "--selector=" "-l"))
+           ("--selector" "--selector=" "-l" :null))
   :subcommands (pcmpl-me-get-completion-widget :kubernetes-node))
 
 ;;
