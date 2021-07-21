@@ -29,10 +29,27 @@
 (ert-deftest pcmpl-me--flag-post-test ()
   (should
    (equal
-    (pcmpl-me--arg-list '("--verbose" "--verbose=" :foobar "barfoo" :no-args))
+    (pcmpl-me--arg-list
+     '("--verbose" "--verbose=" :foobar "barfoo" :no-args))
     '((:no-args)
       (:foobar "barfoo")
       (:args "--verbose=" "--verbose")))))
+
+(ert-deftest pcmpl-me--matcher-expression-test ()
+  (should
+   (equal
+    (pcmpl-me--matcher-expression
+     '((:files) (:args "--verbose=" "--verbose")))
+    '(pcomplete-entries)))
+  (should
+   (equal
+    (pcmpl-me--matcher-expression
+     '((:list "json" "yaml") (:args "--output=" "--output")))
+    '(pcmpl-me--complete-from-list "json" "yaml")))
+  (should
+   (equal
+    (pcmpl-me--matcher-expression '((:args "--output=" "--output")))
+    nil)))
 
 (ert-deftest pcmpl-me--flag-post-test ()
   (should
@@ -66,10 +83,10 @@
   (should
    (equal
     (let ((pcmpl-me-completers (append pcmpl-me-completers '(:test (lambda () '("test"))))))
-      (pcmpl-me--flag-inline-matchers '((("--verbose" "-v"))
-                                        (("--profile" "--profile=") . (:files))
-                                        (("--output" "--output=") . (:list "json" "yaml"))
-                                        (("--filter" "--filter=") . (:test)))))
+      (pcmpl-me--flag-inline-matchers '(("--verbose" "-v")
+                                        ("--profile" "--profile=" :files)
+                                        ("--output" "--output=" :list "json" "yaml")
+                                        ("--filter" "--filter=" :test))))
     '((when
           (pcomplete-match "\\`-" 0)
         (cond
@@ -102,8 +119,8 @@
 (ert-deftest pcmpl-me--flag-matcher-only-inline-test ()
   (should
    (equal
-    (pcmpl-me--flag-inline-matchers '((("--profile=") . (:files))
-                                      (("--output=") . (:list "json" "yaml"))))
+    (pcmpl-me--flag-inline-matchers '(("--profile=" :files)
+                                      ("--output=" :list "json" "yaml")))
     '((when
           (pcomplete-match "\\`-" 0)
         (cond

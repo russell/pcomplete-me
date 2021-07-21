@@ -57,21 +57,12 @@
   "Return the combine all the flags from `PFLAGS'."
   (apply #'append (mapcar #'car pflags)))
 
-(defun pcmpl-me--matcher-expression (plist)
+(defun pcmpl-me--matcher-expression (alist)
   "Generate an expression for matchers from plist"
-  (when (not (keywordp (car plist)))
-    (error "list must start with a keyword"))
-  (let (matchers pkey args)
-    (dolist (i plist)
-      (if (keywordp i)
-          (progn
-            (when pkey
-              (push `(,(plist-get pcmpl-me-completers pkey) ,@args) matchers))
-            (setq pkey i args nil))
-        (push i args)))
-    ;; Add the final entry to the list
-    (when pkey
-      (push `(,(plist-get pcmpl-me-completers pkey) ,@args) matchers))
+  (let ((matchers (cl-loop
+                  for (key . args) in alist
+                  unless (eql key :args)
+                  collect `(,(plist-get pcmpl-me-completers key) ,@args))))
     (cond
      ((> (length matchers) 1)
       `(append ,@matchers))
@@ -99,16 +90,21 @@ For example:
 
 (defun pcmpl-me--flag-post-matchers (pflags)
   "Take `PFLAGS' and return post matcher form."
-  (cl-loop for (flags . matchers) in pflags
-           for post-flags = (seq-filter (lambda (s) (string-match-p "[^=]\\'" s)) flags)
 
-           when matchers
-           for match-expr = (pcmpl-me--matcher-expression matchers)
+  (cl-loop for pflag in pflags
+           for arg-list = (pcmpl-me--arg-list pflag)
+           for post-flags = (seq-filter
+                             (lambda (s) (string-match-p "[^=]\\'" s))
+                             (alist-get :args arg-list))
 
-           when flags
-           for flag-keyword = (intern (format ":%s" (string-trim (car flags) "[- \t\n\r]+" "[= \t\n\r]+")))
+           for match-expr = (pcmpl-me--matcher-expression arg-list)
 
-           when  (and matchers post-flags)
+           when post-flags
+           for flag-keyword = (intern (format ":%s" (string-trim
+                                                     (car (alist-get :args arg-list))
+                                                     "[- \t\n\r]+" "[= \t\n\r]+")))
+
+           when  (and match-expr post-flags)
            collect `((pcomplete-match ,(format "\\`%s\\'" (regexp-opt-group post-flags nil t)) 1)
                      (pcomplete-here* ,match-expr)
                      (pcmpl-me--context-set ,flag-keyword (pcomplete-arg 1)))
@@ -121,16 +117,20 @@ For example:
 
 (defun pcmpl-me--flag-inline-matchers (pflags)
   "Take `PFLAGS' and return inline matcher form."
-  (cl-loop for (flags . matchers) in pflags
-           for inline-flags = (seq-filter (lambda (s) (string-match-p "=\\'" s)) flags)
+  (cl-loop for pflag in pflags
+           for arg-list = (pcmpl-me--arg-list pflag)
+           for inline-flags = (seq-filter
+                               (lambda (s) (string-match-p "=\\'" s))
+                               (alist-get :args arg-list))
 
-           when matchers
-           for match-expr = (pcmpl-me--matcher-expression matchers)
+           for match-expr = (pcmpl-me--matcher-expression arg-list)
 
            when inline-flags
-           for flag-keyword = (intern (format ":%s" (string-trim  (car flags) "[- \t\n\r]+" "[= \t\n\r]+")))
+           for flag-keyword = (intern (format ":%s" (string-trim
+                                                     (car (alist-get :args arg-list))
+                                                     "[- \t\n\r]+" "[= \t\n\r]+")))
 
-           when (and matchers inline-flags)
+           when (and match-expr inline-flags)
            collect `((pcomplete-match ,(format "\\`%s\\(.*\\)" (regexp-opt-group inline-flags nil t)) 0)
                      (pcomplete-here* ,match-expr
                                       (pcomplete-match-string 1 0) t)
