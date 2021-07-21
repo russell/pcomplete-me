@@ -39,7 +39,8 @@
       things)))
 
 (defvar pcmpl-me-completers
-  '(:files pcomplete-entries
+  '(:null (lambda () (pcomplete-here*))
+    :files pcomplete-entries
            :dirs pcomplete-dirs
            :list pcmpl-me--complete-from-list))
 
