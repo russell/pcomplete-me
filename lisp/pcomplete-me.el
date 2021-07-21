@@ -56,7 +56,8 @@
 
 (defun pcmpl-me--flags (pflags)
   "Return the combine all the flags from `PFLAGS'."
-  (apply #'append (mapcar #'car pflags)))
+  (apply #'append
+         (mapcar (lambda (e) (alist-get :args (pcmpl-me--arg-list e))) pflags)))
 
 (defun pcmpl-me--matcher-expression (alist)
   "Generate an expression for matchers from plist"
