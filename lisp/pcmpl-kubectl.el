@@ -183,6 +183,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-set-completion-widget
+ :kubernetes-dry-run (lambda () '("none" "server" "client")))
+(pcmpl-me-set-completion-widget
  :kubernetes-context (lambda () (pcmpl-kubectl--complete "contexts")))
 (pcmpl-me-set-completion-widget
  :kubernetes-user (lambda () (pcmpl-kubectl--complete "users")))
@@ -269,7 +271,7 @@ or slash based resources like \"pod/my-pod\"
   :flags
   '(("--all")
     ("--allow-missing-template-keys")
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--field-manager" "--field-manager=" :null)
     ("--field-selector" "--field-selector=" :null)
     ("--filename" "--filename=" "-f" :files)
@@ -309,7 +311,7 @@ or slash based resources like \"pod/my-pod\"
   '(("--all")
     ("--allow-missing-template-keys")
     ("--cascade")
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--field-manager" "--field-manager=" :null)
     ("--filename" "--filename=" "-f" :files)
     ("--force")
@@ -354,7 +356,7 @@ or slash based resources like \"pod/my-pod\"
   :flags
   '(("--allow-missing-template-keys")
     ("--create-annotation")
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--filename" "--filename=" "-f" :files)
     ("--output" "--output=" "-o" :list kubectl-output-all)
     ("--show-managed-fields")
@@ -402,7 +404,7 @@ or slash based resources like \"pod/my-pod\"
   :inherit-global-flags t
   :flags
   '(("--allow-missing-template-keys")
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--filename" "--filename=" "-f" :files)
     ("--kustomize" "--kustomize=" "-k" :dirs)
     ("--output" "--output=" "-o" :list kubectl-output-all)
@@ -611,7 +613,7 @@ or slash based resources like \"pod/my-pod\"
 (pcmpl-me-command (kubectl cordon)
   :inherit-global-flags t
   :flags
-  '(("--dry-run")
+  '(("--dry-run" :kubernetes-dry-run)
     ("--selector" "--selector=" "-l" :null))
   :subcommands (pcmpl-me-get-completion-widget :kubernetes-node))
 
@@ -627,7 +629,7 @@ or slash based resources like \"pod/my-pod\"
   :inherit-global-flags t
   :flags
   '(("--allow-missing-template-keys")
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--edit")
     ("--field-manager" "--field-manager=" :null)
     ("--filename" "--filename=" "-f" :files)
@@ -666,7 +668,7 @@ or slash based resources like \"pod/my-pod\"
   :flags
   '(("--aggregation-rule" "--aggregation-rule=" :null)
     ("--allow-missing-template-keys")
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--field-manager" "--field-manager=" :null)
     ("--non-resource-url" "--non-resource-url=" :null)
     ("--output" "--output=" "-o" :null)
@@ -690,7 +692,7 @@ or slash based resources like \"pod/my-pod\"
   :flags
   '(("--allow-missing-template-keys")
     ("--append-hash")
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--field-manager" "--field-manager=" :null)
     ("--from-env-file" "--from-env-file=" :null)
     ("--from-file" "--from-file=" :null)
@@ -722,7 +724,7 @@ or slash based resources like \"pod/my-pod\"
     ("--annotation" "--annotation=" :null)
     ("--class" "--class=" :null)
     ("--default-backend" "--default-backend=" :null)
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--field-manager" "--field-manager=" :null)
     ("--output" "--output=" "-o" :null)
     ("--rule" "--rule=" :null)
@@ -736,7 +738,7 @@ or slash based resources like \"pod/my-pod\"
   :inherit-global-flags t
   :flags
   '(("--allow-missing-template-keys")
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--field-manager" "--field-manager=" :null)
     ("--from" "--from=" :null)
     ("--image" "--image=" :null)
@@ -751,7 +753,7 @@ or slash based resources like \"pod/my-pod\"
   :inherit-global-flags t
   :flags
   '(("--allow-missing-template-keys")
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--field-manager" "--field-manager=" :null)
     ("--output" "--output=" "-o" :null)
     ("--save-config")
@@ -764,7 +766,7 @@ or slash based resources like \"pod/my-pod\"
   :inherit-global-flags t
   :flags
   '(("--allow-missing-template-keys")
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--field-manager" "--field-manager=" :null)
     ("--max-unavailable" "--max-unavailable=" :null)
     ("--min-available" "--min-available=" :null)
@@ -781,7 +783,7 @@ or slash based resources like \"pod/my-pod\"
   :flags
   '(("--allow-missing-template-keys")
     ("--description" "--description=" :null)
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--field-manager" "--field-manager=" :null)
     ("--global-default")
     ("--output" "--output=" "-o" :null)
@@ -797,7 +799,7 @@ or slash based resources like \"pod/my-pod\"
   :inherit-global-flags t
   :flags
   '(("--allow-missing-template-keys")
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--field-manager" "--field-manager=" :null)
     ("--hard" "--hard=" :null)
     ("--output" "--output=" "-o" :null)
@@ -812,7 +814,7 @@ or slash based resources like \"pod/my-pod\"
   :inherit-global-flags t
   :flags
   '(("--allow-missing-template-keys")
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--field-manager" "--field-manager=" :null)
     ("--output" "--output=" "-o" :null)
     ("--resource-name" "--resource-name=" :null)
@@ -829,7 +831,7 @@ or slash based resources like \"pod/my-pod\"
   :flags
   '(("--allow-missing-template-keys")
     ("--clusterrole" "--clusterrole=" :null)
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--field-manager" "--field-manager=" :null)
     ("--group" "--group=" :null)
     ("--output" "--output=" "-o" :null)
@@ -856,7 +858,7 @@ or slash based resources like \"pod/my-pod\"
     ("--docker-password" "--docker-password=" :null)
     ("--docker-server" "--docker-server=" :null)
     ("--docker-username" "--docker-username=" :null)
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--field-manager" "--field-manager=" :null)
     ("--from-file" "--from-file=" :null)
     ("--output" "--output=" "-o" :null)
@@ -871,7 +873,7 @@ or slash based resources like \"pod/my-pod\"
   :flags
   '(("--allow-missing-template-keys")
     ("--append-hash")
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--field-manager" "--field-manager=" :null)
     ("--from-env-file" "--from-env-file=" :null)
     ("--from-file" "--from-file=" :null)
@@ -890,7 +892,7 @@ or slash based resources like \"pod/my-pod\"
   '(("--allow-missing-template-keys")
     ("--append-hash")
     ("--cert" "--cert=" :null)
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--field-manager" "--field-manager=" :null)
     ("--key" "--key=" :null)
     ("--output" "--output=" "-o" :null)
@@ -911,7 +913,7 @@ or slash based resources like \"pod/my-pod\"
   :flags
   '(("--allow-missing-template-keys")
     ("--clusterip" "--clusterip=" :null)
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--field-manager" "--field-manager=" :null)
     ("--output" "--output=" "-o" :null)
     ("--save-config")
@@ -931,7 +933,7 @@ or slash based resources like \"pod/my-pod\"
   :inherit-global-flags t
   :flags
   '(("--allow-missing-template-keys")
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--field-manager" "--field-manager=" :null)
     ("--output" "--output=" "-o" :null)
     ("--save-config")
@@ -945,7 +947,7 @@ or slash based resources like \"pod/my-pod\"
   :inherit-global-flags t
   :flags
   '(("--allow-missing-template-keys")
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--field-manager" "--field-manager=" :null)
     ("--node-port" "--node-port=" :null)
     ("--output" "--output=" "-o" :null)
@@ -960,7 +962,7 @@ or slash based resources like \"pod/my-pod\"
   :inherit-global-flags t
   :flags
   '(("--allow-missing-template-keys")
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--field-manager" "--field-manager=" :null)
     ("--output" "--output=" "-o" :null)
     ("--save-config")
@@ -995,7 +997,7 @@ or slash based resources like \"pod/my-pod\"
   '(("--all")
     ("--all-namespaces" "-A")
     ("--cascade")
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--field-selector" "--field-selector=" :null)
     ("--filename" "--filename=" "-f" :files)
     ("--force")
@@ -1041,7 +1043,7 @@ or slash based resources like \"pod/my-pod\"
   :flags
   '(("--delete-emptydir-data")
     ("--disable-eviction")
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--force")
     ("--grace-period" "--grace-period=" :null)
     ("--ignore-daemonsets")
@@ -1096,7 +1098,7 @@ or slash based resources like \"pod/my-pod\"
   :flags
   '(("--allow-missing-template-keys")
     ("--cluster-ip" "--cluster-ip=" :null)
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--external-ip" "--external-ip=" :null)
     ("--field-manager" "--field-manager=" :null)
     ("--filename" "--filename=" "-f" :files)
@@ -1127,7 +1129,7 @@ or slash based resources like \"pod/my-pod\"
   :flags
   '(("--allow-missing-template-keys")
     ("--cluster-ip" "--cluster-ip=" :null)
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--external-ip" "--external-ip=" :null)
     ("--field-manager" "--field-manager=" :null)
     ("--filename" "--filename=" "-f" :files)
@@ -1157,7 +1159,7 @@ or slash based resources like \"pod/my-pod\"
   :flags
   '(("--allow-missing-template-keys")
     ("--cluster-ip" "--cluster-ip=" :null)
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--external-ip" "--external-ip=" :null)
     ("--field-manager" "--field-manager=" :null)
     ("--filename" "--filename=" "-f" :files)
@@ -1187,7 +1189,7 @@ or slash based resources like \"pod/my-pod\"
   :flags
   '(("--allow-missing-template-keys")
     ("--cluster-ip" "--cluster-ip=" :null)
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--external-ip" "--external-ip=" :null)
     ("--field-manager" "--field-manager=" :null)
     ("--filename" "--filename=" "-f" :files)
@@ -1217,7 +1219,7 @@ or slash based resources like \"pod/my-pod\"
   :flags
   '(("--allow-missing-template-keys")
     ("--cluster-ip" "--cluster-ip=" :null)
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--external-ip" "--external-ip=" :null)
     ("--field-manager" "--field-manager=" :null)
     ("--filename" "--filename=" "-f" :files)
@@ -1247,7 +1249,7 @@ or slash based resources like \"pod/my-pod\"
   :flags
   '(("--allow-missing-template-keys")
     ("--cluster-ip" "--cluster-ip=" :null)
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--external-ip" "--external-ip=" :null)
     ("--field-manager" "--field-manager=" :null)
     ("--filename" "--filename=" "-f" :files)
@@ -1774,7 +1776,7 @@ or slash based resources like \"pod/my-pod\"
   :flags
   '(("--all")
     ("--allow-missing-template-keys")
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--field-manager" "--field-manager=" :null)
     ("--field-selector" "--field-selector=" :null)
     ("--filename" "--filename=" "-f" :files)
@@ -1822,7 +1824,7 @@ or slash based resources like \"pod/my-pod\"
   :inherit-global-flags t
   :flags
   '(("--allow-missing-template-keys")
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--field-manager" "--field-manager=" :null)
     ("--filename" "--filename=" "-f" :files)
     ("--kustomize" "--kustomize=" "-k" :dirs)
@@ -1885,7 +1887,7 @@ or slash based resources like \"pod/my-pod\"
   :flags
   '(("--allow-missing-template-keys")
     ("--cascade")
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--field-manager" "--field-manager=" :null)
     ("--filename" "--filename=" "-f" :files)
     ("--force")
@@ -2133,7 +2135,7 @@ or slash based resources like \"pod/my-pod\"
   :inherit-global-flags t
   :flags
   '(("--allow-missing-template-keys")
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--filename" "--filename=" "-f" :files)
     ("--kustomize" "--kustomize=" "-k" :dirs)
     ("--output" "--output=" "-o" :null)
@@ -2149,7 +2151,7 @@ or slash based resources like \"pod/my-pod\"
   :inherit-global-flags t
   :flags
   '(("--allow-missing-template-keys")
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--filename" "--filename=" "-f" :files)
     ("--kustomize" "--kustomize=" "-k" :dirs)
     ("--output" "--output=" "-o" :null)
@@ -2164,7 +2166,7 @@ or slash based resources like \"pod/my-pod\"
   :inherit-global-flags t
   :flags
   '(("--allow-missing-template-keys")
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--filename" "--filename=" "-f" :files)
     ("--kustomize" "--kustomize=" "-k" :dirs)
     ("--output" "--output=" "-o" :null)
@@ -2179,7 +2181,7 @@ or slash based resources like \"pod/my-pod\"
   :inherit-global-flags t
   :flags
   '(("--allow-missing-template-keys")
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--filename" "--filename=" "-f" :files)
     ("--kustomize" "--kustomize=" "-k" :dirs)
     ("--output" "--output=" "-o" :null)
@@ -2238,7 +2240,7 @@ or slash based resources like \"pod/my-pod\"
   '(("--all")
     ("--allow-missing-template-keys")
     ("--containers" "--containers=" :null)
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--env" "--env=" :null)
     ("--field-manager" "--field-manager=" :null)
     ("--filename" "--filename=" "-f" :files)
@@ -2264,7 +2266,7 @@ or slash based resources like \"pod/my-pod\"
   :flags
   '(("--all")
     ("--allow-missing-template-keys")
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--field-manager" "--field-manager=" :null)
     ("--filename" "--filename=" "-f" :files)
     ("--kustomize" "--kustomize=" "-k" :dirs)
@@ -2283,7 +2285,7 @@ or slash based resources like \"pod/my-pod\"
   '(("--all")
     ("--allow-missing-template-keys")
     ("--containers" "--containers=" :null)
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--field-manager" "--field-manager=" :null)
     ("--filename" "--filename=" "-f" :files)
     ("--kustomize" "--kustomize=" "-k" :dirs)
@@ -2304,7 +2306,7 @@ or slash based resources like \"pod/my-pod\"
   :flags
   '(("--all")
     ("--allow-missing-template-keys")
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--field-manager" "--field-manager=" :null)
     ("--filename" "--filename=" "-f" :files)
     ("--local")
@@ -2321,7 +2323,7 @@ or slash based resources like \"pod/my-pod\"
   :flags
   '(("--all")
     ("--allow-missing-template-keys")
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--field-manager" "--field-manager=" :null)
     ("--filename" "--filename=" "-f" :files)
     ("--kustomize" "--kustomize=" "-k" :dirs)
@@ -2338,7 +2340,7 @@ or slash based resources like \"pod/my-pod\"
   :flags
   '(("--all")
     ("--allow-missing-template-keys")
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--field-manager" "--field-manager=" :null)
     ("--filename" "--filename=" "-f" :files)
     ("--group" "--group=" :null)
@@ -2357,7 +2359,7 @@ or slash based resources like \"pod/my-pod\"
   :flags
   '(("--all")
     ("--allow-missing-template-keys")
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--field-manager" "--field-manager=" :null)
     ("--output" "--output=" "-o" :null)
     ("--overwrite")
@@ -2374,7 +2376,7 @@ or slash based resources like \"pod/my-pod\"
   :flags
   '(("--all")
     ("--allow-missing-template-keys")
-    ("--dry-run")
+    ("--dry-run" :kubernetes-dry-run)
     ("--field-manager" "--field-manager=" :null)
     ("--output" "--output=" "-o" :null)
     ("--overwrite")
@@ -2415,7 +2417,7 @@ or slash based resources like \"pod/my-pod\"
 (pcmpl-me-command (kubectl uncordon)
   :inherit-global-flags t
   :flags
-  '(("--dry-run")
+  '(("--dry-run" :kubernetes-dry-run)
     ("--selector" "--selector=" "-l" :null))
   :subcommands (pcmpl-me-get-completion-widget :kubernetes-node))
 
