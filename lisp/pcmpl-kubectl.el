@@ -132,10 +132,11 @@ TYPE is used to specify the scope of the returned names."
 (defun pcmpl-kubectl--complete-resource ()
   "Complete a single resources by name of a single kind.
 
-Support completion in the for \"kind name\" and  \"kind/name\"."
+Support completion in the form \"kind/name\"."
   (cond
    ;; Detect resources like pod/my-pod
    ((pcomplete-match "\\`\\(.*\\)/\\(.*\\)\\'" 0)
+    (setq pcomplete-termination-string " ")
     (pcomplete-here* (pcmpl-kubectl--complete-resource-of (pcomplete-match-string 1 0))
                      (pcomplete-match-string 2 0))
     (pcomplete-match "\\`\\(.*\\)/\\(.*\\)\\'")
@@ -144,6 +145,7 @@ Support completion in the for \"kind name\" and  \"kind/name\"."
 
    ;; Complete kinds
    ((not (pcmpl-me--context-get :resource-kind))
+    (setq pcomplete-termination-string "")
     (pcomplete-here* (mapcar (lambda (e) (format "%s/" e))
                              (pcmpl-kubectl--complete-resource-types)))
     (pcomplete-match "\\`\\(.*\\)/\\([a-z9-0]*\\)/\\'")
