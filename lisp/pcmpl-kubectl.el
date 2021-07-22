@@ -183,7 +183,7 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-set-completion-widget
- :kubernetes-dry-run (lambda () '("none" "server" "client")))
+ :kubernetes-dry-run '("none" "server" "client"))
 (pcmpl-me-set-completion-widget
  :kubernetes-context (lambda () (pcmpl-kubectl--complete "contexts")))
 (pcmpl-me-set-completion-widget
@@ -193,11 +193,11 @@ or slash based resources like \"pod/my-pod\"
 (pcmpl-me-set-completion-widget
  :kubernetes-namespace (lambda () (pcmpl-kubectl--complete-resource-of "namespaces")))
 (pcmpl-me-set-completion-widget
- :kubernetes-resource (lambda () (pcmpl-kubectl--complete-resource)))
+ :kubernetes-resource #'pcmpl-kubectl--complete-resource)
 (pcmpl-me-set-completion-widget
- :kubernetes-resources (lambda () (pcmpl-kubectl--complete-resources)))
+ :kubernetes-resources #'pcmpl-kubectl--complete-resources)
 (pcmpl-me-set-completion-widget
- :kubernetes-resource-container (lambda () (pcmpl-kubectl--complete-containers)))
+ :kubernetes-resource-container #'pcmpl-kubectl--complete-containers)
 (pcmpl-me-set-completion-widget
  :kubernetes-pod (lambda () (pcmpl-kubectl--complete-resource-of "pods")))
 (pcmpl-me-set-completion-widget
@@ -2456,9 +2456,7 @@ or slash based resources like \"pod/my-pod\"
 (defun pcomplete/kubectl ()
   "Completion for kubectl."
   (let ((pcmpl-me--context nil))
-    (unwind-protect
-        (pcmpl-kubectl)
-      (message "context: %S" pcmpl-me--context))))
+    (pcmpl-kubectl)))
 
 (provide 'pcmpl-kubectl)
 ;;; pcmpl-kubectl.el ends here
