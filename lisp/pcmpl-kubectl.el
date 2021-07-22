@@ -154,14 +154,6 @@ Support completion in the for \"kind name\" and  \"kind/name\"."
          (pcmpl-me--context-get :resource-name))
     (pcomplete-here*))))
 
-;;   kubectl logs [-f] [-p] (POD | TYPE/NAME) [-c CONTAINER] [options]
-;;   kubectl port-forward TYPE/NAME [options] [LOCAL_PORT:]REMOTE_PORT [...[LOCAL_PORT_N:]REMOTE_PORT_N]
-;;   kubectl exec (POD | TYPE/NAME) [-c CONTAINER] [flags] -- COMMAND [args...] [options]
-;;   kubectl attach (POD | TYPE/NAME) -c CONTAINER [options]
-
-;;   kubectl describe (-f FILENAME | TYPE [NAME_PREFIX | -l label] | TYPE/NAME) [options]
-;;   kubectl delete ([-f FILENAME] | [-k DIRECTORY] | TYPE [(NAME | -l label | --all)]) [options]
-;;   kubectl label [--overwrite] (-f FILENAME | TYPE NAME) KEY_1=VAL_1 ... KEY_N=VAL_N [--resource-version=version] [options]
 
 
 (defun pcmpl-kubectl--complete-resources ()
@@ -186,6 +178,16 @@ or slash based resources like \"pod/my-pod\"
    (t
     (pcomplete-here* (pcmpl-kubectl--complete-resource-types))
     (pcmpl-me--context-set :resource-kind (pcomplete-arg 1)))))
+
+
+;;   kubectl logs [-f] [-p] (POD | TYPE/NAME) [-c CONTAINER] [options]
+;;   kubectl port-forward TYPE/NAME [options] [LOCAL_PORT:]REMOTE_PORT [...[LOCAL_PORT_N:]REMOTE_PORT_N]
+;;   kubectl exec (POD | TYPE/NAME) [-c CONTAINER] [flags] -- COMMAND [args...] [options]
+;;   kubectl attach (POD | TYPE/NAME) -c CONTAINER [options]
+
+;;   kubectl describe (-f FILENAME | TYPE [NAME_PREFIX | -l label] | TYPE/NAME) [options]
+;;   kubectl delete ([-f FILENAME] | [-k DIRECTORY] | TYPE [(NAME | -l label | --all)]) [options]
+;;   kubectl label [--overwrite] (-f FILENAME | TYPE NAME) KEY_1=VAL_1 ... KEY_N=VAL_N [--resource-version=version] [options]
 
 (pcmpl-me-set-completion-widget :kubernetes-context (lambda () (pcmpl-kubectl--complete "contexts")))
 (pcmpl-me-set-completion-widget :kubernetes-user (lambda () (pcmpl-kubectl--complete "users")))
@@ -283,6 +285,7 @@ or slash based resources like \"pod/my-pod\"
     "version"
     "wait"))
 
+
 (pcmpl-me-command (kubectl annotate)
   :inherit-global-flags t
   :flags
@@ -291,7 +294,7 @@ or slash based resources like \"pod/my-pod\"
     ("--dry-run")
     ("--field-manager" "--field-manager=" :null)
     ("--field-selector" "--field-selector=" :null)
-    ("--filename" "--filename=" "-f" :files))
+    ("--filename" "--filename=" "-f" :files)
     ("--kustomize" "--kustomize=" "-k" :dirs)
     ("--list")
     ("--local")
@@ -302,10 +305,8 @@ or slash based resources like \"pod/my-pod\"
     ("--resource-version" "--resource-version=" :null)
     ("--selector" "--selector=" "-l" :null)
     ("--show-managed-fields")
-    ("--template" "--template=" :null))
+    ("--template" "--template=" :null)))
 
-(pcmpl-me-command (kubectl api-versions)
-  :inherit-global-flags t)
 
 (pcmpl-me-command (kubectl api-resources)
   :inherit-global-flags t
@@ -318,21 +319,24 @@ or slash based resources like \"pod/my-pod\"
     ("--sort-by" "--sort-by=" :list "name" "kind")
     ("--verbs" "--verbs=" :null)))
 
+
+(pcmpl-me-command (kubectl api-versions)
+  :inherit-global-flags t)
+
+
 (pcmpl-me-command (kubectl apply)
   :inherit-global-flags t
   :flags
   '(("--all")
     ("--allow-missing-template-keys")
-    ("--cascade" :list "background" "orphan" "foreground")
-    ("--dry-run" :list "none" "server" "client")
+    ("--cascade")
+    ("--dry-run")
     ("--field-manager" "--field-manager=" :null)
     ("--filename" "--filename=" "-f" :files)
-    ("--filename" "--filename=" :null)
     ("--force")
     ("--force-conflicts")
     ("--grace-period" "--grace-period=" :null)
     ("--kustomize" "--kustomize=" "-k" :dirs)
-    ("--kustomize" "--kustomize=" :null)
     ("--openapi-patch")
     ("--output" "--output=" "-o" :list kubectl-output-all)
     ("--overwrite")
@@ -365,6 +369,7 @@ or slash based resources like \"pod/my-pod\"
     ("--template" "--template=" :null)
     ("--windows-line-endings")))
 
+
 (pcmpl-me-command (kubectl apply set-last-applied)
   :inherit-global-flags t
   :flags
@@ -376,30 +381,33 @@ or slash based resources like \"pod/my-pod\"
     ("--show-managed-fields")
     ("--template" "--template=" :null)))
 
+
 (pcmpl-me-command (kubectl apply view-last-applied)
   :inherit-global-flags t
   :flags
   '(("--all")
-    ("--recursive" "-R")
-    ("--selector" "--selector=" "-l" :null)
     ("--filename" "--filename=" "-f" :files)
-    ("--output" "--output=" "-o" :list kubectl-output-all)))
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--output" "--output=" "-o" :list kubectl-output-all)
+    ("--recursive" "-R")
+    ("--selector" "--selector=" "-l" :null)))
+
 
 (pcmpl-me-command (kubectl attach)
   :inherit-global-flags t
   :flags
-  '(("--pod-running-timeout" "--pod-running-timeout=" :null)
+  '(("--container" "--container=" "-c" :kubernetes-resource-container)
+    ("--pod-running-timeout" "--pod-running-timeout=" :null)
     ("--quiet" "-q")
     ("--stdin" "-i")
-    ("--tty" "-t")
-    ("--container" "--container=" "-c" :kubernetes-resource-container))
+    ("--tty" "-t"))
   :subcommands (pcmpl-me-get-completion-widget :kubernetes-pod))
+
 
 (pcmpl-me-command (kubectl auth)
   :inherit-global-flags t
-  :flags
-  ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl auth" pcmpl-kubectl--global-flags))
-  'nil)
+  :subcommands '("can-i" "reconcile"))
+
 
 (pcmpl-me-command (kubectl auth can-i)
   :inherit-global-flags t
@@ -410,10 +418,10 @@ or slash based resources like \"pod/my-pod\"
     ("--quiet" "-q")
     ("--subresource" "--subresource=" :null)))
 
+
 (pcmpl-me-command (kubectl auth reconcile)
   :inherit-global-flags t
   :flags
-  ;; (rs//replace-sexp (rs//bash-complete-flags "kubectl auth reconcile" pcmpl-kubectl--global-flags))
   '(("--allow-missing-template-keys")
     ("--dry-run")
     ("--filename" "--filename=" "-f" :files)
@@ -425,34 +433,38 @@ or slash based resources like \"pod/my-pod\"
     ("--show-managed-fields")
     ("--template" "--template=" :null)))
 
+
 (pcmpl-me-command (kubectl autoscale)
   :inherit-global-flags t
-  :flags
-  '(("--max=" :null))
-  :subcommands '("deployment" "replicaset" "replicationcontroller" "statefulset"))
+  :flags '(("--max=" :null))
+  :subcommands
+  '("deployment" "replicaset" "replicationcontroller" "statefulset"))
+
 
 (pcmpl-me-command (kubectl autoscale deployment)
   :inherit-global-flags t
-  :flags
-  '(("--max=" :null)))
+  :flags '(("--max=" :null)))
+
 
 (pcmpl-me-command (kubectl autoscale replicaset)
   :inherit-global-flags t
-  :flags
-  '(("--max=" :null)))
+  :flags '(("--max=" :null)))
+
 
 (pcmpl-me-command (kubectl autoscale replicationcontroller)
   :inherit-global-flags t
-  :flags
-  '(("--max=" :null)))
+  :flags '(("--max=" :null)))
+
 
 (pcmpl-me-command (kubectl autoscale statefulset)
   :inherit-global-flags t
-  :flags
-  '(("--max=" :null)))
+  :flags '(("--max=" :null)))
+
 
 (pcmpl-me-command (kubectl certificate)
-  :inherit-global-flags t)
+  :inherit-global-flags t
+  :subcommands '("approve" "deny"))
+
 
 (pcmpl-me-command (kubectl certificate approve)
   :inherit-global-flags t
@@ -466,6 +478,7 @@ or slash based resources like \"pod/my-pod\"
     ("--show-managed-fields")
     ("--template" "--template=" :null)))
 
+
 (pcmpl-me-command (kubectl certificate deny)
   :inherit-global-flags t
   :flags
@@ -478,8 +491,11 @@ or slash based resources like \"pod/my-pod\"
     ("--show-managed-fields")
     ("--template" "--template=" :null)))
 
+
 (pcmpl-me-command (kubectl cluster-info)
-  :inherit-global-flags t)
+  :inherit-global-flags t
+  :subcommands '("dump"))
+
 
 (pcmpl-me-command (kubectl cluster-info dump)
   :inherit-global-flags t
@@ -487,109 +503,481 @@ or slash based resources like \"pod/my-pod\"
   '(("--all-namespaces" "-A")
     ("--allow-missing-template-keys")
     ("--namespaces" "--namespaces=" :null)
-    ("--output" "--output=" "-o" :list kubectl-output-all)
     ("--output-directory" "--output-directory=" :null)
+    ("--output" "--output=" "-o" :list kubectl-output-all)
     ("--pod-running-timeout" "--pod-running-timeout=" :null)
     ("--show-managed-fields")
     ("--template" "--template=" :null)))
 
+
 (pcmpl-me-command (kubectl completion)
   :inherit-global-flags t
+  :flags '(("--help" "-h"))
   :subcommands '("bash" "zsh"))
 
+
 (pcmpl-me-command (kubectl completion bash)
-  (:inherit-global-flags t))
+  :inherit-global-flags t
+  :flags '(("--help" "-h")))
+
 
 (pcmpl-me-command (kubectl completion zsh)
-  (:inherit-global-flags t))
+  :inherit-global-flags t
+  :flags '(("--help" "-h")))
+
 
 (pcmpl-me-command (kubectl config)
   :inherit-global-flags t
-  :subcommands '("current-context"
-                 "delete-cluster"
-                 "delete-context"
-                 "delete-user"
-                 "get-clusters"
-                 "get-contexts"
-                 "get-users"
-                 "rename-context"
-                 "set"
-                 "set-cluster"
-                 "set-context"
-                 "set-credentials"
-                 "unset"
-                 "use-context"
-                 "view"))
+  :subcommands
+  '("current-context"
+    "delete-cluster"
+    "delete-context"
+    "delete-user"
+    "get-clusters"
+    "get-contexts"
+    "get-users"
+    "rename-context"
+    "set"
+    "set-cluster"
+    "set-context"
+    "set-credentials"
+    "unset"
+    "use-context"
+    "view"))
+
 
 (pcmpl-me-command (kubectl config current-context)
   :inherit-global-flags t)
+
 
 (pcmpl-me-command (kubectl config delete-cluster)
   :inherit-global-flags t
   :subcommands (pcmpl-me-get-completion-widget :kubernetes-cluster))
 
+
 (pcmpl-me-command (kubectl config delete-context)
   :inherit-global-flags t
   :subcommands (pcmpl-me-get-completion-widget :kubernetes-context))
+
 
 (pcmpl-me-command (kubectl config delete-user)
   :inherit-global-flags t
   :subcommands (pcmpl-me-get-completion-widget :kubernetes-user))
 
+
 (pcmpl-me-command (kubectl config get-clusters)
   :inherit-global-flags t)
 
+
 (pcmpl-me-command (kubectl config get-contexts)
   :inherit-global-flags t
+  :flags
+  '(("--no-headers")
+    ("--output" "--output=" "-o" :null))
   :subcommands (pcmpl-me-get-completion-widget :kubernetes-context))
+
 
 (pcmpl-me-command (kubectl config get-users)
   :inherit-global-flags t
   :subcommands (pcmpl-me-get-completion-widget :kubernetes-user))
 
+
 (pcmpl-me-command (kubectl config rename-context)
   :inherit-global-flags t
   :subcommands (pcmpl-me-get-completion-widget :kubernetes-context))
+
+
+(pcmpl-me-command (kubectl config set)
+  :inherit-global-flags t
+  :flags '(("--set-raw-bytes")))
+
+
+(pcmpl-me-command (kubectl config set-cluster)
+  :inherit-global-flags t
+  :flags '(("--embed-certs")))
+
+
+(pcmpl-me-command (kubectl config set-context)
+  :inherit-global-flags t
+  :flags '(("--current")))
+
+
+(pcmpl-me-command (kubectl config set-credentials)
+  :inherit-global-flags t
+  :flags
+  '(("--auth-provider-arg" "--auth-provider-arg=" :null)
+    ("--auth-provider" "--auth-provider=" :null)
+    ("--embed-certs")
+    ("--exec-api-version" "--exec-api-version=" :null)
+    ("--exec-arg" "--exec-arg=" :null)
+    ("--exec-command" "--exec-command=" :null)
+    ("--exec-env" "--exec-env=" :null)))
+
+
+(pcmpl-me-command (kubectl config unset)
+  :inherit-global-flags t)
+
 
 (pcmpl-me-command (kubectl config use-context)
   :inherit-global-flags t
   :subcommands (pcmpl-me-get-completion-widget :kubernetes-context))
 
+
+(pcmpl-me-command (kubectl config view)
+  :inherit-global-flags t
+  :flags
+  '(("--allow-missing-template-keys")
+    ("--flatten")
+    ("--merge")
+    ("--minify")
+    ("--output" "--output=" "-o" :null)
+    ("--raw")
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)))
+
+
 (pcmpl-me-command (kubectl cordon)
   :inherit-global-flags t
-  :flags '(("--dry-run")
-           ("--selector" "--selector=" "-l" :null))
-  :subcommands (pcmpl-me-get-completion-widget :kubernetes-node))
-
-(pcmpl-me-command (kubectl drain)
-  :inherit-global-flags t
-  :flags '(("--delete-emptydir-data")
-           ("--disable-eviction")
-           ("--dry-run")
-           ("--force")
-           ("--grace-period" "--grace-period=" :null)
-           ("--ignore-daemonsets")
-           ("--ignore-errors")
-           ("--pod-selector" "--pod-selector=" :null)
-           ("--selector" "--selector=" "-l" :null)
-           ("--skip-wait-for-delete-timeout" "--skip-wait-for-delete-timeout=" :null)
-           ("--timeout" "--timeout=" :null))
-  :subcommands (pcmpl-me-get-completion-widget :kubernetes-node))
-
-(pcmpl-me-command (kubectl describe)
-  :inherit-global-flags t
   :flags
-  '(("--all-namespaces" "-A")
+  '(("--dry-run")
+    ("--selector" "--selector=" "-l" :null))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-node))
+
+
+(pcmpl-me-command (kubectl cp)
+  :inherit-global-flags t :flags
+  '(("--container" "--container=" "-c" :kubernetes-resource-container)
+    ("--no-preserve")))
+
+
+(pcmpl-me-command (kubectl create)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--dry-run")
+    ("--edit")
+    ("--field-manager" "--field-manager=" :null)
     ("--filename" "--filename=" "-f" :files)
     ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--output" "--output=" "-o" :null)
+    ("--raw" "--raw=" :null)
+    ("--record")
     ("--recursive" "-R")
-    ("--selector" "--selector=" "-l")
-    ("--show-events"))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-resource))
+    ("--save-config")
+    ("--selector" "--selector=" "-l" :null)
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)
+    ("--validate")
+    ("--windows-line-endings"))
+  :subcommands
+  '("clusterrole" "clusterrolebinding" "configmap" "cronjob" "deployment" "ingress" "job" "namespace" "poddisruptionbudget" "priorityclass" "quota" "role" "rolebinding" "secret" "service" "serviceaccount"))
+
+
+(pcmpl-me-command (kubectl create clusterrole)
+  :inherit-global-flags t :flags
+  '(("--aggregation-rule" "--aggregation-rule=" :null)
+    ("--allow-missing-template-keys")
+    ("--dry-run")
+    ("--field-manager" "--field-manager=" :null)
+    ("--non-resource-url" "--non-resource-url=" :null)
+    ("--output" "--output=" "-o" :null)
+    ("--resource-name" "--resource-name=" :null)
+    ("--resource" "--resource=" :null)
+    ("--save-config")
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)
+    ("--validate")
+    ("--verb" "--verb=" :null)))
+
+
+(pcmpl-me-command (kubectl create clusterrolebinding)
+  :inherit-global-flags t :flags
+  '(("--clusterrole=" :null)))
+
+
+(pcmpl-me-command (kubectl create configmap)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--append-hash")
+    ("--dry-run")
+    ("--field-manager" "--field-manager=" :null)
+    ("--from-env-file" "--from-env-file=" :null)
+    ("--from-file" "--from-file=" :null)
+    ("--from-literal" "--from-literal=" :null)
+    ("--output" "--output=" "-o" :null)
+    ("--save-config")
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)
+    ("--validate")))
+
+
+(pcmpl-me-command (kubectl create cronjob)
+  :inherit-global-flags t :flags
+  '(("--image=" :null)
+    ("--schedule=" :null)))
+
+
+(pcmpl-me-command (kubectl create deployment)
+  :inherit-global-flags t :flags
+  '(("--image=" :null)))
+
+
+(pcmpl-me-command (kubectl create ingress)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--annotation" "--annotation=" :null)
+    ("--class" "--class=" :null)
+    ("--default-backend" "--default-backend=" :null)
+    ("--dry-run")
+    ("--field-manager" "--field-manager=" :null)
+    ("--output" "--output=" "-o" :null)
+    ("--rule" "--rule=" :null)
+    ("--save-config")
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)
+    ("--validate")))
+
+
+(pcmpl-me-command (kubectl create job)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--dry-run")
+    ("--field-manager" "--field-manager=" :null)
+    ("--from" "--from=" :null)
+    ("--image" "--image=" :null)
+    ("--output" "--output=" "-o" :null)
+    ("--save-config")
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)
+    ("--validate")))
+
+
+(pcmpl-me-command (kubectl create namespace)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--dry-run")
+    ("--field-manager" "--field-manager=" :null)
+    ("--output" "--output=" "-o" :null)
+    ("--save-config")
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)
+    ("--validate")))
+
+
+(pcmpl-me-command (kubectl create poddisruptionbudget)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--dry-run")
+    ("--field-manager" "--field-manager=" :null)
+    ("--max-unavailable" "--max-unavailable=" :null)
+    ("--min-available" "--min-available=" :null)
+    ("--output" "--output=" "-o" :null)
+    ("--save-config")
+    ("--selector" "--selector=" "-l" :null)
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)
+    ("--validate")))
+
+
+(pcmpl-me-command (kubectl create priorityclass)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--description" "--description=" :null)
+    ("--dry-run")
+    ("--field-manager" "--field-manager=" :null)
+    ("--global-default")
+    ("--output" "--output=" "-o" :null)
+    ("--preemption-policy" "--preemption-policy=" :null)
+    ("--save-config")
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)
+    ("--validate")
+    ("--value" "--value=" :null)))
+
+
+(pcmpl-me-command (kubectl create quota)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--dry-run")
+    ("--field-manager" "--field-manager=" :null)
+    ("--hard" "--hard=" :null)
+    ("--output" "--output=" "-o" :null)
+    ("--save-config")
+    ("--scopes" "--scopes=" :null)
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)
+    ("--validate")))
+
+
+(pcmpl-me-command (kubectl create role)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--dry-run")
+    ("--field-manager" "--field-manager=" :null)
+    ("--output" "--output=" "-o" :null)
+    ("--resource-name" "--resource-name=" :null)
+    ("--resource" "--resource=" :null)
+    ("--save-config")
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)
+    ("--validate")
+    ("--verb" "--verb=" :null)))
+
+
+(pcmpl-me-command (kubectl create rolebinding)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--clusterrole" "--clusterrole=" :null)
+    ("--dry-run")
+    ("--field-manager" "--field-manager=" :null)
+    ("--group" "--group=" :null)
+    ("--output" "--output=" "-o" :null)
+    ("--role" "--role=" :null)
+    ("--save-config")
+    ("--serviceaccount" "--serviceaccount=" :null)
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)
+    ("--validate")))
+
+
+(pcmpl-me-command (kubectl create secret)
+  :inherit-global-flags t :subcommands
+  '("docker-registry" "generic" "tls"))
+
+
+(pcmpl-me-command (kubectl create secret docker-registry)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--append-hash")
+    ("--docker-email" "--docker-email=" :null)
+    ("--docker-password" "--docker-password=" :null)
+    ("--docker-server" "--docker-server=" :null)
+    ("--docker-username" "--docker-username=" :null)
+    ("--dry-run")
+    ("--field-manager" "--field-manager=" :null)
+    ("--from-file" "--from-file=" :null)
+    ("--output" "--output=" "-o" :null)
+    ("--save-config")
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)
+    ("--validate")))
+
+
+(pcmpl-me-command (kubectl create secret generic)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--append-hash")
+    ("--dry-run")
+    ("--field-manager" "--field-manager=" :null)
+    ("--from-env-file" "--from-env-file=" :null)
+    ("--from-file" "--from-file=" :null)
+    ("--from-literal" "--from-literal=" :null)
+    ("--output" "--output=" "-o" :null)
+    ("--save-config")
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)
+    ("--type" "--type=" :null)
+    ("--validate")))
+
+
+(pcmpl-me-command (kubectl create secret tls)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--append-hash")
+    ("--cert" "--cert=" :null)
+    ("--dry-run")
+    ("--field-manager" "--field-manager=" :null)
+    ("--key" "--key=" :null)
+    ("--output" "--output=" "-o" :null)
+    ("--save-config")
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)
+    ("--validate")))
+
+
+(pcmpl-me-command (kubectl create service)
+  :inherit-global-flags t :subcommands
+  '("clusterip" "externalname" "loadbalancer" "nodeport"))
+
+
+(pcmpl-me-command (kubectl create service clusterip)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--clusterip" "--clusterip=" :null)
+    ("--dry-run")
+    ("--field-manager" "--field-manager=" :null)
+    ("--output" "--output=" "-o" :null)
+    ("--save-config")
+    ("--show-managed-fields")
+    ("--tcp" "--tcp=" :null)
+    ("--template" "--template=" :null)
+    ("--validate")))
+
+
+(pcmpl-me-command (kubectl create service externalname)
+  :inherit-global-flags t :flags
+  '(("--external-name=" :null)))
+
+
+(pcmpl-me-command (kubectl create service loadbalancer)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--dry-run")
+    ("--field-manager" "--field-manager=" :null)
+    ("--output" "--output=" "-o" :null)
+    ("--save-config")
+    ("--show-managed-fields")
+    ("--tcp" "--tcp=" :null)
+    ("--template" "--template=" :null)
+    ("--validate")))
+
+
+(pcmpl-me-command (kubectl create service nodeport)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--dry-run")
+    ("--field-manager" "--field-manager=" :null)
+    ("--node-port" "--node-port=" :null)
+    ("--output" "--output=" "-o" :null)
+    ("--save-config")
+    ("--show-managed-fields")
+    ("--tcp" "--tcp=" :null)
+    ("--template" "--template=" :null)
+    ("--validate")))
+
+
+(pcmpl-me-command (kubectl create serviceaccount)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--dry-run")
+    ("--field-manager" "--field-manager=" :null)
+    ("--output" "--output=" "-o" :null)
+    ("--save-config")
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)
+    ("--validate")))
+
+
+(pcmpl-me-command (kubectl debug)
+  :inherit-global-flags t :flags
+  '(("--arguments-only")
+    ("--attach")
+    ("--container" "--container=" "-c" :kubernetes-resource-container)
+    ("--copy-to" "--copy-to=" :null)
+    ("--env" "--env=" :null)
+    ("--image-pull-policy" "--image-pull-policy=" :null)
+    ("--image" "--image=" :null)
+    ("--quiet" "-q")
+    ("--replace")
+    ("--same-node")
+    ("--set-image" "--set-image=" :null)
+    ("--share-processes")
+    ("--stdin" "-i")
+    ("--target" "--target=" :null)
+    ("--tty" "-t")))
+
 
 (pcmpl-me-command (kubectl delete)
-  :inherit-global-flags t
-  :flags
+  :inherit-global-flags t :flags
   '(("--all")
     ("--all-namespaces" "-A")
     ("--cascade")
@@ -609,16 +997,249 @@ or slash based resources like \"pod/my-pod\"
     ("--wait"))
   :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-resources))
 
-(pcmpl-me-command (kubectl exec)
+
+(pcmpl-me-command (kubectl describe)
   :inherit-global-flags t
   :flags
+  '(("--all-namespaces" "-A")
+    ("--filename" "--filename=" "-f" :files)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--recursive" "-R")
+    ("--selector" "--selector=" "-l" :null)
+    ("--show-events"))
+  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-resource))
+
+
+(pcmpl-me-command (kubectl diff)
+  :inherit-global-flags t :flags
+  '(("--field-manager" "--field-manager=" :null)
+    ("--filename" "--filename=" "-f" :files)
+    ("--force-conflicts")
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--recursive" "-R")
+    ("--selector" "--selector=" "-l" :null)
+    ("--server-side")))
+
+
+(pcmpl-me-command (kubectl drain)
+  :inherit-global-flags t :flags
+  '(("--delete-emptydir-data")
+    ("--disable-eviction")
+    ("--dry-run")
+    ("--force")
+    ("--grace-period" "--grace-period=" :null)
+    ("--ignore-daemonsets")
+    ("--ignore-errors")
+    ("--pod-selector" "--pod-selector=" :null)
+    ("--selector" "--selector=" "-l" :null)
+    ("--skip-wait-for-delete-timeout" "--skip-wait-for-delete-timeout=" :null)
+    ("--timeout" "--timeout=" :null))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-node))
+
+
+(pcmpl-me-command (kubectl edit)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--field-manager" "--field-manager=" :null)
+    ("--filename" "--filename=" "-f" :files)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--output-patch")
+    ("--output" "--output=" "-o" :null)
+    ("--record")
+    ("--recursive" "-R")
+    ("--save-config")
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)
+    ("--validate")
+    ("--windows-line-endings")))
+
+
+(pcmpl-me-command (kubectl exec)
+  :inherit-global-flags t :flags
   '(("--container" "--container=" "-c" :kubernetes-resource-container)
-    ("--pod-running-timeout" "--pod-running-timeout=" "-t" :null)
-    ("--tty" "-t")
-    ("--stdin" "-i")
+    ("--filename" "--filename=" "-f" :files)
+    ("--pod-running-timeout" "--pod-running-timeout=" :null)
     ("--quiet" "-q")
-    ("--filename" "--filename=" "-f" :files))
+    ("--stdin" "-i")
+    ("--tty" "-t"))
   :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-pod))
+
+
+(pcmpl-me-command (kubectl explain)
+  :inherit-global-flags t :flags
+  '(("--api-version" "--api-version=" :null)
+    ("--recursive" "-R")))
+
+
+(pcmpl-me-command (kubectl expose)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--cluster-ip" "--cluster-ip=" :null)
+    ("--dry-run")
+    ("--external-ip" "--external-ip=" :null)
+    ("--field-manager" "--field-manager=" :null)
+    ("--filename" "--filename=" "-f" :files)
+    ("--generator" "--generator=" :null)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--labels" "--labels=" :null)
+    ("--load-balancer-ip" "--load-balancer-ip=" :null)
+    ("--name" "--name=" :null)
+    ("--output" "--output=" "-o" :null)
+    ("--overrides" "--overrides=" :null)
+    ("--port" "--port=" :null)
+    ("--protocol" "--protocol=" :null)
+    ("--record")
+    ("--recursive" "-R")
+    ("--save-config")
+    ("--selector" "--selector=" "-l" :null)
+    ("--session-affinity" "--session-affinity=" :null)
+    ("--show-managed-fields")
+    ("--target-port" "--target-port=" :null)
+    ("--template" "--template=" :null)
+    ("--type" "--type=" :null))
+  :subcommands
+  '("deployment" "pod" "replicaset" "replicationcontroller" "service"))
+
+
+(pcmpl-me-command (kubectl expose deployment)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--cluster-ip" "--cluster-ip=" :null)
+    ("--dry-run")
+    ("--external-ip" "--external-ip=" :null)
+    ("--field-manager" "--field-manager=" :null)
+    ("--filename" "--filename=" "-f" :files)
+    ("--generator" "--generator=" :null)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--labels" "--labels=" :null)
+    ("--load-balancer-ip" "--load-balancer-ip=" :null)
+    ("--name" "--name=" :null)
+    ("--output" "--output=" "-o" :null)
+    ("--overrides" "--overrides=" :null)
+    ("--port" "--port=" :null)
+    ("--protocol" "--protocol=" :null)
+    ("--record")
+    ("--recursive" "-R")
+    ("--save-config")
+    ("--selector" "--selector=" "-l" :null)
+    ("--session-affinity" "--session-affinity=" :null)
+    ("--show-managed-fields")
+    ("--target-port" "--target-port=" :null)
+    ("--template" "--template=" :null)
+    ("--type" "--type=" :null)))
+
+
+(pcmpl-me-command (kubectl expose pod)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--cluster-ip" "--cluster-ip=" :null)
+    ("--dry-run")
+    ("--external-ip" "--external-ip=" :null)
+    ("--field-manager" "--field-manager=" :null)
+    ("--filename" "--filename=" "-f" :files)
+    ("--generator" "--generator=" :null)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--labels" "--labels=" :null)
+    ("--load-balancer-ip" "--load-balancer-ip=" :null)
+    ("--name" "--name=" :null)
+    ("--output" "--output=" "-o" :null)
+    ("--overrides" "--overrides=" :null)
+    ("--port" "--port=" :null)
+    ("--protocol" "--protocol=" :null)
+    ("--record")
+    ("--recursive" "-R")
+    ("--save-config")
+    ("--selector" "--selector=" "-l" :null)
+    ("--session-affinity" "--session-affinity=" :null)
+    ("--show-managed-fields")
+    ("--target-port" "--target-port=" :null)
+    ("--template" "--template=" :null)
+    ("--type" "--type=" :null)))
+
+
+(pcmpl-me-command (kubectl expose replicaset)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--cluster-ip" "--cluster-ip=" :null)
+    ("--dry-run")
+    ("--external-ip" "--external-ip=" :null)
+    ("--field-manager" "--field-manager=" :null)
+    ("--filename" "--filename=" "-f" :files)
+    ("--generator" "--generator=" :null)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--labels" "--labels=" :null)
+    ("--load-balancer-ip" "--load-balancer-ip=" :null)
+    ("--name" "--name=" :null)
+    ("--output" "--output=" "-o" :null)
+    ("--overrides" "--overrides=" :null)
+    ("--port" "--port=" :null)
+    ("--protocol" "--protocol=" :null)
+    ("--record")
+    ("--recursive" "-R")
+    ("--save-config")
+    ("--selector" "--selector=" "-l" :null)
+    ("--session-affinity" "--session-affinity=" :null)
+    ("--show-managed-fields")
+    ("--target-port" "--target-port=" :null)
+    ("--template" "--template=" :null)
+    ("--type" "--type=" :null)))
+
+
+(pcmpl-me-command (kubectl expose replicationcontroller)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--cluster-ip" "--cluster-ip=" :null)
+    ("--dry-run")
+    ("--external-ip" "--external-ip=" :null)
+    ("--field-manager" "--field-manager=" :null)
+    ("--filename" "--filename=" "-f" :files)
+    ("--generator" "--generator=" :null)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--labels" "--labels=" :null)
+    ("--load-balancer-ip" "--load-balancer-ip=" :null)
+    ("--name" "--name=" :null)
+    ("--output" "--output=" "-o" :null)
+    ("--overrides" "--overrides=" :null)
+    ("--port" "--port=" :null)
+    ("--protocol" "--protocol=" :null)
+    ("--record")
+    ("--recursive" "-R")
+    ("--save-config")
+    ("--selector" "--selector=" "-l" :null)
+    ("--session-affinity" "--session-affinity=" :null)
+    ("--show-managed-fields")
+    ("--target-port" "--target-port=" :null)
+    ("--template" "--template=" :null)
+    ("--type" "--type=" :null)))
+
+
+(pcmpl-me-command (kubectl expose service)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--cluster-ip" "--cluster-ip=" :null)
+    ("--dry-run")
+    ("--external-ip" "--external-ip=" :null)
+    ("--field-manager" "--field-manager=" :null)
+    ("--filename" "--filename=" "-f" :files)
+    ("--generator" "--generator=" :null)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--labels" "--labels=" :null)
+    ("--load-balancer-ip" "--load-balancer-ip=" :null)
+    ("--name" "--name=" :null)
+    ("--output" "--output=" "-o" :null)
+    ("--overrides" "--overrides=" :null)
+    ("--port" "--port=" :null)
+    ("--protocol" "--protocol=" :null)
+    ("--record")
+    ("--recursive" "-R")
+    ("--save-config")
+    ("--selector" "--selector=" "-l" :null)
+    ("--session-affinity" "--session-affinity=" :null)
+    ("--show-managed-fields")
+    ("--target-port" "--target-port=" :null)
+    ("--template" "--template=" :null)
+    ("--type" "--type=" :null)))
+
 
 (pcmpl-me-command (kubectl get)
   :inherit-global-flags t
@@ -630,10 +1251,10 @@ or slash based resources like \"pod/my-pod\"
     ("--filename" "--filename=" "-f" :files)
     ("--ignore-not-found")
     ("--kustomize" "--kustomize=" "-k" :dirs)
-    ("--label-columns" "--label-columns=" "-L" :null)
+    ("--label-columns" "--label-columns=" :null)
     ("--no-headers")
-    ("--output" "--output=" "-o" :null)
     ("--output-watch-events")
+    ("--output" "--output=" "-o" :null)
     ("--raw" "--raw=" :null)
     ("--recursive" "-R")
     ("--selector" "--selector=" "-l" :null)
@@ -643,58 +1264,1081 @@ or slash based resources like \"pod/my-pod\"
     ("--show-managed-fields")
     ("--sort-by" "--sort-by=" :null)
     ("--template" "--template=" :null)
-    ("--watch" "-w")
-    ("--watch-only"))
+    ("--watch")
+    ("--watch-only")
+    ("-w"))
   :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-resources))
+
+
+(pcmpl-me-command (kubectl help)
+  :inherit-global-flags t :subcommands
+  '("annotate" "api-resources" "api-versions" "apply" "attach" "auth" "autoscale" "certificate" "cluster-info" "completion" "config" "cordon" "cp" "create" "debug" "delete" "describe" "diff" "drain" "edit" "exec" "explain" "expose" "get" "help" "kustomize" "label" "logs" "options" "patch" "plugin" "port-forward" "proxy" "replace" "rollout" "run" "scale" "set" "taint" "top" "uncordon" "version" "wait"))
+
+
+(pcmpl-me-command (kubectl help annotate)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help api-resources)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help api-versions)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help apply)
+  :inherit-global-flags t :subcommands
+  '("edit-last-applied" "set-last-applied" "view-last-applied"))
+
+
+(pcmpl-me-command (kubectl help apply edit-last-applied)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help apply set-last-applied)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help apply view-last-applied)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help attach)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help auth)
+  :inherit-global-flags t :subcommands
+  '("can-i" "reconcile"))
+
+
+(pcmpl-me-command (kubectl help auth can-i)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help auth reconcile)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help autoscale)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help certificate)
+  :inherit-global-flags t :subcommands
+  '("approve" "deny"))
+
+
+(pcmpl-me-command (kubectl help certificate approve)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help certificate deny)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help cluster-info)
+  :inherit-global-flags t :subcommands
+  '("dump"))
+
+
+(pcmpl-me-command (kubectl help cluster-info dump)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help completion)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help config)
+  :inherit-global-flags t :subcommands
+  '("current-context" "delete-cluster" "delete-context" "delete-user" "get-clusters" "get-contexts" "get-users" "rename-context" "set" "set-cluster" "set-context" "set-credentials" "unset" "use-context" "view"))
+
+
+(pcmpl-me-command (kubectl help config current-context)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help config delete-cluster)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help config delete-context)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help config delete-user)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help config get-clusters)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help config get-contexts)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help config get-users)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help config rename-context)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help config set)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help config set-cluster)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help config set-context)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help config set-credentials)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help config unset)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help config use-context)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help config view)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help cordon)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help cp)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help create)
+  :inherit-global-flags t :subcommands
+  '("clusterrole" "clusterrolebinding" "configmap" "cronjob" "deployment" "ingress" "job" "namespace" "poddisruptionbudget" "priorityclass" "quota" "role" "rolebinding" "secret" "service" "serviceaccount"))
+
+
+(pcmpl-me-command (kubectl help create clusterrole)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help create clusterrolebinding)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help create configmap)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help create cronjob)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help create deployment)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help create ingress)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help create job)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help create namespace)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help create poddisruptionbudget)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help create priorityclass)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help create quota)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help create role)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help create rolebinding)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help create secret)
+  :inherit-global-flags t :subcommands
+  '("docker-registry" "generic" "tls"))
+
+
+(pcmpl-me-command (kubectl help create secret docker-registry)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help create secret generic)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help create secret tls)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help create service)
+  :inherit-global-flags t :subcommands
+  '("clusterip" "externalname" "loadbalancer" "nodeport"))
+
+
+(pcmpl-me-command (kubectl help create service clusterip)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help create service externalname)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help create service loadbalancer)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help create service nodeport)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help create serviceaccount)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help debug)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help delete)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help describe)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help diff)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help drain)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help edit)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help exec)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help explain)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help expose)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help get)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help help)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help kustomize)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help label)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help logs)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help options)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help patch)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help plugin)
+  :inherit-global-flags t :subcommands
+  '("list"))
+
+
+(pcmpl-me-command (kubectl help plugin list)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help port-forward)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help proxy)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help replace)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help rollout)
+  :inherit-global-flags t :subcommands
+  '("history" "pause" "restart" "resume" "status" "undo"))
+
+
+(pcmpl-me-command (kubectl help rollout history)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help rollout pause)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help rollout restart)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help rollout resume)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help rollout status)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help rollout undo)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help run)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help scale)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help set)
+  :inherit-global-flags t :subcommands
+  '("env" "image" "resources" "selector" "serviceaccount" "subject"))
+
+
+(pcmpl-me-command (kubectl help set env)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help set image)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help set resources)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help set selector)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help set serviceaccount)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help set subject)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help taint)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help top)
+  :inherit-global-flags t :subcommands
+  '("node" "pod"))
+
+
+(pcmpl-me-command (kubectl help top node)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help top pod)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help uncordon)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help version)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl help wait)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl kustomize)
+  :inherit-global-flags t :flags
+  '(("--enable-alpha-plugins")
+    ("--enable-helm")
+    ("--enable-managedby-label")
+    ("--env" "--env=" :null)
+    ("--helm-command" "--helm-command=" :null)
+    ("--load-restrictor" "--load-restrictor=" :null)
+    ("--mount" "--mount=" :null)
+    ("--network")
+    ("--network-name" "--network-name=" :null)
+    ("--output" "--output=" "-o" :null)
+    ("--reorder" "--reorder=" :null)
+    ("-e")))
+
+
+(pcmpl-me-command (kubectl label)
+  :inherit-global-flags t
+  :flags
+  '(("--all")
+    ("--allow-missing-template-keys")
+    ("--dry-run")
+    ("--field-manager" "--field-manager=" :null)
+    ("--field-selector" "--field-selector=" :null)
+    ("--filename" "--filename=" "-f" :files)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--list")
+    ("--local")
+    ("--output" "--output=" "-o" :null)
+    ("--overwrite")
+    ("--record")
+    ("--recursive" "-R")
+    ("--resource-version" "--resource-version=" :null)
+    ("--selector" "--selector=" "-l" :null)
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)))
+
 
 (pcmpl-me-command (kubectl logs)
   :inherit-global-flags t
   :flags
-
   '(("--all-containers")
     ("--container" "--container=" "-c" :kubernetes-resource-container)
-    ("--follow" "-f")
+    ("--follow")
     ("--ignore-errors")
     ("--insecure-skip-tls-verify-backend")
     ("--limit-bytes" "--limit-bytes=" :null)
     ("--max-log-requests" "--max-log-requests=" :null)
     ("--pod-running-timeout" "--pod-running-timeout=" :null)
     ("--prefix")
-    ("--previous" "-p")
+    ("--previous")
     ("--selector" "--selector=" "-l" :null)
-    ("--since" "--since=" :null)
     ("--since-time" "--since-time=" :null)
+    ("--since" "--since=" :null)
     ("--tail" "--tail=" :null)
-    ("--timestamps"))
+    ("--timestamps")
+    ("-p"))
   :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-resource))
+
+
+(pcmpl-me-command (kubectl options)
+  :inherit-global-flags t)
+
+
+(pcmpl-me-command (kubectl patch)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--dry-run")
+    ("--field-manager" "--field-manager=" :null)
+    ("--filename" "--filename=" "-f" :files)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--local")
+    ("--output" "--output=" "-o" :null)
+    ("--patch-file" "--patch-file=" :null)
+    ("--patch" "--patch=" :null)
+    ("--record")
+    ("--recursive" "-R")
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)
+    ("--type" "--type=" :null)
+    ("-p")))
+
+
+(pcmpl-me-command (kubectl plugin)
+  :inherit-global-flags t :subcommands
+  '("list"))
+
+
+(pcmpl-me-command (kubectl plugin list)
+  :inherit-global-flags t :flags
+  '(("--name-only")))
+
+
+(pcmpl-me-command (kubectl port-forward)
+  :inherit-global-flags t :flags
+  '(("--address" "--address=" :null)
+    ("--pod-running-timeout" "--pod-running-timeout=" :null)))
+
+
+(pcmpl-me-command (kubectl proxy)
+  :inherit-global-flags t :flags
+  '(("--accept-hosts" "--accept-hosts=" :null)
+    ("--accept-paths" "--accept-paths=" :null)
+    ("--address" "--address=" :null)
+    ("--api-prefix" "--api-prefix=" :null)
+    ("--disable-filter")
+    ("--keepalive" "--keepalive=" :null)
+    ("--port" "--port=" :null)
+    ("--reject-methods" "--reject-methods=" :null)
+    ("--reject-paths" "--reject-paths=" :null)
+    ("--unix-socket" "--unix-socket=" :null)
+    ("--www-prefix" "--www-prefix=" :null)
+    ("--www" "--www=" :null)
+    ("-P")
+    ("-p")
+    ("-u")
+    ("-w")))
+
+
+(pcmpl-me-command (kubectl replace)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--cascade")
+    ("--dry-run")
+    ("--field-manager" "--field-manager=" :null)
+    ("--filename" "--filename=" "-f" :files)
+    ("--force")
+    ("--grace-period" "--grace-period=" :null)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--output" "--output=" "-o" :null)
+    ("--raw" "--raw=" :null)
+    ("--recursive" "-R")
+    ("--save-config")
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)
+    ("--timeout" "--timeout=" :null)
+    ("--validate")
+    ("--wait")))
+
+
+(pcmpl-me-command (kubectl rollout)
+  :inherit-global-flags t :subcommands
+  '("history" "pause" "restart" "resume" "status" "undo"))
+
+
+(pcmpl-me-command (kubectl rollout history)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--filename" "--filename=" "-f" :files)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--output" "--output=" "-o" :null)
+    ("--recursive" "-R")
+    ("--revision" "--revision=" :null)
+    ("--show-managed-fields")
+    ("--template" "--template=" :null))
+  :subcommands
+  '("daemonset" "deployment" "statefulset"))
+
+
+(pcmpl-me-command (kubectl rollout history daemonset)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--filename" "--filename=" "-f" :files)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--output" "--output=" "-o" :null)
+    ("--recursive" "-R")
+    ("--revision" "--revision=" :null)
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)))
+
+
+(pcmpl-me-command (kubectl rollout history deployment)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--filename" "--filename=" "-f" :files)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--output" "--output=" "-o" :null)
+    ("--recursive" "-R")
+    ("--revision" "--revision=" :null)
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)))
+
+
+(pcmpl-me-command (kubectl rollout history statefulset)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--filename" "--filename=" "-f" :files)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--output" "--output=" "-o" :null)
+    ("--recursive" "-R")
+    ("--revision" "--revision=" :null)
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)))
+
+
+(pcmpl-me-command (kubectl rollout pause)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--field-manager" "--field-manager=" :null)
+    ("--filename" "--filename=" "-f" :files)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--output" "--output=" "-o" :null)
+    ("--recursive" "-R")
+    ("--show-managed-fields")
+    ("--template" "--template=" :null))
+  :subcommands
+  '("deployment"))
+
+
+(pcmpl-me-command (kubectl rollout pause deployment)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--field-manager" "--field-manager=" :null)
+    ("--filename" "--filename=" "-f" :files)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--output" "--output=" "-o" :null)
+    ("--recursive" "-R")
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)))
+
+
+(pcmpl-me-command (kubectl rollout restart)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--field-manager" "--field-manager=" :null)
+    ("--filename" "--filename=" "-f" :files)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--output" "--output=" "-o" :null)
+    ("--recursive" "-R")
+    ("--show-managed-fields")
+    ("--template" "--template=" :null))
+  :subcommands
+  '("daemonset" "deployment" "statefulset"))
+
+
+(pcmpl-me-command (kubectl rollout restart daemonset)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--field-manager" "--field-manager=" :null)
+    ("--filename" "--filename=" "-f" :files)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--output" "--output=" "-o" :null)
+    ("--recursive" "-R")
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)))
+
+
+(pcmpl-me-command (kubectl rollout restart deployment)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--field-manager" "--field-manager=" :null)
+    ("--filename" "--filename=" "-f" :files)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--output" "--output=" "-o" :null)
+    ("--recursive" "-R")
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)))
+
+
+(pcmpl-me-command (kubectl rollout restart statefulset)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--field-manager" "--field-manager=" :null)
+    ("--filename" "--filename=" "-f" :files)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--output" "--output=" "-o" :null)
+    ("--recursive" "-R")
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)))
+
+
+(pcmpl-me-command (kubectl rollout resume)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--field-manager" "--field-manager=" :null)
+    ("--filename" "--filename=" "-f" :files)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--output" "--output=" "-o" :null)
+    ("--recursive" "-R")
+    ("--show-managed-fields")
+    ("--template" "--template=" :null))
+  :subcommands
+  '("deployment"))
+
+
+(pcmpl-me-command (kubectl rollout resume deployment)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--field-manager" "--field-manager=" :null)
+    ("--filename" "--filename=" "-f" :files)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--output" "--output=" "-o" :null)
+    ("--recursive" "-R")
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)))
+
+
+(pcmpl-me-command (kubectl rollout status)
+  :inherit-global-flags t :flags
+  '(("--filename" "--filename=" "-f" :files)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--recursive" "-R")
+    ("--revision" "--revision=" :null)
+    ("--timeout" "--timeout=" :null)
+    ("--watch")
+    ("-w"))
+  :subcommands
+  '("daemonset" "deployment" "statefulset"))
+
+
+(pcmpl-me-command (kubectl rollout status daemonset)
+  :inherit-global-flags t :flags
+  '(("--filename" "--filename=" "-f" :files)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--recursive" "-R")
+    ("--revision" "--revision=" :null)
+    ("--timeout" "--timeout=" :null)
+    ("--watch")
+    ("-w")))
+
+
+(pcmpl-me-command (kubectl rollout status deployment)
+  :inherit-global-flags t :flags
+  '(("--filename" "--filename=" "-f" :files)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--recursive" "-R")
+    ("--revision" "--revision=" :null)
+    ("--timeout" "--timeout=" :null)
+    ("--watch")
+    ("-w")))
+
+
+(pcmpl-me-command (kubectl rollout status statefulset)
+  :inherit-global-flags t :flags
+  '(("--filename" "--filename=" "-f" :files)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--recursive" "-R")
+    ("--revision" "--revision=" :null)
+    ("--timeout" "--timeout=" :null)
+    ("--watch")
+    ("-w")))
+
+
+(pcmpl-me-command (kubectl rollout undo)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--dry-run")
+    ("--filename" "--filename=" "-f" :files)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--output" "--output=" "-o" :null)
+    ("--recursive" "-R")
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)
+    ("--to-revision" "--to-revision=" :null))
+  :subcommands
+  '("daemonset" "deployment" "statefulset"))
+
+
+(pcmpl-me-command (kubectl rollout undo daemonset)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--dry-run")
+    ("--filename" "--filename=" "-f" :files)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--output" "--output=" "-o" :null)
+    ("--recursive" "-R")
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)
+    ("--to-revision" "--to-revision=" :null)))
+
+
+(pcmpl-me-command (kubectl rollout undo deployment)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--dry-run")
+    ("--filename" "--filename=" "-f" :files)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--output" "--output=" "-o" :null)
+    ("--recursive" "-R")
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)
+    ("--to-revision" "--to-revision=" :null)))
+
+
+(pcmpl-me-command (kubectl rollout undo statefulset)
+  :inherit-global-flags t :flags
+  '(("--allow-missing-template-keys")
+    ("--dry-run")
+    ("--filename" "--filename=" "-f" :files)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--output" "--output=" "-o" :null)
+    ("--recursive" "-R")
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)
+    ("--to-revision" "--to-revision=" :null)))
+
+
+(pcmpl-me-command (kubectl run)
+  :inherit-global-flags t :flags
+  '(("--image=" :null)))
+
+
+(pcmpl-me-command (kubectl scale)
+  :inherit-global-flags t :flags
+  '(("--replicas=" :null))
+  :subcommands
+  '("deployment" "replicaset" "replicationcontroller" "statefulset"))
+
+
+(pcmpl-me-command (kubectl scale deployment)
+  :inherit-global-flags t :flags
+  '(("--replicas=" :null)))
+
+
+(pcmpl-me-command (kubectl scale replicaset)
+  :inherit-global-flags t :flags
+  '(("--replicas=" :null)))
+
+
+(pcmpl-me-command (kubectl scale replicationcontroller)
+  :inherit-global-flags t :flags
+  '(("--replicas=" :null)))
+
+
+(pcmpl-me-command (kubectl scale statefulset)
+  :inherit-global-flags t :flags
+  '(("--replicas=" :null)))
+
+
+(pcmpl-me-command (kubectl set)
+  :inherit-global-flags t :subcommands
+  '("env" "image" "resources" "selector" "serviceaccount" "subject"))
+
+
+(pcmpl-me-command (kubectl set env)
+  :inherit-global-flags t :flags
+  '(("--all")
+    ("--allow-missing-template-keys")
+    ("--containers" "--containers=" :null)
+    ("--dry-run")
+    ("--env" "--env=" :null)
+    ("--field-manager" "--field-manager=" :null)
+    ("--filename" "--filename=" "-f" :files)
+    ("--from" "--from=" :null)
+    ("--keys" "--keys=" :null)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--list")
+    ("--local")
+    ("--output" "--output=" "-o" :null)
+    ("--overwrite")
+    ("--prefix" "--prefix=" :null)
+    ("--recursive" "-R")
+    ("--resolve")
+    ("--selector" "--selector=" "-l" :null)
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)
+    ("-c")
+    ("-e")))
+
+
+(pcmpl-me-command (kubectl set image)
+  :inherit-global-flags t :flags
+  '(("--all")
+    ("--allow-missing-template-keys")
+    ("--dry-run")
+    ("--field-manager" "--field-manager=" :null)
+    ("--filename" "--filename=" "-f" :files)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--local")
+    ("--output" "--output=" "-o" :null)
+    ("--record")
+    ("--recursive" "-R")
+    ("--selector" "--selector=" "-l" :null)
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)))
+
+
+(pcmpl-me-command (kubectl set resources)
+  :inherit-global-flags t :flags
+  '(("--all")
+    ("--allow-missing-template-keys")
+    ("--containers" "--containers=" :null)
+    ("--dry-run")
+    ("--field-manager" "--field-manager=" :null)
+    ("--filename" "--filename=" "-f" :files)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--limits" "--limits=" :null)
+    ("--local")
+    ("--output" "--output=" "-o" :null)
+    ("--record")
+    ("--recursive" "-R")
+    ("--requests" "--requests=" :null)
+    ("--selector" "--selector=" "-l" :null)
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)
+    ("-c")))
+
+
+(pcmpl-me-command (kubectl set selector)
+  :inherit-global-flags t :flags
+  '(("--all")
+    ("--allow-missing-template-keys")
+    ("--dry-run")
+    ("--field-manager" "--field-manager=" :null)
+    ("--filename" "--filename=" "-f" :files)
+    ("--local")
+    ("--output" "--output=" "-o" :null)
+    ("--record")
+    ("--recursive" "-R")
+    ("--resource-version" "--resource-version=" :null)
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)))
+
+
+(pcmpl-me-command (kubectl set serviceaccount)
+  :inherit-global-flags t :flags
+  '(("--all")
+    ("--allow-missing-template-keys")
+    ("--dry-run")
+    ("--field-manager" "--field-manager=" :null)
+    ("--filename" "--filename=" "-f" :files)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--local")
+    ("--output" "--output=" "-o" :null)
+    ("--record")
+    ("--recursive" "-R")
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)))
+
+
+(pcmpl-me-command (kubectl set subject)
+  :inherit-global-flags t :flags
+  '(("--all")
+    ("--allow-missing-template-keys")
+    ("--dry-run")
+    ("--field-manager" "--field-manager=" :null)
+    ("--filename" "--filename=" "-f" :files)
+    ("--group" "--group=" :null)
+    ("--kustomize" "--kustomize=" "-k" :dirs)
+    ("--local")
+    ("--output" "--output=" "-o" :null)
+    ("--recursive" "-R")
+    ("--selector" "--selector=" "-l" :null)
+    ("--serviceaccount" "--serviceaccount=" :null)
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)))
+
+
+(pcmpl-me-command (kubectl taint)
+  :inherit-global-flags t :flags
+  '(("--all")
+    ("--allow-missing-template-keys")
+    ("--dry-run")
+    ("--field-manager" "--field-manager=" :null)
+    ("--output" "--output=" "-o" :null)
+    ("--overwrite")
+    ("--selector" "--selector=" "-l" :null)
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)
+    ("--validate"))
+  :subcommands
+  '("node"))
+
+
+(pcmpl-me-command (kubectl taint node)
+  :inherit-global-flags t
+  :flags
+  '(("--all")
+    ("--allow-missing-template-keys")
+    ("--dry-run")
+    ("--field-manager" "--field-manager=" :null)
+    ("--output" "--output=" "-o" :null)
+    ("--overwrite")
+    ("--selector" "--selector=" "-l" :null)
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)
+    ("--validate")))
+
 
 (pcmpl-me-command (kubectl top)
   :inherit-global-flags t
-  :subcommands '("pod" "node"))
+  :subcommands '("node" "pod"))
 
-(pcmpl-me-command (kubectl top pod)
-  :inherit-global-flags t
-  :flags '(("--all-namespaces" "-A")
-           ("--containers")
-           ("--no-headers")
-           ("--selector" "--selector=" "-l" :null)
-           ("--sort-by" "--sort-by=" :null)
-           ("--use-protocol-buffers"))
-  :subcommands (pcmpl-me-get-completion-widget :kubernetes-pod))
 
 (pcmpl-me-command (kubectl top node)
   :inherit-global-flags t
-  :flags '(("--no-headers")
-           ("--selector" "--selector=" "-l" :null)
-           ("--sort-by" "--sort-by=" :null)
-           ("--use-protocol-buffers"))
+  :flags
+  '(("--no-headers")
+    ("--selector" "--selector=" "-l" :null)
+    ("--sort-by" "--sort-by=" :null)
+    ("--use-protocol-buffers"))
   :subcommands (pcmpl-me-get-completion-widget :kubernetes-node))
 
+
+(pcmpl-me-command (kubectl top pod)
+  :inherit-global-flags t :flags
+  '(("--all-namespaces" "-A")
+    ("--containers")
+    ("--no-headers")
+    ("--selector" "--selector=" "-l" :null)
+    ("--sort-by" "--sort-by=" :null)
+    ("--use-protocol-buffers"))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-pod))
+
+
 (pcmpl-me-command (kubectl uncordon)
-  :inherit-global-flags t
-  :flags '(("--dry-run")
-           ("--selector" "--selector=" "-l" :null))
+  :inherit-global-flags t :flags
+  '(("--dry-run")
+    ("--selector" "--selector=" "-l" :null))
   :subcommands (pcmpl-me-get-completion-widget :kubernetes-node))
+
+
+(pcmpl-me-command (kubectl version)
+  :inherit-global-flags t :flags
+  '(("--client")
+    ("--output" "--output=" "-o" :null)
+    ("--short")))
+
+
+(pcmpl-me-command (kubectl wait)
+  :inherit-global-flags t :flags
+  '(("--all")
+    ("--all-namespaces" "-A")
+    ("--allow-missing-template-keys")
+    ("--field-selector" "--field-selector=" :null)
+    ("--filename" "--filename=" "-f" :files)
+    ("--for" "--for=" :null)
+    ("--local")
+    ("--output" "--output=" "-o" :null)
+    ("--recursive" "-R")
+    ("--selector" "--selector=" "-l" :null)
+    ("--show-managed-fields")
+    ("--template" "--template=" :null)
+    ("--timeout" "--timeout=" :null)))
+
+
 
 ;;
 ;; PComplete kubectl
