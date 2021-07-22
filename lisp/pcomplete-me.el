@@ -60,11 +60,18 @@
          (mapcar (lambda (e) (alist-get :args (pcmpl-me--arg-list e))) pflags)))
 
 (defun pcmpl-me--matcher-expression (alist)
-  "Generate an expression for matchers from plist"
-  (let ((matchers (cl-loop
-                  for (key . args) in alist
-                  unless (eql key :args)
-                  collect `(,(plist-get pcmpl-me-completers key) ,@args))))
+  "Generate an expression for matchers from alist."
+  (let ((matchers
+         (cl-loop
+          for (key . args) in alist
+          for widget-expression = (unless (eql key :args)
+                                      (plist-get pcmpl-me-completers key))
+          if widget-expression
+          collect (cond
+                   ((functionp widget-expression)
+                    `(,(plist-get pcmpl-me-completers key) ,@args))
+                   (t
+                    `(quote ,(plist-get pcmpl-me-completers key)))))))
     (cond
      ((> (length matchers) 1)
       `(append ,@matchers))
@@ -101,10 +108,10 @@ For example:
 
            for match-expr = (pcmpl-me--matcher-expression arg-list)
 
-           when post-flags
-           for flag-keyword = (intern (format ":%s" (string-trim
-                                                     (car (alist-get :args arg-list))
-                                                     "[- \t\n\r]+" "[= \t\n\r]+")))
+           for flag-keyword = (when post-flags
+                                (intern (format ":%s" (string-trim
+                                                       (car (alist-get :args arg-list))
+                                                       "[- \t\n\r]+" "[= \t\n\r]+"))))
 
            when  (and match-expr post-flags)
            collect `((pcomplete-match ,(format "\\`%s\\'" (regexp-opt-group post-flags nil t)) 1)
@@ -127,10 +134,10 @@ For example:
 
            for match-expr = (pcmpl-me--matcher-expression arg-list)
 
-           when inline-flags
-           for flag-keyword = (intern (format ":%s" (string-trim
-                                                     (car (alist-get :args arg-list))
-                                                     "[- \t\n\r]+" "[= \t\n\r]+")))
+           for flag-keyword = (when inline-flags
+                                (intern (format ":%s" (string-trim
+                                                       (car (alist-get :args arg-list))
+                                                       "[- \t\n\r]+" "[= \t\n\r]+"))))
 
            when (and match-expr inline-flags)
            collect `((pcomplete-match ,(format "\\`%s\\(.*\\)" (regexp-opt-group inline-flags nil t)) 0)
