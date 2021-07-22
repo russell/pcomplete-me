@@ -241,49 +241,13 @@ or slash based resources like \"pod/my-pod\"
 (pcmpl-me-command kubectl
   :inherit-global-flags t
   :subcommands
-  '("annotate"
-    "api-resources"
-    "api-versions"
-    "apply"
-    "attach"
-    "auth"
-    "autoscale"
-    "certificate"
-    "cluster-info"
-    "completion"
-    "config"
-    "cordon"
-    "cp"
-    "create"
-    "debug"
-    "delete"
-    "describe"
-    "diff"
-    "drain"
-    "edit"
-    "exec"
-    "explain"
-    "expose"
-    "get"
-    "help"
-    "kustomize"
-    "label"
-    "logs"
-    "options"
-    "patch"
-    "plugin"
-    "port-forward"
-    "proxy"
-    "replace"
-    "rollout"
-    "run"
-    "scale"
-    "set"
-    "taint"
-    "top"
-    "uncordon"
-    "version"
-    "wait"))
+  '("annotate" "api-resources" "api-versions" "apply" "attach" "auth"
+"autoscale" "certificate" "cluster-info" "completion" "config"
+"cordon" "cp" "create" "debug" "delete" "describe" "diff" "drain"
+"edit" "exec" "explain" "expose" "get" "help" "kustomize" "label"
+"logs" "options" "patch" "plugin" "port-forward" "proxy" "replace"
+"rollout" "run" "scale" "set" "taint" "top" "uncordon" "version"
+"wait"))
 
 
 (pcmpl-me-command (kubectl annotate)
@@ -529,21 +493,10 @@ or slash based resources like \"pod/my-pod\"
 (pcmpl-me-command (kubectl config)
   :inherit-global-flags t
   :subcommands
-  '("current-context"
-    "delete-cluster"
-    "delete-context"
-    "delete-user"
-    "get-clusters"
-    "get-contexts"
-    "get-users"
-    "rename-context"
-    "set"
-    "set-cluster"
-    "set-context"
-    "set-credentials"
-    "unset"
-    "use-context"
-    "view"))
+  '("current-context" "delete-cluster" "delete-context" "delete-user"
+"get-clusters" "get-contexts" "get-users" "rename-context" "set"
+"set-cluster" "set-context" "set-credentials" "unset" "use-context"
+"view"))
 
 
 (pcmpl-me-command (kubectl config current-context)
@@ -1326,7 +1279,13 @@ or slash based resources like \"pod/my-pod\"
 (pcmpl-me-command (kubectl help)
   :inherit-global-flags t
   :subcommands
-  '("annotate" "api-resources" "api-versions" "apply" "attach" "auth" "autoscale" "certificate" "cluster-info" "completion" "config" "cordon" "cp" "create" "debug" "delete" "describe" "diff" "drain" "edit" "exec" "explain" "expose" "get" "help" "kustomize" "label" "logs" "options" "patch" "plugin" "port-forward" "proxy" "replace" "rollout" "run" "scale" "set" "taint" "top" "uncordon" "version" "wait"))
+  '("annotate" "api-resources" "api-versions" "apply" "attach" "auth"
+"autoscale" "certificate" "cluster-info" "completion" "config"
+"cordon" "cp" "create" "debug" "delete" "describe" "diff" "drain"
+"edit" "exec" "explain" "expose" "get" "help" "kustomize" "label"
+"logs" "options" "patch" "plugin" "port-forward" "proxy" "replace"
+"rollout" "run" "scale" "set" "taint" "top" "uncordon" "version"
+"wait"))
 
 
 (pcmpl-me-command (kubectl help annotate)
@@ -1486,22 +1445,10 @@ or slash based resources like \"pod/my-pod\"
 (pcmpl-me-command (kubectl help create)
   :inherit-global-flags t
   :subcommands
-  '("clusterrole"
-    "clusterrolebinding"
-    "configmap"
-    "cronjob"
-    "deployment"
-    "ingress"
-    "job"
-    "namespace"
-    "poddisruptionbudget"
-    "priorityclass"
-    "quota"
-    "role"
-    "rolebinding"
-    "secret"
-    "service"
-    "serviceaccount"))
+  '("clusterrole" "clusterrolebinding" "configmap" "cronjob"
+"deployment" "ingress" "job" "namespace" "poddisruptionbudget"
+"priorityclass" "quota" "role" "rolebinding" "secret" "service"
+"serviceaccount"))
 
 
 (pcmpl-me-command (kubectl help create clusterrole)
