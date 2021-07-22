@@ -77,7 +77,7 @@
            ((lambda nil
               '("test"))))
           (pcmpl-me--context-set :filter
-                                 (pcomplete-arg 1))))))))))
+                                 (pcomplete-arg 1)))))))))
 
 (ert-deftest pcmpl-me--flag-inline-test ()
   (should

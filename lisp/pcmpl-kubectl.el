@@ -772,7 +772,7 @@ or slash based resources like \"pod/my-pod\"
     ("--min-available" "--min-available=" :null)
     ("--output" "--output=" "-o" :null)
     ("--save-config")
-    ("--selector" "--selector=" "-l" :null)
+    ("--selector" "--selector=" :null)  ;;  "-l" is missing upstream?
     ("--show-managed-fields")
     ("--template" "--template=" :null)
     ("--validate")))
@@ -1090,7 +1090,7 @@ or slash based resources like \"pod/my-pod\"
   :inherit-global-flags t
   :flags
   '(("--api-version" "--api-version=" :null)
-    ("--recursive" "-R")))
+    ("--recursive")))
 
 
 (pcmpl-me-command (kubectl expose)
@@ -2446,7 +2446,6 @@ or slash based resources like \"pod/my-pod\"
     ("--show-managed-fields")
     ("--template" "--template=" :null)
     ("--timeout" "--timeout=" :null)))
-
 
 
 ;;
