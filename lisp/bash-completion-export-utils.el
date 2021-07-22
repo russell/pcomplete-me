@@ -104,27 +104,30 @@
     (insert (string-trim (format "'%s" (pp-to-string options)))))
   (indent-pp-sexp))
 
-(defun rs//subcommand-tree-to-commands (tree path)
+(defun rs//create-test-definition (command)
+  (format "(pcmpl-me-test (%s) (:inherit-global-flags t))"
+          (mapconcat #'identity command " ")))
+
+(defun rs//create-command-definition (command)
+  (pp-to-string (macroexpand-1 `(rs//generate-pcmpl-me-command ,command ,pcmpl-kubectl--global-flags))))
+
+(defun rs//subcommand-tree-to-commands (tree path format-fn)
   ;; TODO this doesn't correctly capture all subcommand's it misses
   ;; the intermediate ones.
-  (if (null tree)
-      path
-    (cl-loop
-     for p in tree
-     for key = (car p)
+  (let ((key (car tree))
+        (nodes (cdr tree)))
+   (cl-loop
+    for node in nodes
 
-     do (message "path %S" path)
+    do (message "path %S key %S" path key)
 
-     if (null tree)
-     do (message "null tree")
-
-     if (null (assoc-default key tree #'string-equal))
-     collect (format "(pcmpl-me-test (%s) (:inherit-global-flags t))"
-                     (mapconcat #'identity (reverse (cons key path)) " "))
-     else
-     collect (mapcar
-              (lambda (e) (command-things-now e (cons key path)))
-              (assoc-default key tree #'string-equal)))))
+    if (null (cdr node))
+    collect (funcall format-fn (reverse (cons (car node) (cons key path)))) into forms
+    else
+    collect (rs//subcommand-tree-to-commands node (cons key path) format-fn) into forms
+    finally
+    (push (funcall format-fn (reverse (cons key path))) forms)
+    finally return forms)))
 
 (defun rs//group-flags (flags)
   ""
@@ -143,12 +146,15 @@
 
 (defmacro rs//generate-pcmpl-me-command (command &optional global-flags)
   ""
-  (let ((subcommands (rs//bash-complete-kubectl-subcommand command))
-        (flags (rs//add-null-completers (rs//group-flags (rs//bash-complete-flags command global-flags)))))
-   `(pcmpl-me-command
-        :inherit-global-flags ,(when pcmpl-kubectl--global-flags t)
-        :flags (quote ,flags)
-        :subcommands (quote ,subcommands))))
+  (let* ((shell-args (mapconcat 'identity command " "))
+         (subcommands (rs//bash-complete-kubectl-subcommand shell-args))
+         (flags (rs//add-null-completers
+                 (rs//group-flags
+                  (rs//bash-complete-flags shell-args global-flags)))))
+   `(pcmpl-me-command ,(mapcar #'intern command)
+      :inherit-global-flags ,(when global-flags t)
+      :flags (quote ,flags)
+      :subcommands (quote ,subcommands))))
 
 (defun rs//bash-complete-kubectl-subcommands (command)
   ""
