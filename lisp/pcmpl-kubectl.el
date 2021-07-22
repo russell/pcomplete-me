@@ -645,13 +645,15 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl cp)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--container" "--container=" "-c" :kubernetes-resource-container)
     ("--no-preserve")))
 
 
 (pcmpl-me-command (kubectl create)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--dry-run")
     ("--edit")
@@ -669,11 +671,27 @@ or slash based resources like \"pod/my-pod\"
     ("--validate")
     ("--windows-line-endings"))
   :subcommands
-  '("clusterrole" "clusterrolebinding" "configmap" "cronjob" "deployment" "ingress" "job" "namespace" "poddisruptionbudget" "priorityclass" "quota" "role" "rolebinding" "secret" "service" "serviceaccount"))
+  '("clusterrole"
+    "clusterrolebinding"
+    "configmap"
+    "cronjob"
+    "deployment"
+    "ingress"
+    "job"
+    "namespace"
+    "poddisruptionbudget"
+    "priorityclass"
+    "quota"
+    "role"
+    "rolebinding"
+    "secret"
+    "service"
+    "serviceaccount"))
 
 
 (pcmpl-me-command (kubectl create clusterrole)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--aggregation-rule" "--aggregation-rule=" :null)
     ("--allow-missing-template-keys")
     ("--dry-run")
@@ -690,12 +708,14 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl create clusterrolebinding)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--clusterrole=" :null)))
 
 
 (pcmpl-me-command (kubectl create configmap)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--append-hash")
     ("--dry-run")
@@ -711,18 +731,21 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl create cronjob)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--image=" :null)
     ("--schedule=" :null)))
 
 
 (pcmpl-me-command (kubectl create deployment)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--image=" :null)))
 
 
 (pcmpl-me-command (kubectl create ingress)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--annotation" "--annotation=" :null)
     ("--class" "--class=" :null)
@@ -738,7 +761,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl create job)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--dry-run")
     ("--field-manager" "--field-manager=" :null)
@@ -752,7 +776,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl create namespace)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--dry-run")
     ("--field-manager" "--field-manager=" :null)
@@ -764,7 +789,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl create poddisruptionbudget)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--dry-run")
     ("--field-manager" "--field-manager=" :null)
@@ -779,7 +805,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl create priorityclass)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--description" "--description=" :null)
     ("--dry-run")
@@ -795,7 +822,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl create quota)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--dry-run")
     ("--field-manager" "--field-manager=" :null)
@@ -809,7 +837,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl create role)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--dry-run")
     ("--field-manager" "--field-manager=" :null)
@@ -824,7 +853,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl create rolebinding)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--clusterrole" "--clusterrole=" :null)
     ("--dry-run")
@@ -840,12 +870,14 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl create secret)
-  :inherit-global-flags t :subcommands
+  :inherit-global-flags t
+  :subcommands
   '("docker-registry" "generic" "tls"))
 
 
 (pcmpl-me-command (kubectl create secret docker-registry)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--append-hash")
     ("--docker-email" "--docker-email=" :null)
@@ -863,7 +895,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl create secret generic)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--append-hash")
     ("--dry-run")
@@ -880,7 +913,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl create secret tls)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--append-hash")
     ("--cert" "--cert=" :null)
@@ -895,12 +929,14 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl create service)
-  :inherit-global-flags t :subcommands
+  :inherit-global-flags t
+  :subcommands
   '("clusterip" "externalname" "loadbalancer" "nodeport"))
 
 
 (pcmpl-me-command (kubectl create service clusterip)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--clusterip" "--clusterip=" :null)
     ("--dry-run")
@@ -914,12 +950,14 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl create service externalname)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--external-name=" :null)))
 
 
 (pcmpl-me-command (kubectl create service loadbalancer)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--dry-run")
     ("--field-manager" "--field-manager=" :null)
@@ -932,7 +970,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl create service nodeport)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--dry-run")
     ("--field-manager" "--field-manager=" :null)
@@ -946,7 +985,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl create serviceaccount)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--dry-run")
     ("--field-manager" "--field-manager=" :null)
@@ -958,7 +998,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl debug)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--arguments-only")
     ("--attach")
     ("--container" "--container=" "-c" :kubernetes-resource-container)
@@ -977,7 +1018,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl delete)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--all")
     ("--all-namespaces" "-A")
     ("--cascade")
@@ -1011,7 +1053,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl diff)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--field-manager" "--field-manager=" :null)
     ("--filename" "--filename=" "-f" :files)
     ("--force-conflicts")
@@ -1022,7 +1065,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl drain)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--delete-emptydir-data")
     ("--disable-eviction")
     ("--dry-run")
@@ -1038,7 +1082,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl edit)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--field-manager" "--field-manager=" :null)
     ("--filename" "--filename=" "-f" :files)
@@ -1055,7 +1100,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl exec)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--container" "--container=" "-c" :kubernetes-resource-container)
     ("--filename" "--filename=" "-f" :files)
     ("--pod-running-timeout" "--pod-running-timeout=" :null)
@@ -1066,13 +1112,15 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl explain)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--api-version" "--api-version=" :null)
     ("--recursive" "-R")))
 
 
 (pcmpl-me-command (kubectl expose)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--cluster-ip" "--cluster-ip=" :null)
     ("--dry-run")
@@ -1102,7 +1150,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl expose deployment)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--cluster-ip" "--cluster-ip=" :null)
     ("--dry-run")
@@ -1130,7 +1179,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl expose pod)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--cluster-ip" "--cluster-ip=" :null)
     ("--dry-run")
@@ -1158,7 +1208,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl expose replicaset)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--cluster-ip" "--cluster-ip=" :null)
     ("--dry-run")
@@ -1186,7 +1237,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl expose replicationcontroller)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--cluster-ip" "--cluster-ip=" :null)
     ("--dry-run")
@@ -1214,7 +1266,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl expose service)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--cluster-ip" "--cluster-ip=" :null)
     ("--dry-run")
@@ -1271,7 +1324,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl help)
-  :inherit-global-flags t :subcommands
+  :inherit-global-flags t
+  :subcommands
   '("annotate" "api-resources" "api-versions" "apply" "attach" "auth" "autoscale" "certificate" "cluster-info" "completion" "config" "cordon" "cp" "create" "debug" "delete" "describe" "diff" "drain" "edit" "exec" "explain" "expose" "get" "help" "kustomize" "label" "logs" "options" "patch" "plugin" "port-forward" "proxy" "replace" "rollout" "run" "scale" "set" "taint" "top" "uncordon" "version" "wait"))
 
 
@@ -1288,7 +1342,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl help apply)
-  :inherit-global-flags t :subcommands
+  :inherit-global-flags t
+  :subcommands
   '("edit-last-applied" "set-last-applied" "view-last-applied"))
 
 
@@ -1309,7 +1364,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl help auth)
-  :inherit-global-flags t :subcommands
+  :inherit-global-flags t
+  :subcommands
   '("can-i" "reconcile"))
 
 
@@ -1326,7 +1382,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl help certificate)
-  :inherit-global-flags t :subcommands
+  :inherit-global-flags t
+  :subcommands
   '("approve" "deny"))
 
 
@@ -1339,7 +1396,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl help cluster-info)
-  :inherit-global-flags t :subcommands
+  :inherit-global-flags t
+  :subcommands
   '("dump"))
 
 
@@ -1352,7 +1410,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl help config)
-  :inherit-global-flags t :subcommands
+  :inherit-global-flags t
+  :subcommands
   '("current-context" "delete-cluster" "delete-context" "delete-user" "get-clusters" "get-contexts" "get-users" "rename-context" "set" "set-cluster" "set-context" "set-credentials" "unset" "use-context" "view"))
 
 
@@ -1425,8 +1484,24 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl help create)
-  :inherit-global-flags t :subcommands
-  '("clusterrole" "clusterrolebinding" "configmap" "cronjob" "deployment" "ingress" "job" "namespace" "poddisruptionbudget" "priorityclass" "quota" "role" "rolebinding" "secret" "service" "serviceaccount"))
+  :inherit-global-flags t
+  :subcommands
+  '("clusterrole"
+    "clusterrolebinding"
+    "configmap"
+    "cronjob"
+    "deployment"
+    "ingress"
+    "job"
+    "namespace"
+    "poddisruptionbudget"
+    "priorityclass"
+    "quota"
+    "role"
+    "rolebinding"
+    "secret"
+    "service"
+    "serviceaccount"))
 
 
 (pcmpl-me-command (kubectl help create clusterrole)
@@ -1482,7 +1557,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl help create secret)
-  :inherit-global-flags t :subcommands
+  :inherit-global-flags t
+  :subcommands
   '("docker-registry" "generic" "tls"))
 
 
@@ -1499,7 +1575,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl help create service)
-  :inherit-global-flags t :subcommands
+  :inherit-global-flags t
+  :subcommands
   '("clusterip" "externalname" "loadbalancer" "nodeport"))
 
 
@@ -1588,8 +1665,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl help plugin)
-  :inherit-global-flags t :subcommands
-  '("list"))
+  :inherit-global-flags t
+  :subcommands '("list"))
 
 
 (pcmpl-me-command (kubectl help plugin list)
@@ -1609,8 +1686,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl help rollout)
-  :inherit-global-flags t :subcommands
-  '("history" "pause" "restart" "resume" "status" "undo"))
+  :inherit-global-flags t
+  :subcommands '("history" "pause" "restart" "resume" "status" "undo"))
 
 
 (pcmpl-me-command (kubectl help rollout history)
@@ -1646,7 +1723,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl help set)
-  :inherit-global-flags t :subcommands
+  :inherit-global-flags t
+  :subcommands
   '("env" "image" "resources" "selector" "serviceaccount" "subject"))
 
 
@@ -1679,7 +1757,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl help top)
-  :inherit-global-flags t :subcommands
+  :inherit-global-flags t
+  :subcommands
   '("node" "pod"))
 
 
@@ -1704,7 +1783,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl kustomize)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--enable-alpha-plugins")
     ("--enable-helm")
     ("--enable-managedby-label")
@@ -1768,7 +1848,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl patch)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--dry-run")
     ("--field-manager" "--field-manager=" :null)
@@ -1787,23 +1868,27 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl plugin)
-  :inherit-global-flags t :subcommands
+  :inherit-global-flags t
+  :subcommands
   '("list"))
 
 
 (pcmpl-me-command (kubectl plugin list)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--name-only")))
 
 
 (pcmpl-me-command (kubectl port-forward)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--address" "--address=" :null)
     ("--pod-running-timeout" "--pod-running-timeout=" :null)))
 
 
 (pcmpl-me-command (kubectl proxy)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--accept-hosts" "--accept-hosts=" :null)
     ("--accept-paths" "--accept-paths=" :null)
     ("--address" "--address=" :null)
@@ -1823,7 +1908,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl replace)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--cascade")
     ("--dry-run")
@@ -1844,12 +1930,14 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl rollout)
-  :inherit-global-flags t :subcommands
+  :inherit-global-flags t
+  :subcommands
   '("history" "pause" "restart" "resume" "status" "undo"))
 
 
 (pcmpl-me-command (kubectl rollout history)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--filename" "--filename=" "-f" :files)
     ("--kustomize" "--kustomize=" "-k" :dirs)
@@ -1863,7 +1951,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl rollout history daemonset)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--filename" "--filename=" "-f" :files)
     ("--kustomize" "--kustomize=" "-k" :dirs)
@@ -1875,7 +1964,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl rollout history deployment)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--filename" "--filename=" "-f" :files)
     ("--kustomize" "--kustomize=" "-k" :dirs)
@@ -1887,7 +1977,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl rollout history statefulset)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--filename" "--filename=" "-f" :files)
     ("--kustomize" "--kustomize=" "-k" :dirs)
@@ -1899,7 +1990,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl rollout pause)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--field-manager" "--field-manager=" :null)
     ("--filename" "--filename=" "-f" :files)
@@ -1913,7 +2005,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl rollout pause deployment)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--field-manager" "--field-manager=" :null)
     ("--filename" "--filename=" "-f" :files)
@@ -1925,7 +2018,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl rollout restart)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--field-manager" "--field-manager=" :null)
     ("--filename" "--filename=" "-f" :files)
@@ -1939,7 +2033,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl rollout restart daemonset)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--field-manager" "--field-manager=" :null)
     ("--filename" "--filename=" "-f" :files)
@@ -1951,7 +2046,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl rollout restart deployment)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--field-manager" "--field-manager=" :null)
     ("--filename" "--filename=" "-f" :files)
@@ -1963,7 +2059,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl rollout restart statefulset)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--field-manager" "--field-manager=" :null)
     ("--filename" "--filename=" "-f" :files)
@@ -1975,7 +2072,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl rollout resume)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--field-manager" "--field-manager=" :null)
     ("--filename" "--filename=" "-f" :files)
@@ -1989,7 +2087,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl rollout resume deployment)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--field-manager" "--field-manager=" :null)
     ("--filename" "--filename=" "-f" :files)
@@ -2001,7 +2100,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl rollout status)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--filename" "--filename=" "-f" :files)
     ("--kustomize" "--kustomize=" "-k" :dirs)
     ("--recursive" "-R")
@@ -2014,7 +2114,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl rollout status daemonset)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--filename" "--filename=" "-f" :files)
     ("--kustomize" "--kustomize=" "-k" :dirs)
     ("--recursive" "-R")
@@ -2025,7 +2126,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl rollout status deployment)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--filename" "--filename=" "-f" :files)
     ("--kustomize" "--kustomize=" "-k" :dirs)
     ("--recursive" "-R")
@@ -2036,7 +2138,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl rollout status statefulset)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--filename" "--filename=" "-f" :files)
     ("--kustomize" "--kustomize=" "-k" :dirs)
     ("--recursive" "-R")
@@ -2047,7 +2150,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl rollout undo)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--dry-run")
     ("--filename" "--filename=" "-f" :files)
@@ -2062,7 +2166,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl rollout undo daemonset)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--dry-run")
     ("--filename" "--filename=" "-f" :files)
@@ -2075,7 +2180,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl rollout undo deployment)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--dry-run")
     ("--filename" "--filename=" "-f" :files)
@@ -2088,7 +2194,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl rollout undo statefulset)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--allow-missing-template-keys")
     ("--dry-run")
     ("--filename" "--filename=" "-f" :files)
@@ -2101,44 +2208,52 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl run)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--image=" :null)))
 
 
 (pcmpl-me-command (kubectl scale)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--replicas=" :null))
   :subcommands
   '("deployment" "replicaset" "replicationcontroller" "statefulset"))
 
 
 (pcmpl-me-command (kubectl scale deployment)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--replicas=" :null)))
 
 
 (pcmpl-me-command (kubectl scale replicaset)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--replicas=" :null)))
 
 
 (pcmpl-me-command (kubectl scale replicationcontroller)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--replicas=" :null)))
 
 
 (pcmpl-me-command (kubectl scale statefulset)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--replicas=" :null)))
 
 
 (pcmpl-me-command (kubectl set)
-  :inherit-global-flags t :subcommands
+  :inherit-global-flags t
+  :subcommands
   '("env" "image" "resources" "selector" "serviceaccount" "subject"))
 
 
 (pcmpl-me-command (kubectl set env)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--all")
     ("--allow-missing-template-keys")
     ("--containers" "--containers=" :null)
@@ -2164,7 +2279,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl set image)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--all")
     ("--allow-missing-template-keys")
     ("--dry-run")
@@ -2181,7 +2297,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl set resources)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--all")
     ("--allow-missing-template-keys")
     ("--containers" "--containers=" :null)
@@ -2202,7 +2319,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl set selector)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--all")
     ("--allow-missing-template-keys")
     ("--dry-run")
@@ -2218,7 +2336,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl set serviceaccount)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--all")
     ("--allow-missing-template-keys")
     ("--dry-run")
@@ -2234,7 +2353,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl set subject)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--all")
     ("--allow-missing-template-keys")
     ("--dry-run")
@@ -2252,7 +2372,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl taint)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--all")
     ("--allow-missing-template-keys")
     ("--dry-run")
@@ -2298,7 +2419,8 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl top pod)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--all-namespaces" "-A")
     ("--containers")
     ("--no-headers")
@@ -2309,21 +2431,24 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl uncordon)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--dry-run")
     ("--selector" "--selector=" "-l" :null))
   :subcommands (pcmpl-me-get-completion-widget :kubernetes-node))
 
 
 (pcmpl-me-command (kubectl version)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--client")
     ("--output" "--output=" "-o" :null)
     ("--short")))
 
 
 (pcmpl-me-command (kubectl wait)
-  :inherit-global-flags t :flags
+  :inherit-global-flags t
+  :flags
   '(("--all")
     ("--all-namespaces" "-A")
     ("--allow-missing-template-keys")
