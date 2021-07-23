@@ -60,7 +60,7 @@
          (mapcar (lambda (e) (alist-get :args (pcmpl-me--arg-list e))) pflags)))
 
 (defun pcmpl-me--matcher-expression (alist)
-  "Generate an expression for matchers from alist."
+  "Generate an expression for matchers from ALIST."
   (let ((matchers
          (cl-loop
           for (key . args) in alist

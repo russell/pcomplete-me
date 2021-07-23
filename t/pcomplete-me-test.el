@@ -79,6 +79,24 @@
           (pcmpl-me--context-set :filter
                                  (pcomplete-arg 1)))))))))
 
+(ert-deftest pcmpl-me--context-symbol-test ()
+  (should
+   (equal
+    (pcmpl-me--context-symbol '("--foobar=" "--bar=" "-b="))
+    :foobar))
+  (should
+   (equal
+    (pcmpl-me--context-symbol '("-b=" "--bar=" "--foobar=" ))
+    :foobar))
+  (should
+   (equal
+    (pcmpl-me--context-symbol '("--foobar"))
+    :foobar))
+  (should
+   (equal
+    (pcmpl-me--context-symbol '("--foobar="))
+    :foobar)))
+
 (ert-deftest pcmpl-me--flag-inline-test ()
   (should
    (equal
