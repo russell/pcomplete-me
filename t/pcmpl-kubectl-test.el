@@ -41,17 +41,17 @@
     (rs//bash-complete-recursive-subcommands command)))
 
 
-(defun rs//bash-complete-kubectl-subcommand (command &optional global-flags)
+(defun rs//bash-complete-kubectl-subcommand (command)
   ""
   (let ((bash-completion-start-files `(,pcmpl-kubectl-test-bashinit)))
     (rs//bash-complete-isolated
      (rs//bash-complete-subcommand command))))
 
-(defun rs//bash-complete-kubectl-flags (command)
+(defun rs//bash-complete-kubectl-flags (command &optional global-flags)
   ""
   (let ((bash-completion-start-files `(,pcmpl-kubectl-test-bashinit)))
     (rs//bash-complete-isolated
-     (rs//bash-complete-flags command))))
+     (rs//bash-complete-flags command global-flags))))
 
 (cl-defmacro pcmpl-me-test (command (&key inherit-global-flags))
   (let* ((command-list (if (listp command) command (cons command nil)))
@@ -68,7 +68,7 @@
              ,subcommand-flags
              'string-lessp)
             (let ((bash-completion-start-files `(,pcmpl-kubectl-test-bashinit)))
-              (rs//bash-complete-flags ,(mapconcat 'symbol-name command-list " ") ,global-flags))
+              (rs//bash-complete-kubectl-flags ,(mapconcat 'symbol-name command-list " ") ,global-flags))
             :test #'string-equal)
            nil)))
        (ert-deftest ,(intern (mapconcat 'symbol-name `(pcmpl ,@command-list -subcommands) "-")) ()

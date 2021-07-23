@@ -109,7 +109,7 @@
           (mapconcat #'identity command " ")))
 
 (defun rs//create-command-definition (command)
-  (pp-to-string (macroexpand-1 `(rs//generate-pcmpl-me-command ,command ,pcmpl-kubectl--global-flags))))
+  (pp-to-string (macroexpand-1 `(rs//generate-pcmpl-me-command ,command ,pcmpl-argo--global-flags))))
 
 (defun rs//subcommand-tree-to-commands (tree path format-fn)
   ;; TODO this doesn't correctly capture all subcommand's it misses
@@ -147,22 +147,14 @@
 (defmacro rs//generate-pcmpl-me-command (command &optional global-flags)
   ""
   (let* ((shell-args (mapconcat 'identity command " "))
-         (subcommands (rs//bash-complete-kubectl-subcommand shell-args))
+         (subcommands (rs//bash-complete-argo-subcommand shell-args))
          (flags (rs//add-null-completers
                  (rs//group-flags
-                  (rs//bash-complete-flags shell-args global-flags)))))
+                  (rs//bash-complete-argo-flags shell-args global-flags)))))
    `(pcmpl-me-command ,(mapcar #'intern command)
       :inherit-global-flags ,(when global-flags t)
       :flags (quote ,flags)
       :subcommands (quote ,subcommands))))
-
-(defun rs//bash-complete-kubectl-subcommands (command)
-  ""
-  (rs//bash-complete-recursive-subcommands command))
-
-(defun rs//bash-complete-kubectl-flags (command &optional global-flags)
-  ""
-  (rs//bash-complete-flags command global-flags))
 
 (provide 'bash-completion-export-utils)
 ;;; bash-completion-export-utils.el ends here

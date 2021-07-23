@@ -31,6 +31,7 @@ test:
 	@$(BATCH) --eval "(progn\
 	$$suppress_warnings\
 	(load-file \"t/pcomplete-me-test.el\")\
+	(load-file \"t/pcmpl-argo-test.el\")\
 	(load-file \"t/pcmpl-kubectl-test.el\")\
 	(ert-run-tests-batch-and-exit))"
 
