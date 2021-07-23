@@ -97,6 +97,20 @@ For example:
                  (push (cons key nil) args-alist)))
    args-alist))
 
+(defun pcmpl-me--context-symbol (args)
+  "Return a symbol to use a the context key.
+
+Take a list of arguments ARGS and return a symbol that can be
+used as the context key."
+  (intern
+   (format ":%s"
+           (string-trim
+            (cl-reduce  ;; find the longest argument
+             (lambda (a b) (if (> (length a) (length b)) a b))
+             args)
+            ;; Strip any `-' or `=' chars
+            "[- \t\n\r]+" "[= \t\n\r]+"))))
+
 (defun pcmpl-me--flag-post-matchers (pflags)
   "Take `PFLAGS' and return post matcher form."
 
@@ -109,9 +123,7 @@ For example:
            for match-expr = (pcmpl-me--matcher-expression arg-list)
 
            for flag-keyword = (when post-flags
-                                (intern (format ":%s" (string-trim
-                                                       (car (alist-get :args arg-list))
-                                                       "[- \t\n\r]+" "[= \t\n\r]+"))))
+                                (pcmpl-me--context-symbol (alist-get :args arg-list)))
 
            when  (and match-expr post-flags)
            collect `((pcomplete-match ,(format "\\`%s\\'" (regexp-opt-group post-flags nil t)) 1)
@@ -135,9 +147,7 @@ For example:
            for match-expr = (pcmpl-me--matcher-expression arg-list)
 
            for flag-keyword = (when inline-flags
-                                (intern (format ":%s" (string-trim
-                                                       (car (alist-get :args arg-list))
-                                                       "[- \t\n\r]+" "[= \t\n\r]+"))))
+                                (pcmpl-me--context-symbol (alist-get :args arg-list)))
 
            when (and match-expr inline-flags)
            collect `((pcomplete-match ,(format "\\`%s\\(.*\\)" (regexp-opt-group inline-flags nil t)) 0)
