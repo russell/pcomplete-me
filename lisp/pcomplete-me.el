@@ -271,5 +271,20 @@ COMMAND can be either a list with subcommands or a symbol.
                 `(,global-post-fn))
              ,@body))))))
 
+(defun pcmpl-me--call1 (program &rest args)
+  ""
+  (with-temp-buffer
+    (list (apply 'call-process program nil (current-buffer) nil args)
+          (buffer-string))))
+
+(defun pcmpl-me--call (&rest args)
+  ""
+  (cl-destructuring-bind (code result)
+      (apply #'pcmpl-me--call1 args)
+    (if (= code 0)
+        result
+      (message (string-trim result))
+      "")))
+
 (provide 'pcomplete-me)
 ;;; pcomplete-me.el ends here

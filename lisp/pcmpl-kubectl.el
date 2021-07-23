@@ -47,21 +47,6 @@ CONTEXT is a context alist."
                                           pcmpl-kubectl--override-flags)) context)))
 
 
-(defun pcmpl-kubectl--call (&rest args)
-  ""
-  (cl-destructuring-bind (code result)
-      (apply #'pcmpl-kubectl--call1 args)
-    (if (= code 0)
-        result
-      (message (string-trim result))
-      "")))
-
-(defun pcmpl-kubectl--call1 (program &rest args)
-  ""
-  (with-temp-buffer
-    (list (apply 'call-process program nil (current-buffer) nil args)
-          (buffer-string))))
-
 (defun pcmpl-kubectl--complete-resource-of (kind &optional context)
   "Return a list of all resources of a type.
 
@@ -70,7 +55,7 @@ alist."
   (let* ((context-args (pcmpl-kubectl--override-args (or context pcmpl-me--context)))
          (template "{{ range .items  }}{{ .metadata.name }} {{ end }}")
          (args `("kubectl" "get" ,@context-args "--output=template" "--template" ,template ,kind)))
-    (split-string (apply #'pcmpl-kubectl--call args))))
+    (split-string (apply #'pcmpl-me--call args))))
 
 
 (defun pcmpl-kubectl--complete-containers (&optional context)
@@ -92,7 +77,7 @@ context alist."
                           (pcmpl-me--context-get :resource-kind context)
                           (pcmpl-me--context-get :resource-name context))))
    (split-string
-    (apply #'pcmpl-kubectl--call
+    (apply #'pcmpl-me--call
            `("kubectl" "get" ,@context-args "--output=template" "--template" ,template ,resource)))))
 
 
@@ -107,7 +92,7 @@ CONTEXT is a context alist."
     (seq-filter
      (lambda (e) (not (equal e "")))
      (split-string
-      (apply #'pcmpl-kubectl--call
+      (apply #'pcmpl-me--call
              `("kubectl" "api-resources" ,@context-args "--verbs" "get" "--output=wide" "--cached" "--request-timeout=5s" "--no-headers"))
       "\n")))))
 
@@ -117,7 +102,7 @@ CONTEXT is a context alist."
 CONTEXT is a context alist."
   (let ((context-args (pcmpl-kubectl--override-args (or context pcmpl-me--context))))
    (split-string
-    (apply #'pcmpl-kubectl--call
+    (apply #'pcmpl-me--call
            `("kubectl" "api-resources" ,@context-args "--output=name" "--cached" "--request-timeout=5s" "--verbs=get")))))
 
 (defun pcmpl-kubectl--complete (type)
@@ -126,7 +111,7 @@ CONTEXT is a context alist."
 TYPE is used to specify the scope of the returned names."
   (let ((template "{{ range .%s}}{{ .name }} {{end}}"))
     (split-string
-     (apply #'pcmpl-kubectl--call
+     (apply #'pcmpl-me--call
             `("kubectl" "config" "view" "--output=template" "--template" ,template ,type)))))
 
 (defun pcmpl-kubectl--complete-resource ()
@@ -238,7 +223,7 @@ or slash based resources like \"pod/my-pod\"
     ("--log-flush-frequency" "--log-flush-frequency=" :null)
     ("--logtostderr")
     ("--match-server-version")
-    ("--namespace" "--namespace=" "-n" :kubernetes-namespaces)
+    ("--namespace" "--namespace=" "-n" :kubernetes-namespace)
     ("--one-output")
     ("--password" "--password=" :null)
     ("--profile" "--profile=" :list "none" "cpu" "heap" "goroutine" "threadcreate" "block" "mutex")
