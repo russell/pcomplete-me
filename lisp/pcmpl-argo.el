@@ -261,7 +261,7 @@ CONTEXT is context alist."
   :inherit-global-flags t
   :flags
   '(("--strict"))
-  :subcommands-fn (pcmpl-me-get-completion-widget :files))
+  :subcommands (pcmpl-me-get-completion-widget :files))
 
 (pcmpl-me-command (argo list)
   :inherit-global-flags t :flags
@@ -396,7 +396,7 @@ CONTEXT is context alist."
   :inherit-global-flags t
   :flags
   '(("--strict"))
-  :subcommands-fn (pcmpl-me-get-completion-widget :files))
+  :subcommands (pcmpl-me-get-completion-widget :files))
 
 (pcmpl-me-command (argo template list)
   :inherit-global-flags t

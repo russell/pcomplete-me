@@ -227,7 +227,6 @@ COMMAND can be either a list with subcommands or a symbol.
     (let* ((inherit-global-flags (plist-get args :inherit-global-flags))
            (flags (eval (plist-get args :flags)))
            (subcommands (plist-get args :subcommands))
-           (subcommands-fn (plist-get args :subcommands-fn))
            (body (plist-get args :body))
            (command-list (if (listp command) command (cons command nil)))
            (global-command (car command-list))
@@ -252,7 +251,7 @@ COMMAND can be either a list with subcommands or a symbol.
              ,@(pcmpl-me--flag-inline-matchers flags)
              ,(when inherit-global-flags
                 `(,global-inline-fn))
-             ,(if (or subcommands subcommands-fn)
+             ,(if subcommands
                   `(if (pcomplete-match "\\`-" 0)
                        (pcomplete-here* (append
                                          ,(cond
@@ -263,13 +262,14 @@ COMMAND can be either a list with subcommands or a symbol.
                                          ,subcommand-flags
                                          ,@(when inherit-global-flags
                                              `(,global-flags))))
-                     ,(if subcommands-fn
-                          `(funcall ,subcommands-fn)
-                        `(pcomplete-here* ,(cond
-                                           ((or (functionp subcommands) (functionp (car subcommands)))
-                                            `(funcall ,subcommands))
-                                           ((listp subcommands)
-                                            subcommand-subcommands)))))
+                     ,(cond
+                       ((or (functionp subcommands) (functionp (car subcommands)))
+                        `(let ((subcommands-result (funcall ,subcommands)))
+                           (when (listp subcommands-result)
+                               (pcomplete-here* subcommands-result))))
+                       ((listp subcommands)
+                        `(pcomplete-here* ,subcommand-subcommands)))
+                     )
                 `(pcomplete-here* (append
                                    ,subcommand-flags
                                    ,@(when inherit-global-flags

@@ -273,7 +273,7 @@ or slash based resources like \"pod/my-pod\"
     ("--selector" "--selector=" "-l" :null)
     ("--show-managed-fields")
     ("--template" "--template=" :null))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-resource))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-resource))
 
 
 (pcmpl-me-command (kubectl api-resources)
@@ -412,25 +412,25 @@ or slash based resources like \"pod/my-pod\"
 (pcmpl-me-command (kubectl autoscale deployment)
   :inherit-global-flags t
   :flags '(("--max=" :null))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-deployment))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-deployment))
 
 
 (pcmpl-me-command (kubectl autoscale replicaset)
   :inherit-global-flags t
   :flags '(("--max=" :null))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-replicaset))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-replicaset))
 
 
 (pcmpl-me-command (kubectl autoscale replicationcontroller)
   :inherit-global-flags t
   :flags '(("--max=" :null))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-replicationcontroller))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-replicationcontroller))
 
 
 (pcmpl-me-command (kubectl autoscale statefulset)
   :inherit-global-flags t
   :flags '(("--max=" :null))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-statefulset))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-statefulset))
 
 
 (pcmpl-me-command (kubectl certificate)
@@ -998,7 +998,7 @@ or slash based resources like \"pod/my-pod\"
     ("--selector" "--selector=" "-l" :null)
     ("--timeout" "--timeout=" :null)
     ("--wait"))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-resources))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-resources))
 
 
 (pcmpl-me-command (kubectl describe)
@@ -1010,7 +1010,7 @@ or slash based resources like \"pod/my-pod\"
     ("--recursive" "-R")
     ("--selector" "--selector=" "-l" :null)
     ("--show-events"))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-resource))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-resource))
 
 
 (pcmpl-me-command (kubectl diff)
@@ -1058,7 +1058,7 @@ or slash based resources like \"pod/my-pod\"
     ("--template" "--template=" :null)
     ("--validate")
     ("--windows-line-endings"))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-resource))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-resource))
 
 
 (pcmpl-me-command (kubectl exec)
@@ -1070,7 +1070,7 @@ or slash based resources like \"pod/my-pod\"
     ("--quiet" "-q")
     ("--stdin" "-i")
     ("--tty" "-t"))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-resource))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-resource))
 
 
 (pcmpl-me-command (kubectl explain)
@@ -1138,7 +1138,7 @@ or slash based resources like \"pod/my-pod\"
     ("--target-port" "--target-port=" :null)
     ("--template" "--template=" :null)
     ("--type" "--type=" :null))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-deployment))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-deployment))
 
 
 (pcmpl-me-command (kubectl expose pod)
@@ -1168,7 +1168,7 @@ or slash based resources like \"pod/my-pod\"
     ("--target-port" "--target-port=" :null)
     ("--template" "--template=" :null)
     ("--type" "--type=" :null))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-pod))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-pod))
 
 
 (pcmpl-me-command (kubectl expose replicaset)
@@ -1198,7 +1198,7 @@ or slash based resources like \"pod/my-pod\"
     ("--target-port" "--target-port=" :null)
     ("--template" "--template=" :null)
     ("--type" "--type=" :null))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-replicaset))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-replicaset))
 
 
 (pcmpl-me-command (kubectl expose replicationcontroller)
@@ -1228,7 +1228,7 @@ or slash based resources like \"pod/my-pod\"
     ("--target-port" "--target-port=" :null)
     ("--template" "--template=" :null)
     ("--type" "--type=" :null))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-replicationcontroller))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-replicationcontroller))
 
 
 (pcmpl-me-command (kubectl expose service)
@@ -1285,7 +1285,7 @@ or slash based resources like \"pod/my-pod\"
     ("--template" "--template=" :null)
     ("--watch" "-w")
     ("--watch-only"))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-resources))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-resources))
 
 
 (pcmpl-me-command (kubectl help)
@@ -1778,7 +1778,7 @@ or slash based resources like \"pod/my-pod\"
     ("--selector" "--selector=" "-l" :null)
     ("--show-managed-fields")
     ("--template" "--template=" :null))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-resource))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-resource))
 
 
 (pcmpl-me-command (kubectl logs)
@@ -1800,7 +1800,7 @@ or slash based resources like \"pod/my-pod\"
     ("--tail" "--tail=" :null)
     ("--timestamps")
     ("-p"))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-resource))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-resource))
 
 
 (pcmpl-me-command (kubectl options)
@@ -1825,7 +1825,7 @@ or slash based resources like \"pod/my-pod\"
     ("--template" "--template=" :null)
     ("--type" "--type=" :null)
     ("-p"))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-resource))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-resource))
 
 
 (pcmpl-me-command (kubectl plugin)
@@ -1845,7 +1845,7 @@ or slash based resources like \"pod/my-pod\"
   :flags
   '(("--address" "--address=" :null)
     ("--pod-running-timeout" "--pod-running-timeout=" :null))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-resource))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-resource))
 
 
 (pcmpl-me-command (kubectl proxy)
@@ -1923,7 +1923,7 @@ or slash based resources like \"pod/my-pod\"
     ("--revision" "--revision=" :null)
     ("--show-managed-fields")
     ("--template" "--template=" :null))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-daemonset))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-daemonset))
 
 
 (pcmpl-me-command (kubectl rollout history deployment)
@@ -1937,7 +1937,7 @@ or slash based resources like \"pod/my-pod\"
     ("--revision" "--revision=" :null)
     ("--show-managed-fields")
     ("--template" "--template=" :null))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-deployment))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-deployment))
 
 
 (pcmpl-me-command (kubectl rollout history statefulset)
@@ -1951,7 +1951,7 @@ or slash based resources like \"pod/my-pod\"
     ("--revision" "--revision=" :null)
     ("--show-managed-fields")
     ("--template" "--template=" :null))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-statefulset))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-statefulset))
 
 
 (pcmpl-me-command (kubectl rollout pause)
@@ -1980,7 +1980,7 @@ or slash based resources like \"pod/my-pod\"
     ("--recursive" "-R")
     ("--show-managed-fields")
     ("--template" "--template=" :null))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-deployment))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-deployment))
 
 
 (pcmpl-me-command (kubectl rollout restart)
@@ -2009,7 +2009,7 @@ or slash based resources like \"pod/my-pod\"
     ("--recursive" "-R")
     ("--show-managed-fields")
     ("--template" "--template=" :null))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-daemonset))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-daemonset))
 
 
 (pcmpl-me-command (kubectl rollout restart deployment)
@@ -2023,7 +2023,7 @@ or slash based resources like \"pod/my-pod\"
     ("--recursive" "-R")
     ("--show-managed-fields")
     ("--template" "--template=" :null))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-deployment))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-deployment))
 
 
 (pcmpl-me-command (kubectl rollout restart statefulset)
@@ -2037,7 +2037,7 @@ or slash based resources like \"pod/my-pod\"
     ("--recursive" "-R")
     ("--show-managed-fields")
     ("--template" "--template=" :null))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-statefulset))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-statefulset))
 
 
 (pcmpl-me-command (kubectl rollout resume)
@@ -2066,7 +2066,7 @@ or slash based resources like \"pod/my-pod\"
     ("--recursive" "-R")
     ("--show-managed-fields")
     ("--template" "--template=" :null))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-deployment))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-deployment))
 
 
 (pcmpl-me-command (kubectl rollout status)
@@ -2091,7 +2091,7 @@ or slash based resources like \"pod/my-pod\"
     ("--revision" "--revision=" :null)
     ("--timeout" "--timeout=" :null)
     ("--watch" "-w"))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-daemonset))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-daemonset))
 
 
 (pcmpl-me-command (kubectl rollout status deployment)
@@ -2103,7 +2103,7 @@ or slash based resources like \"pod/my-pod\"
     ("--revision" "--revision=" :null)
     ("--timeout" "--timeout=" :null)
     ("--watch" "-w"))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-deployment))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-deployment))
 
 
 (pcmpl-me-command (kubectl rollout status statefulset)
@@ -2115,7 +2115,7 @@ or slash based resources like \"pod/my-pod\"
     ("--revision" "--revision=" :null)
     ("--timeout" "--timeout=" :null)
     ("--watch" "-w"))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-statefulset))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-statefulset))
 
 
 (pcmpl-me-command (kubectl rollout undo)
@@ -2146,7 +2146,7 @@ or slash based resources like \"pod/my-pod\"
     ("--show-managed-fields")
     ("--template" "--template=" :null)
     ("--to-revision" "--to-revision=" :null))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-daemonset))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-daemonset))
 
 
 (pcmpl-me-command (kubectl rollout undo deployment)
@@ -2161,7 +2161,7 @@ or slash based resources like \"pod/my-pod\"
     ("--show-managed-fields")
     ("--template" "--template=" :null)
     ("--to-revision" "--to-revision=" :null))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-deployment))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-deployment))
 
 
 (pcmpl-me-command (kubectl rollout undo statefulset)
@@ -2176,7 +2176,7 @@ or slash based resources like \"pod/my-pod\"
     ("--show-managed-fields")
     ("--template" "--template=" :null)
     ("--to-revision" "--to-revision=" :null))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-statefulset))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-statefulset))
 
 
 (pcmpl-me-command (kubectl run)
@@ -2194,25 +2194,25 @@ or slash based resources like \"pod/my-pod\"
 (pcmpl-me-command (kubectl scale deployment)
   :inherit-global-flags t
   :flags '(("--replicas=" :null))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-deployment))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-deployment))
 
 
 (pcmpl-me-command (kubectl scale replicaset)
   :inherit-global-flags t
   :flags '(("--replicas=" :null))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-replicaset))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-replicaset))
 
 
 (pcmpl-me-command (kubectl scale replicationcontroller)
   :inherit-global-flags t
   :flags '(("--replicas=" :null))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-replicationcontroller))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-replicationcontroller))
 
 
 (pcmpl-me-command (kubectl scale statefulset)
   :inherit-global-flags t
   :flags '(("--replicas=" :null))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-statefulset))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-statefulset))
 
 
 (pcmpl-me-command (kubectl set)
@@ -2371,7 +2371,7 @@ or slash based resources like \"pod/my-pod\"
     ("--show-managed-fields")
     ("--template" "--template=" :null)
     ("--validate"))
-  :subcommands-fn (pcmpl-me-get-completion-widget :kubernetes-node))
+  :subcommands (pcmpl-me-get-completion-widget :kubernetes-node))
 
 
 (pcmpl-me-command (kubectl top)
@@ -2443,7 +2443,9 @@ or slash based resources like \"pod/my-pod\"
 (defun pcomplete/kubectl ()
   "Completion for kubectl."
   (let ((pcmpl-me--context nil))
-    (pcmpl-kubectl)))
+    (unwind-protect
+        (pcmpl-kubectl)
+      (message "%S" pcmpl-me--context))))
 
 (provide 'pcmpl-kubectl)
 ;;; pcmpl-kubectl.el ends here
