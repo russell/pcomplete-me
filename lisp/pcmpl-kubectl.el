@@ -190,7 +190,7 @@ or slash based resources like \"pod/my-pod\"
 (pcmpl-me-set-completion-widget
  :kubernetes-daemonset (lambda () (pcmpl-kubectl--complete-resource-of "daemonset")))
 (pcmpl-me-set-completion-widget
- :kubernetes-deployments (lambda () (pcmpl-kubectl--complete-resource-of "deployments")))
+ :kubernetes-deployment (lambda () (pcmpl-kubectl--complete-resource-of "deployments")))
 (pcmpl-me-set-completion-widget
  :kubernetes-replicaset (lambda () (pcmpl-kubectl--complete-resource-of "replicaset")))
 (pcmpl-me-set-completion-widget
