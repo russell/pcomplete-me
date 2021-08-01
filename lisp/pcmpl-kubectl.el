@@ -109,10 +109,10 @@ CONTEXT is a context alist."
   "Return names of available entries in a kubeconfig file.
 
 TYPE is used to specify the scope of the returned names."
-  (let ((template "{{ range .%s}}{{ .name }} {{end}}"))
+  (let ((template (format "{{ range .%s}}{{ .name }} {{end}}" type)))
     (split-string
      (apply #'pcmpl-me--call
-            `("kubectl" "config" "view" "--output=template" "--template" ,template ,type)))))
+            `("kubectl" "config" "view" "--output=template" "--template" ,template)))))
 
 (defun pcmpl-kubectl--complete-resource ()
   "Complete a single resources by name of a single kind.
