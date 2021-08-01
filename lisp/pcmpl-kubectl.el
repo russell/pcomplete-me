@@ -727,7 +727,7 @@ or slash based resources like \"pod/my-pod\"
   '(("--allow-missing-template-keys")
     ("--dry-run" :kubernetes-dry-run)
     ("--field-manager" "--field-manager=" :null)
-    ("--from" "--from=" :null)
+    ("--from" "--from=" :kubernetes-resource)
     ("--image" "--image=" :null)
     ("--output" "--output=" "-o" :null)
     ("--save-config")
