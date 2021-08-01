@@ -3,3 +3,25 @@
   #+begin_src sh
   nix-shell -p '(import ./default.nix).emacs-27-1'
   #+end_src
+
+* adding new commands
+
+  #+begin_src emacs-lisp
+
+  ;; define a list of all subcommands
+  (defconst argo-all-subcommands (rs//bash-complete-argo-subcommands "argo"))
+
+  (defconst argo-command-definitions
+    (mapconcat
+     'identity
+     (flatten-list
+      (rs//subcommand-tree-to-commands
+       (cons "argo" argo-all-subcommands) nil #'rs//create-command-definition))
+     "\n"))
+  #+end_src
+
+  figuring out flags
+
+  #+begin_src emacs-lisp
+  (rs//replace-sexp (rs//add-null-completers (rs//group-flags (rs//bash-complete-argo-flags "argo"))))
+  #+end_src
