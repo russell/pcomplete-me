@@ -185,8 +185,10 @@ used as the context key."
 
 (defun pcmpl-me-get-completion-widget (key)
   ""
-  (or (plist-get pcmpl-me-completers key)
-      (error "Completion for %S doesn't exist" key)))
+  (let ((widget (plist-get pcmpl-me-completers key)))
+    (if widget
+        widget
+      (error "Completion for %S doesn't exist" key))))
 
 (defmacro pcmpl-me-global-args (name &rest args)
   ""
