@@ -59,6 +59,16 @@
   (apply #'append
          (mapcar (lambda (e) (alist-get :args (pcmpl-me--arg-list e))) pflags)))
 
+(defun pcmpl-me--normalise-flags (flags)
+  "Remove all FLAGS ending with `=' and add any missing flags."
+  (mapcar (lambda (flag)
+            (let ((flag-end-pos (- (length flag) 1)))
+              (if (eq t (compare-strings "=" nil nil
+                                         flag flag-end-pos nil))
+                 (substring flag 0 flag-end-pos)
+               flag)))
+          flags))
+
 (defun pcmpl-me--matcher-expression (alist)
   "Generate an expression for matchers from ALIST."
   (let ((matchers
@@ -228,6 +238,7 @@ COMMAND can be either a list with subcommands or a symbol.
   (declare (indent 1))
   (cl-flet ((intern-symbol (args) (intern (mapconcat 'symbol-name args "-"))))
     (let* ((inherit-global-flags (plist-get args :inherit-global-flags))
+           (filter-flags (or (plist-get args :filter-flags) (quote #'identity)))
            (flags (eval (plist-get args :flags)))
            (subcommands (plist-get args :subcommands))
            (body (plist-get args :body))
@@ -262,21 +273,20 @@ COMMAND can be either a list with subcommands or a symbol.
                                             `(funcall ,subcommands))
                                            ((listp subcommands)
                                             subcommand-subcommands))
-                                         ,subcommand-flags
-                                         ,@(when inherit-global-flags
-                                             `(,global-flags))))
+                                         (funcall ,filter-flags ,subcommand-flags)
+                                         ,(when inherit-global-flags
+                                             `(funcall ,filter-flags ,global-flags))))
                      ,(cond
                        ((or (functionp subcommands) (functionp (car subcommands)))
                         `(let ((subcommands-result (funcall ,subcommands)))
                            (when (listp subcommands-result)
                                (pcomplete-here* subcommands-result))))
                        ((listp subcommands)
-                        `(pcomplete-here* ,subcommand-subcommands)))
-                     )
+                        `(pcomplete-here* ,subcommand-subcommands))))
                 `(pcomplete-here* (append
-                                   ,subcommand-flags
-                                   ,@(when inherit-global-flags
-                                       `(,global-flags)))))
+                                   (funcall ,filter-flags ,subcommand-flags)
+                                   ,(when inherit-global-flags
+                                       `(funcall ,filter-flags ,global-flags)()))))
 
              ,@(pcmpl-me--flag-post-matchers flags)
              ,@(pcmpl-me--subcommand-matchers command-list subcommands-list)
