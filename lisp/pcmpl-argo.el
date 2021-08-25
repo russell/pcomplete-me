@@ -44,7 +44,7 @@ CONTEXT is a context alist."
 KIND is the type of resorce to complete.  CONTEXT is context
 alist."
   (let* ((context-args (pcmpl-argo--override-args (or context pcmpl-me--context)))
-         (args `("argo" kind "list" ,@context-args
+         (args `("argo" ,kind "list" ,@context-args
                  "--output=name")))
     (split-string (apply #'pcmpl-me--call args))))
 
