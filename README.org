@@ -1,3 +1,28 @@
+* PComplete Me
+
+  An attempt to reduce the API of PComplete down to the minimum
+  useful expression of the flags that a program provides.
+
+  This project is a *WORK IN PROGRESS* it's not working for general
+  usage and still has bugs.
+
+  PComplete-Me uses some hacky scripts to export completion data from
+  =bash-completion=. It doesn't directly build on it because
+  pcompelete-me is providing extra completion on top of what is
+  provided by =bash-completion= and the integration serves to improve
+  maintainability rather than act as a live API.
+
+* Widget
+
+  PComplete-Me has a concept of completion widgets for providing
+  completion targets, the idea being that the same widget might be
+  shared between multiple CLI tools.  Or possibly provide alternative
+  completion for sets of targets.
+
+  Lots of the Kubernetes tooling re-defines the way to find
+  configuration, but this duplication can be removed in the
+  =pcomplete-me= package
+
 * test
 
   #+begin_src sh
