@@ -29,6 +29,7 @@
 (require 'pcomplete)
 
 (defvar pcmpl-me--context nil)
+(defvar pcmpl-me-debug nil)
 
 (defun pcmpl-me--complete-from-list (&rest things)
   ""

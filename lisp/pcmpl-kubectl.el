@@ -2587,7 +2587,7 @@ or slash based resources like \"pod/my-pod\"
   (let ((pcmpl-me--context nil))
     (unwind-protect
         (pcmpl-kubectl)
-      (message "%S" pcmpl-me--context))))
+      (when pcmpl-me-debug (message "%S" pcmpl-me--context)))))
 
 (provide 'pcmpl-kubectl)
 ;;; pcmpl-kubectl.el ends here

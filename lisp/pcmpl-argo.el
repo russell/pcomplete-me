@@ -435,7 +435,9 @@ CONTEXT is context alist."
 (defun pcomplete/argo ()
   "Completion for kubectl."
   (let ((pcmpl-me--context nil))
-    (pcmpl-argo)))
+    (unwind-protect
+        (pcmpl-argo)
+      (when pcmpl-me-debug (message "%S" pcmpl-me--context)))))
 
 
 (provide 'pcmpl-argo)
