@@ -64,11 +64,9 @@
          (should
           (equal
            (cl-set-difference
-            (cl-sort
-             ,subcommand-flags
-             'string-lessp)
             (let ((bash-completion-start-files `(,pcmpl-kubectl-test-bashinit)))
               (rs//bash-complete-kubectl-flags ,(mapconcat 'symbol-name command-list " ") ,global-flags))
+            (cl-sort ,subcommand-flags 'string-lessp)
             :test #'string-equal)
            nil)))
        (ert-deftest ,(intern (mapconcat 'symbol-name `(pcmpl ,@command-list -subcommands) "-")) ()
