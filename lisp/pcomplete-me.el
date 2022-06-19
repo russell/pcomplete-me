@@ -57,8 +57,7 @@
 
 (defun pcmpl-me--flags (pflags)
   "Return the combine all the flags from `PFLAGS'."
-  (apply #'append
-         (mapcar (lambda (e) (alist-get :args (pcmpl-me--arg-list e))) pflags)))
+  (cl-sort (apply #'append (mapcar (lambda (e) (alist-get :args (pcmpl-me--arg-list e))) pflags)) 'string-lessp))
 
 (defun pcmpl-me--normalise-flags (flags)
   "Remove all FLAGS ending with `=' and add any missing flags."
@@ -95,18 +94,13 @@ For example:
   (pcmpl-me--arg-list '(\"--verbose\" \"--verbose=\" :foobar \"barfoo\"))
   -> '((:foobar \"barfoo\")
        (:args \"--verbose=\" \"--verbose\"))"
-  (let (args-alist)
-   (cl-loop for element in `(:args ,@args)
-            when (keywordp element)
-            for key = element
-            else
-            do (if (alist-get key args-alist)
-                     (push element (alist-get key args-alist))
-                 (push (cons key (cons element nil)) args-alist))
-            finally
-            do (unless (alist-get key args-alist)
-                 (push (cons key nil) args-alist)))
-   args-alist))
+  (seq-reduce (lambda (acc element)
+                (let ((key (caar acc)))
+                  (if (keywordp element)
+                      (push (cons element nil) acc)
+                    (push element (alist-get key acc))
+                    acc)))
+              args (list (list :args))))
 
 (defun pcmpl-me--context-symbol (args)
   "Return a symbol to use a the context key.
@@ -238,12 +232,12 @@ COMMAND can be either a list with subcommands or a symbol.
                       subcommands."
   (declare (indent 1))
   (cl-flet ((intern-symbol (args) (intern (mapconcat 'symbol-name args "-"))))
-    (let* ((inherit-global-flags (plist-get args :inherit-global-flags))
+    (let* ((command-list (if (listp command) command (cons command nil)))
+           (inherit-global-flags (plist-get args :inherit-global-flags))
            (filter-flags (or (plist-get args :filter-flags) (quote #'identity)))
            (flags (eval (plist-get args :flags)))
            (subcommands (plist-get args :subcommands))
            (body (plist-get args :body))
-           (command-list (if (listp command) command (cons command nil)))
            (global-command (car command-list))
            (subcommands-list (when (and (listp subcommands)
                                         (not (functionp (car subcommands)))

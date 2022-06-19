@@ -159,5 +159,18 @@
           (pcmpl-me--context-set :output
                                  (pcomplete-match-string 1)))))))))
 
+(ert-deftest pcmpl-me--flags ()
+  "Should return a sorted set of flags"
+  (should
+   (equal
+    (pcmpl-me--flags '(("--api-group" "--api-group=")
+                       ("--cached")
+                       ("--no-headers")
+                       ("--namespaced")
+                       ("--output" "--output=" "-o" :list kubectl-output-name-or-wide)
+                       ("--sort-by" "--sort-by=" :list "name" "kind")
+                       ("--verbs" "--verbs=" :null)))
+    '("--api-group" "--api-group=" "--cached" "--namespaced" "--no-headers"
+      "--output" "--output=" "--sort-by" "--sort-by=" "--verbs" "--verbs=" "-o"))))
 (provide 'pcomplete-me-test)
 ;;; pcomplete-me-test.el ends here
