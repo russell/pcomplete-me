@@ -207,6 +207,7 @@ or slash based resources like \"pod/my-pod\"
   '(("--add-dir-header")
     ("--alsologtostderr")
     ("--as" "--as=" :null)
+    ("--as-uid" "--as-uid=" :null)
     ("--as-group" "--as-group=" :null)
     ("--cache-dir" "--cache-dir=" :dirs)
     ("--certificate-authority" "--certificate-authority=" :files)
@@ -259,6 +260,7 @@ or slash based resources like \"pod/my-pod\"
   :filter-flags #'pcmpl-me--normalise-flags
   :flags
   '(("--all")
+    ("--all-namespaces" "-A")
     ("--allow-missing-template-keys")
     ("--dry-run" :kubernetes-dry-run)
     ("--field-manager" "--field-manager=" :null)
@@ -648,6 +650,7 @@ or slash based resources like \"pod/my-pod\"
   :filter-flags #'pcmpl-me--normalise-flags
   :flags
   '(("--container" "--container=" "-c" :kubernetes-resource-container)
+    ("--retries" "--retries=")
     ("--no-preserve")))
 
 
@@ -1049,6 +1052,7 @@ or slash based resources like \"pod/my-pod\"
   '(("--all")
     ("--all-namespaces" "-A")
     ("--cascade")
+    ("--chunk-size" "--chunk-size=" :null)
     ("--dry-run" :kubernetes-dry-run)
     ("--field-selector" "--field-selector=" :null)
     ("--filename" "--filename=" "-f" :files)
@@ -1071,6 +1075,7 @@ or slash based resources like \"pod/my-pod\"
   :filter-flags #'pcmpl-me--normalise-flags
   :flags
   '(("--all-namespaces" "-A")
+    ("--chunk-size" "--chunk-size=" :null)
     ("--filename" "--filename=" "-f" :files)
     ("--kustomize" "--kustomize=" "-k" :dirs)
     ("--recursive" "-R")
@@ -1096,7 +1101,8 @@ or slash based resources like \"pod/my-pod\"
   :inherit-global-flags t
   :filter-flags #'pcmpl-me--normalise-flags
   :flags
-  '(("--delete-emptydir-data")
+  '(("--chunk-size" "--chunk-size=" :null)
+    ("--delete-emptydir-data")
     ("--disable-eviction")
     ("--dry-run" :kubernetes-dry-run)
     ("--force")
@@ -1148,6 +1154,7 @@ or slash based resources like \"pod/my-pod\"
   :filter-flags #'pcmpl-me--normalise-flags
   :flags
   '(("--api-version" "--api-version=" :null)
+    ("--override-type" "--override-type=" :null)
     ("--recursive")))
 
 
@@ -1167,6 +1174,7 @@ or slash based resources like \"pod/my-pod\"
     ("--load-balancer-ip" "--load-balancer-ip=" :null)
     ("--name" "--name=" :null)
     ("--output" "--output=" "-o" :null)
+    ("--override-type" "--override-type=" :null)
     ("--overrides" "--overrides=" :null)
     ("--port" "--port=" :null)
     ("--protocol" "--protocol=" :null)
@@ -1199,6 +1207,7 @@ or slash based resources like \"pod/my-pod\"
     ("--load-balancer-ip" "--load-balancer-ip=" :null)
     ("--name" "--name=" :null)
     ("--output" "--output=" "-o" :null)
+    ("--override-type" "--override-type=" :null)
     ("--overrides" "--overrides=" :null)
     ("--port" "--port=" :null)
     ("--protocol" "--protocol=" :null)
@@ -1230,6 +1239,7 @@ or slash based resources like \"pod/my-pod\"
     ("--load-balancer-ip" "--load-balancer-ip=" :null)
     ("--name" "--name=" :null)
     ("--output" "--output=" "-o" :null)
+    ("--override-type" "--override-type=" :null)
     ("--overrides" "--overrides=" :null)
     ("--port" "--port=" :null)
     ("--protocol" "--protocol=" :null)
@@ -1261,6 +1271,7 @@ or slash based resources like \"pod/my-pod\"
     ("--load-balancer-ip" "--load-balancer-ip=" :null)
     ("--name" "--name=" :null)
     ("--output" "--output=" "-o" :null)
+    ("--override-type" "--override-type=" :null)
     ("--overrides" "--overrides=" :null)
     ("--port" "--port=" :null)
     ("--protocol" "--protocol=" :null)
@@ -1292,6 +1303,7 @@ or slash based resources like \"pod/my-pod\"
     ("--load-balancer-ip" "--load-balancer-ip=" :null)
     ("--name" "--name=" :null)
     ("--output" "--output=" "-o" :null)
+    ("--override-type" "--override-type=" :null)
     ("--overrides" "--overrides=" :null)
     ("--port" "--port=" :null)
     ("--protocol" "--protocol=" :null)
@@ -1323,6 +1335,7 @@ or slash based resources like \"pod/my-pod\"
     ("--load-balancer-ip" "--load-balancer-ip=" :null)
     ("--name" "--name=" :null)
     ("--output" "--output=" "-o" :null)
+    ("--override-type" "--override-type=" :null)
     ("--overrides" "--overrides=" :null)
     ("--port" "--port=" :null)
     ("--protocol" "--protocol=" :null)
@@ -1348,7 +1361,7 @@ or slash based resources like \"pod/my-pod\"
     ("--filename" "--filename=" "-f" :files)
     ("--ignore-not-found")
     ("--kustomize" "--kustomize=" "-k" :dirs)
-    ("--label-columns" "--label-columns=" :null)
+    ("--label-columns" "--label-columns=" "-L" :null)
     ("--no-headers")
     ("--output-watch-events")
     ("--output" "--output=" "-o" :null)
@@ -1836,7 +1849,8 @@ or slash based resources like \"pod/my-pod\"
   :inherit-global-flags t
   :filter-flags #'pcmpl-me--normalise-flags
   :flags
-  '(("--enable-alpha-plugins")
+  '(("--as-current-user")
+    ("--enable-alpha-plugins")
     ("--enable-helm")
     ("--enable-managedby-label")
     ("--env" "--env=" :null)
@@ -1855,6 +1869,7 @@ or slash based resources like \"pod/my-pod\"
   :filter-flags #'pcmpl-me--normalise-flags
   :flags
   '(("--all")
+    ("--all-namespaces" "-A")
     ("--allow-missing-template-keys")
     ("--dry-run" :kubernetes-dry-run)
     ("--field-manager" "--field-manager=" :null)
@@ -1880,7 +1895,7 @@ or slash based resources like \"pod/my-pod\"
   :flags
   '(("--all-containers")
     ("--container" "--container=" "-c" :kubernetes-resource-container)
-    ("--follow")
+    ("--follow" "-f")
     ("--ignore-errors")
     ("--insecure-skip-tls-verify-backend")
     ("--limit-bytes" "--limit-bytes=" :null)
@@ -1954,6 +1969,7 @@ or slash based resources like \"pod/my-pod\"
     ("--accept-paths" "--accept-paths=" :null)
     ("--address" "--address=" :null)
     ("--api-prefix" "--api-prefix=" :null)
+    ("--append-server-path")
     ("--disable-filter")
     ("--keepalive" "--keepalive=" :null)
     ("--port" "--port=" :null)
@@ -2522,6 +2538,7 @@ or slash based resources like \"pod/my-pod\"
   :flags
   '(("--no-headers")
     ("--selector" "--selector=" "-l" :null)
+    ("--show-capacity")
     ("--sort-by" "--sort-by=" :null)
     ("--use-protocol-buffers"))
   :subcommands (pcmpl-me-get-completion-widget :kubernetes-node))
@@ -2533,6 +2550,7 @@ or slash based resources like \"pod/my-pod\"
   :flags
   '(("--all-namespaces" "-A")
     ("--containers")
+    ("--field-selector" "--field-selector=" :null)
     ("--no-headers")
     ("--selector" "--selector=" "-l" :null)
     ("--sort-by" "--sort-by=" :null)
