@@ -92,38 +92,6 @@ endif
 
 ELPA_DIR ?= $(USER_EMACS_DIR)/elpa
 
-DASH_DIR ?= $(shell \
-  find -L $(ELPA_DIR) -maxdepth 1 -regex '.*/dash-[.0-9]*' 2> /dev/null | \
-  sort | tail -n 1)
-ifeq "$(DASH_DIR)" ""
-  DASH_DIR = $(TOP)../dash
-endif
-
-LIBGIT_DIR ?= $(shell \
-  find -L $(ELPA_DIR) -maxdepth 1 -regex '.*/libgit-[.0-9]*' 2> /dev/null | \
-  sort | tail -n 1)
-ifeq "$(LIBGIT_DIR)" ""
-  LIBGIT_DIR = $(TOP)../libgit
-endif
-
-TRANSIENT_DIR ?= $(shell \
-  find -L $(ELPA_DIR) -maxdepth 1 -regex '.*/transient-[.0-9]*' 2> /dev/null | \
-  sort | tail -n 1)
-ifeq "$(TRANSIENT_DIR)" ""
-  TRANSIENT_DIR = $(TOP)../transient/lisp
-endif
-
-WITH_EDITOR_DIR ?= $(shell \
-  find -L $(ELPA_DIR) -maxdepth 1 -regex '.*/with-editor-[.0-9]*' 2> /dev/null | \
-  sort | tail -n 1)
-ifeq "$(WITH_EDITOR_DIR)" ""
-  WITH_EDITOR_DIR = $(TOP)../with-editor
-endif
-
-MAGIT_SECTION_DIR ?= $(shell \
-  find -L $(ELPA_DIR) -maxdepth 1 -regex '.*/magit-section-[.0-9]*' 2> /dev/null | \
-  sort | tail -n 1)
-
 SYSTYPE := $(shell $(EMACSBIN) -Q --batch --eval "(princ system-type)")
 ifeq ($(SYSTYPE), windows-nt)
   CYGPATH := $(shell cygpath --version 2>/dev/null)
@@ -136,32 +104,7 @@ LOAD_PATH = -L $(TOP)lisp
 # `magit-emacs-Q-command' and the "Installing from the Git Repository"
 # info node accordingly.  Also don't forget to "rgrep \b<pkg>\b".
 
-ifdef CYGPATH
-  LOAD_PATH += -L $(shell cygpath --mixed $(DASH_DIR))
-  LOAD_PATH += -L $(shell cygpath --mixed $(LIBGIT_DIR))
-  LOAD_PATH += -L $(shell cygpath --mixed $(TRANSIENT_DIR))
-  LOAD_PATH += -L $(shell cygpath --mixed $(WITH_EDITOR_DIR))
-  ifneq "$(MAGIT_SECTION_DIR)" ""
-    LOAD_PATH += -L $(shell cygpath --mixed $(MAGIT_SECTION_DIR))
-  endif
-else
-  LOAD_PATH += -L $(DASH_DIR)
-  LOAD_PATH += -L $(LIBGIT_DIR)
-  LOAD_PATH += -L $(TRANSIENT_DIR)
-  LOAD_PATH += -L $(WITH_EDITOR_DIR)
-  ifneq "$(MAGIT_SECTION_DIR)" ""
-    LOAD_PATH += -L $(MAGIT_SECTION_DIR)
-  endif
-endif
-
 endif # ifndef LOAD_PATH
-
-ifndef ORG_LOAD_PATH
-ORG_LOAD_PATH  = $(LOAD_PATH)
-ORG_LOAD_PATH += -L ../../org/lisp
-ORG_LOAD_PATH += -L ../../org-contrib/lisp
-ORG_LOAD_PATH += -L ../../ox-texinfo+
-endif
 
 ## Publish ###########################################################
 
