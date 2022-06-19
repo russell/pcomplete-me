@@ -24,6 +24,8 @@
 
 ;;; Code:
 
+(require 'thunk)
+
 (require 'pcmpl-kubectl)
 (require 'bash-completion-export-utils)
 
@@ -54,29 +56,46 @@
      (rs//bash-complete-flags command global-flags))))
 
 (cl-defmacro pcmpl-me-test (command (&key inherit-global-flags))
-  (let* ((command-list (if (listp command) command (cons command nil)))
-         (global-command (car command-list))
-         (global-flags (intern (mapconcat 'symbol-name `(pcmpl ,global-command -global-flags) "-")))
-         (subcommand-flags (intern (mapconcat 'symbol-name `(pcmpl ,@command-list -flags) "-")))
-         (subcommand-subcommands (intern (mapconcat 'symbol-name `(pcmpl ,@command-list -subcommands) "-"))))
-    `(progn
-       (ert-deftest ,(intern (mapconcat 'symbol-name `(pcmpl ,@command-list -flags) "-")) ()
-         (should
-          (equal
-           (cl-set-difference
-            (let ((bash-completion-start-files `(,pcmpl-kubectl-test-bashinit)))
-              (rs//bash-complete-kubectl-flags ,(mapconcat 'symbol-name command-list " ") ,global-flags))
-            (cl-sort ,subcommand-flags 'string-lessp)
-            :test #'string-equal)
-           nil)))
-       (ert-deftest ,(intern (mapconcat 'symbol-name `(pcmpl ,@command-list -subcommands) "-")) ()
-         (should
-          (equal
-           (cl-set-difference
-            ,subcommand-subcommands
-            (rs//bash-complete-kubectl-subcommand ,(mapconcat 'symbol-name command-list " "))
-            :test #'string-equal)
-           nil))))))
+  (cl-flet ((test-name (&rest args) (intern (mapconcat 'symbol-name args "-"))))
+   (let* ((command-list (if (listp command) command (cons command nil)))
+          (global-command (car command-list))
+          (global-flags (intern (mapconcat 'symbol-name `(pcmpl ,global-command -global-flags) "-")))
+          (subcommand-flags (intern (mapconcat 'symbol-name `(pcmpl ,@command-list -flags) "-")))
+          (subcommand-subcommands (intern (mapconcat 'symbol-name `(pcmpl ,@command-list -subcommands) "-"))))
+     `(progn
+        (thunk-let ((actual-flags (let ((bash-completion-start-files `(,pcmpl-kubectl-test-bashinit)))
+                                    (rs//bash-complete-kubectl-flags ,(mapconcat 'symbol-name command-list " ") ,global-flags)))
+                    (actual-subcommands (rs//bash-complete-kubectl-subcommand ,(mapconcat 'symbol-name command-list " "))))
+
+          ;; Test for cases where we are missing flags in the Emacs side of the completion
+          (ert-deftest ,(test-name subcommand-flags  '-is-missing-flags) ()
+            ,(format "Flags missing from Emacs completion %S" subcommand-flags)
+            (should
+             (equal
+              (cl-set-difference actual-flags ,subcommand-flags :test #'string-equal)
+              nil)))
+          ;; Test for cases where we have extra flags in the Emacs side of the completion
+          (ert-deftest ,(test-name subcommand-flags  '-has-extra-flags) ()
+            ,(format "Extra flags found in Emacs completion command %S" subcommand-flags)
+            (should
+             (equal
+              (cl-set-difference ,subcommand-flags actual-flags :test #'string-equal)
+              nil)))
+
+          ;; Test for cases where there are missing subcommands
+          (ert-deftest ,(test-name subcommand-subcommands' -is-missing-flags) ()
+            ,(format "Subcommands missing from Emacs completion %S" subcommand-subcommands)
+            (should
+             (equal
+              (cl-set-difference actual-subcommands ,subcommand-subcommands :test #'string-equal)
+              nil)))
+          ;; Test for cases where we have declared extra subcommands
+          (ert-deftest ,(test-name subcommand-subcommands' -has-extra-flags) ()
+            ,(format "Extra subcommands in the system version of command %S" subcommand-subcommands)
+            (should
+             (equal
+              (cl-set-difference ,subcommand-subcommands actual-subcommands :test #'string-equal)
+              nil))))))))
 
 (pcmpl-me-test (kubectl annotate) (:inherit-global-flags t))
 (pcmpl-me-test (kubectl api-resources) (:inherit-global-flags t))
@@ -101,6 +120,8 @@
 (pcmpl-me-test (kubectl cluster-info) (:inherit-global-flags t))
 (pcmpl-me-test (kubectl completion bash) (:inherit-global-flags t))
 (pcmpl-me-test (kubectl completion zsh) (:inherit-global-flags t))
+(pcmpl-me-test (kubectl completion fish) (:inherit-global-flags t))
+(pcmpl-me-test (kubectl completion powershell) (:inherit-global-flags t))
 (pcmpl-me-test (kubectl completion) (:inherit-global-flags t))
 (pcmpl-me-test (kubectl config current-context) (:inherit-global-flags t))
 (pcmpl-me-test (kubectl config delete-cluster) (:inherit-global-flags t))

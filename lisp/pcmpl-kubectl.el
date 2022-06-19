@@ -207,8 +207,8 @@ or slash based resources like \"pod/my-pod\"
   '(("--add-dir-header")
     ("--alsologtostderr")
     ("--as" "--as=" :null)
-    ("--as-uid" "--as-uid=" :null)
     ("--as-group" "--as-group=" :null)
+    ("--as-uid" "--as-uid=" :null)
     ("--cache-dir" "--cache-dir=" :dirs)
     ("--certificate-authority" "--certificate-authority=" :files)
     ("--client-certificate" "--client-certificate=" :files)
@@ -271,7 +271,6 @@ or slash based resources like \"pod/my-pod\"
     ("--local")
     ("--output" "--output=" "-o" :list kubectl-output-all)
     ("--overwrite")
-    ("--record")
     ("--recursive" "-R")
     ("--resource-version" "--resource-version=" :null)
     ("--selector" "--selector=" "-l" :null)
@@ -316,7 +315,6 @@ or slash based resources like \"pod/my-pod\"
     ("--overwrite")
     ("--prune")
     ("--prune-whitelist" "--prune-whitelist=" :null)
-    ("--record")
     ("--recursive" "-R")
     ("--selector" "--selector=" "-l" :null)
     ("--server-side")
@@ -338,7 +336,6 @@ or slash based resources like \"pod/my-pod\"
     ("--filename" "--filename=" "-f" :files)
     ("--kustomize" "--kustomize=" "-k" :dirs)
     ("--output" "--output=" "-o" :list kubectl-output-all)
-    ("--record")
     ("--recursive" "-R")
     ("--show-managed-fields")
     ("--template" "--template=" :null)
@@ -509,7 +506,7 @@ or slash based resources like \"pod/my-pod\"
   :inherit-global-flags t
   :filter-flags #'pcmpl-me--normalise-flags
   :flags '(("--help" "-h"))
-  :subcommands '("bash" "zsh"))
+  :subcommands '("bash" "fish" "powershell" "zsh"))
 
 
 (pcmpl-me-command (kubectl completion bash)
@@ -519,6 +516,18 @@ or slash based resources like \"pod/my-pod\"
 
 
 (pcmpl-me-command (kubectl completion zsh)
+  :inherit-global-flags t
+  :filter-flags #'pcmpl-me--normalise-flags
+  :flags '(("--help" "-h")))
+
+
+(pcmpl-me-command (kubectl completion fish)
+  :inherit-global-flags t
+  :filter-flags #'pcmpl-me--normalise-flags
+  :flags '(("--help" "-h")))
+
+
+(pcmpl-me-command (kubectl completion powershell)
   :inherit-global-flags t
   :filter-flags #'pcmpl-me--normalise-flags
   :flags '(("--help" "-h")))
@@ -666,7 +675,6 @@ or slash based resources like \"pod/my-pod\"
     ("--kustomize" "--kustomize=" "-k" :dirs)
     ("--output" "--output=" "-o" :null)
     ("--raw" "--raw=" :null)
-    ("--record")
     ("--recursive" "-R")
     ("--save-config")
     ("--selector" "--selector=" "-l" :null)
@@ -1052,7 +1060,6 @@ or slash based resources like \"pod/my-pod\"
   '(("--all")
     ("--all-namespaces" "-A")
     ("--cascade")
-    ("--chunk-size" "--chunk-size=" :null)
     ("--dry-run" :kubernetes-dry-run)
     ("--field-selector" "--field-selector=" :null)
     ("--filename" "--filename=" "-f" :files)
@@ -1108,7 +1115,6 @@ or slash based resources like \"pod/my-pod\"
     ("--force")
     ("--grace-period" "--grace-period=" :null)
     ("--ignore-daemonsets")
-    ("--ignore-errors")
     ("--pod-selector" "--pod-selector=" :null)
     ("--selector" "--selector=" "-l" :null)
     ("--skip-wait-for-delete-timeout" "--skip-wait-for-delete-timeout=" :null)
@@ -1126,7 +1132,6 @@ or slash based resources like \"pod/my-pod\"
     ("--kustomize" "--kustomize=" "-k" :dirs)
     ("--output-patch")
     ("--output" "--output=" "-o" :null)
-    ("--record")
     ("--recursive" "-R")
     ("--save-config")
     ("--show-managed-fields")
@@ -1154,7 +1159,6 @@ or slash based resources like \"pod/my-pod\"
   :filter-flags #'pcmpl-me--normalise-flags
   :flags
   '(("--api-version" "--api-version=" :null)
-    ("--override-type" "--override-type=" :null)
     ("--recursive")))
 
 
@@ -1178,7 +1182,6 @@ or slash based resources like \"pod/my-pod\"
     ("--overrides" "--overrides=" :null)
     ("--port" "--port=" :null)
     ("--protocol" "--protocol=" :null)
-    ("--record")
     ("--recursive" "-R")
     ("--save-config")
     ("--selector" "--selector=" "-l" :null)
@@ -1211,7 +1214,6 @@ or slash based resources like \"pod/my-pod\"
     ("--overrides" "--overrides=" :null)
     ("--port" "--port=" :null)
     ("--protocol" "--protocol=" :null)
-    ("--record")
     ("--recursive" "-R")
     ("--save-config")
     ("--selector" "--selector=" "-l" :null)
@@ -1243,7 +1245,6 @@ or slash based resources like \"pod/my-pod\"
     ("--overrides" "--overrides=" :null)
     ("--port" "--port=" :null)
     ("--protocol" "--protocol=" :null)
-    ("--record")
     ("--recursive" "-R")
     ("--save-config")
     ("--selector" "--selector=" "-l" :null)
@@ -1275,7 +1276,6 @@ or slash based resources like \"pod/my-pod\"
     ("--overrides" "--overrides=" :null)
     ("--port" "--port=" :null)
     ("--protocol" "--protocol=" :null)
-    ("--record")
     ("--recursive" "-R")
     ("--save-config")
     ("--selector" "--selector=" "-l" :null)
@@ -1307,7 +1307,6 @@ or slash based resources like \"pod/my-pod\"
     ("--overrides" "--overrides=" :null)
     ("--port" "--port=" :null)
     ("--protocol" "--protocol=" :null)
-    ("--record")
     ("--recursive" "-R")
     ("--save-config")
     ("--selector" "--selector=" "-l" :null)
@@ -1339,7 +1338,6 @@ or slash based resources like \"pod/my-pod\"
     ("--overrides" "--overrides=" :null)
     ("--port" "--port=" :null)
     ("--protocol" "--protocol=" :null)
-    ("--record")
     ("--recursive" "-R")
     ("--save-config")
     ("--selector" "--selector=" "-l" :null)
@@ -1383,13 +1381,17 @@ or slash based resources like \"pod/my-pod\"
   :inherit-global-flags t
   :filter-flags #'pcmpl-me--normalise-flags
   :subcommands
-  '("annotate" "api-resources" "api-versions" "apply" "attach" "auth"
-"autoscale" "certificate" "cluster-info" "completion" "config"
-"cordon" "cp" "create" "debug" "delete" "describe" "diff" "drain"
-"edit" "exec" "explain" "expose" "get" "help" "kustomize" "label"
-"logs" "options" "patch" "plugin" "port-forward" "proxy" "replace"
-"rollout" "run" "scale" "set" "taint" "top" "uncordon" "version"
-"wait"))
+  '("annotate" "api-resources" "api-versions" "alpha" "apply"
+    "attach" "auth" "autoscale" "certificate" "cluster-info"
+    "completion" "config" "cordon" "cp" "create" "debug"
+    "delete" "describe" "diff" "drain" "edit" "exec" "explain"
+    "expose" "get" "help" "kustomize" "label" "logs" "options"
+    "patch" "plugin" "port-forward" "proxy" "replace"
+    "rollout" "run" "scale" "set" "taint" "top" "uncordon"
+    "version" "wait"))
+
+(pcmpl-me-command (kubectl help alpha)
+  :inherit-global-flags t)
 
 
 (pcmpl-me-command (kubectl help annotate)
@@ -1880,7 +1882,6 @@ or slash based resources like \"pod/my-pod\"
     ("--local")
     ("--output" "--output=" "-o" :null)
     ("--overwrite")
-    ("--record")
     ("--recursive" "-R")
     ("--resource-version" "--resource-version=" :null)
     ("--selector" "--selector=" "-l" :null)
@@ -1929,7 +1930,6 @@ or slash based resources like \"pod/my-pod\"
     ("--output" "--output=" "-o" :null)
     ("--patch-file" "--patch-file=" :null)
     ("--patch" "--patch=" :null)
-    ("--record")
     ("--recursive" "-R")
     ("--show-managed-fields")
     ("--template" "--template=" :null)
@@ -2405,7 +2405,6 @@ or slash based resources like \"pod/my-pod\"
     ("--kustomize" "--kustomize=" "-k" :dirs)
     ("--local")
     ("--output" "--output=" "-o" :null)
-    ("--record")
     ("--recursive" "-R")
     ("--selector" "--selector=" "-l" :null)
     ("--show-managed-fields")
@@ -2426,7 +2425,6 @@ or slash based resources like \"pod/my-pod\"
     ("--limits" "--limits=" :null)
     ("--local")
     ("--output" "--output=" "-o" :null)
-    ("--record")
     ("--recursive" "-R")
     ("--requests" "--requests=" :null)
     ("--selector" "--selector=" "-l" :null)
@@ -2446,7 +2444,6 @@ or slash based resources like \"pod/my-pod\"
     ("--filename" "--filename=" "-f" :files)
     ("--local")
     ("--output" "--output=" "-o" :null)
-    ("--record")
     ("--recursive" "-R")
     ("--resource-version" "--resource-version=" :null)
     ("--show-managed-fields")
@@ -2465,7 +2462,6 @@ or slash based resources like \"pod/my-pod\"
     ("--kustomize" "--kustomize=" "-k" :dirs)
     ("--local")
     ("--output" "--output=" "-o" :null)
-    ("--record")
     ("--recursive" "-R")
     ("--show-managed-fields")
     ("--template" "--template=" :null)))

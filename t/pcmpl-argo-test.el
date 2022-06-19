@@ -65,9 +65,7 @@
          (should
           (equal
            (cl-set-difference
-            (cl-sort
-             ,subcommand-flags
-             'string-lessp)
+            ,subcommand-flags
             (let ((bash-completion-start-files `(,pcmpl-argo-test-bashinit)))
               (rs//bash-complete-argo-flags ,(mapconcat 'symbol-name command-list " ") ,global-flags))
             :test #'string-equal)
