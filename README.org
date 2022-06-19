@@ -1,15 +1,15 @@
 * PComplete Me
 
-An attempt to reduce the API of PComplete down to the minimum
-useful expression of the flags that a program provides.
+An attempt to reduce the API of PComplete down to the minimum useful
+expression of the flags that a program provides.
 
 This project is a *WORK IN PROGRESS* it's not working for general
 usage and still has bugs.
 
 PComplete-Me uses some hacky scripts to export completion data from
 =bash-completion=. It doesn't directly build on it because
-pcompelete-me is providing extra completion on top of what's
-provided by =bash-completion= and the integration serves to improve
+pcompelete-me is providing extra completion on top of what's provided
+by =bash-completion= and the integration serves to improve
 maintainability rather than act as a live API.
 
 * Widget
@@ -26,7 +26,8 @@ configuration, but this duplication can be removed in the
 * test
 
 #+begin_src sh
-nix-shell -p '(import ./default.nix).emacs-27-1'
+nix-shell
+make test
 #+end_src
 
 * adding new commands
