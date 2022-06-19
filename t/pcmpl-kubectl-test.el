@@ -68,14 +68,14 @@
                     (actual-subcommands (rs//bash-complete-kubectl-subcommand ,(mapconcat 'symbol-name command-list " "))))
 
           ;; Test for cases where we are missing flags in the Emacs side of the completion
-          (ert-deftest ,(test-name subcommand-flags  '-is-missing-flags) ()
+          (ert-deftest ,(test-name subcommand-flags  '-are-missing) ()
             ,(format "Flags missing from Emacs completion %S" subcommand-flags)
             (should
              (equal
               (cl-set-difference actual-flags ,subcommand-flags :test #'string-equal)
               nil)))
           ;; Test for cases where we have extra flags in the Emacs side of the completion
-          (ert-deftest ,(test-name subcommand-flags  '-has-extra-flags) ()
+          (ert-deftest ,(test-name subcommand-flags  '-has-unwanted-flags) ()
             ,(format "Extra flags found in Emacs completion command %S" subcommand-flags)
             (should
              (equal
@@ -83,14 +83,14 @@
               nil)))
 
           ;; Test for cases where there are missing subcommands
-          (ert-deftest ,(test-name subcommand-subcommands' -is-missing-flags) ()
+          (ert-deftest ,(test-name subcommand-subcommands' -are-missing) ()
             ,(format "Subcommands missing from Emacs completion %S" subcommand-subcommands)
             (should
              (equal
               (cl-set-difference actual-subcommands ,subcommand-subcommands :test #'string-equal)
               nil)))
           ;; Test for cases where we have declared extra subcommands
-          (ert-deftest ,(test-name subcommand-subcommands' -has-extra-flags) ()
+          (ert-deftest ,(test-name subcommand-subcommands' -has-unwanted-subcommand) ()
             ,(format "Extra subcommands in the system version of command %S" subcommand-subcommands)
             (should
              (equal

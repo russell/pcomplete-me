@@ -24,6 +24,7 @@
 
 ;;; Code:
 
+(require 'thunk)
 
 (require 'pcmpl-argo)
 (require 'bash-completion-export-utils)
@@ -55,35 +56,54 @@
      (rs//bash-complete-flags command global-flags))))
 
 (cl-defmacro pcmpl-me-test (command (&key inherit-global-flags))
-  (let* ((command-list (if (listp command) command (cons command nil)))
-         (global-command (car command-list))
-         (global-flags (intern (mapconcat 'symbol-name `(pcmpl ,global-command -global-flags) "-")))
-         (subcommand-flags (intern (mapconcat 'symbol-name `(pcmpl ,@command-list -flags) "-")))
-         (subcommand-subcommands (intern (mapconcat 'symbol-name `(pcmpl ,@command-list -subcommands) "-"))))
-    `(progn
-       (ert-deftest ,(intern (mapconcat 'symbol-name `(pcmpl ,@command-list -flags) "-")) ()
-         (should
-          (equal
-           (cl-set-difference
-            ,subcommand-flags
-            (let ((bash-completion-start-files `(,pcmpl-argo-test-bashinit)))
-              (rs//bash-complete-argo-flags ,(mapconcat 'symbol-name command-list " ") ,global-flags))
-            :test #'string-equal)
-           nil)))
-       (ert-deftest ,(intern (mapconcat 'symbol-name `(pcmpl ,@command-list -subcommands) "-")) ()
-         (should
-          (equal
-           (cl-set-difference
-            ,subcommand-subcommands
-            (rs//bash-complete-argo-subcommand ,(mapconcat 'symbol-name command-list " "))
-            :test #'string-equal)
-           nil))))))
+  (cl-flet ((test-name (&rest args) (intern (mapconcat 'symbol-name args "-"))))
+    (let* ((command-list (if (listp command) command (cons command nil)))
+           (global-command (car command-list))
+           (global-flags (intern (mapconcat 'symbol-name `(pcmpl ,global-command -global-flags) "-")))
+           (subcommand-flags (intern (mapconcat 'symbol-name `(pcmpl ,@command-list -flags) "-")))
+           (subcommand-subcommands (intern (mapconcat 'symbol-name `(pcmpl ,@command-list -subcommands) "-"))))
+      `(progn
+         (thunk-let ((actual-flags (let ((bash-completion-start-files `(,pcmpl-argo-test-bashinit)))
+                                     (rs//bash-complete-argo-flags ,(mapconcat 'symbol-name command-list " ") ,global-flags)))
+                     (actual-subcommands (rs//bash-complete-argo-subcommand ,(mapconcat 'symbol-name command-list " "))))
+
+           ;; Test for cases where we are missing flags in the Emacs side of the completion
+           (ert-deftest ,(test-name subcommand-flags  '-are-missing) ()
+             ,(format "Flags missing from Emacs completion %S" subcommand-flags)
+             (should
+              (equal
+               (cl-set-difference actual-flags ,subcommand-flags :test #'string-equal)
+               nil)))
+           ;; Test for cases where we have extra flags in the Emacs side of the completion
+           (ert-deftest ,(test-name subcommand-flags  '-has-unwanted-flags) ()
+             ,(format "Extra flags found in Emacs completion command %S" subcommand-flags)
+             (should
+              (equal
+               (cl-set-difference ,subcommand-flags actual-flags :test #'string-equal)
+               nil)))
+
+           ;; Test for cases where there are missing subcommands
+           (ert-deftest ,(test-name subcommand-subcommands' -are-missing) ()
+             ,(format "Subcommands missing from Emacs completion %S" subcommand-subcommands)
+             (should
+              (equal
+               (cl-set-difference actual-subcommands ,subcommand-subcommands :test #'string-equal)
+               nil)))
+           ;; Test for cases where we have declared extra subcommands
+           (ert-deftest ,(test-name subcommand-subcommands' -has-unwanted-subcommand) ()
+             ,(format "Extra subcommands in the system version of command %S" subcommand-subcommands)
+             (should
+              (equal
+               (cl-set-difference ,subcommand-subcommands actual-subcommands :test #'string-equal)
+               nil))))))))
 
 (pcmpl-me-test (argo) (:inherit-global-flags t))
 (pcmpl-me-test (argo archive) (:inherit-global-flags t))
 (pcmpl-me-test (argo archive delete) (:inherit-global-flags t))
 (pcmpl-me-test (argo archive get) (:inherit-global-flags t))
 (pcmpl-me-test (argo archive list) (:inherit-global-flags t))
+(pcmpl-me-test (argo archive list-label-keys) (:inherit-global-flags t))
+(pcmpl-me-test (argo archive list-label-values) (:inherit-global-flags t))
 (pcmpl-me-test (argo auth) (:inherit-global-flags t))
 (pcmpl-me-test (argo auth token) (:inherit-global-flags t))
 (pcmpl-me-test (argo cluster-template) (:inherit-global-flags t))
@@ -102,6 +122,8 @@
 (pcmpl-me-test (argo cron resume) (:inherit-global-flags t))
 (pcmpl-me-test (argo cron suspend) (:inherit-global-flags t))
 (pcmpl-me-test (argo delete) (:inherit-global-flags t))
+(pcmpl-me-test (argo executor-plugin) (:inherit-global-flags t))
+(pcmpl-me-test (argo executor-plugin build) (:inherit-global-flags t))
 (pcmpl-me-test (argo get) (:inherit-global-flags t))
 (pcmpl-me-test (argo lint) (:inherit-global-flags t))
 (pcmpl-me-test (argo list) (:inherit-global-flags t))
