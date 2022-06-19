@@ -1,52 +1,52 @@
 * PComplete Me
 
-  An attempt to reduce the API of PComplete down to the minimum
-  useful expression of the flags that a program provides.
+An attempt to reduce the API of PComplete down to the minimum
+useful expression of the flags that a program provides.
 
-  This project is a *WORK IN PROGRESS* it's not working for general
-  usage and still has bugs.
+This project is a *WORK IN PROGRESS* it's not working for general
+usage and still has bugs.
 
-  PComplete-Me uses some hacky scripts to export completion data from
-  =bash-completion=. It doesn't directly build on it because
-  pcompelete-me is providing extra completion on top of what is
-  provided by =bash-completion= and the integration serves to improve
-  maintainability rather than act as a live API.
+PComplete-Me uses some hacky scripts to export completion data from
+=bash-completion=. It doesn't directly build on it because
+pcompelete-me is providing extra completion on top of what's
+provided by =bash-completion= and the integration serves to improve
+maintainability rather than act as a live API.
 
 * Widget
 
-  PComplete-Me has a concept of completion widgets for providing
-  completion targets, the idea being that the same widget might be
-  shared between multiple CLI tools.  Or possibly provide alternative
-  completion for sets of targets.
+PComplete-Me has a concept of completion widgets for providing
+completion targets, the idea being that the same widget might be
+shared between multiple CLI tools. Or possibly provide alternative
+completion for sets of targets.
 
-  Lots of the Kubernetes tooling re-defines the way to find
-  configuration, but this duplication can be removed in the
-  =pcomplete-me= package
+Lots of the Kubernetes tooling re-defines the way to find
+configuration, but this duplication can be removed in the
+=pcomplete-me= package
 
 * test
 
-  #+begin_src sh
-  nix-shell -p '(import ./default.nix).emacs-27-1'
-  #+end_src
+#+begin_src sh
+nix-shell -p '(import ./default.nix).emacs-27-1'
+#+end_src
 
 * adding new commands
 
-  #+begin_src emacs-lisp
+#+begin_src emacs-lisp
 
-  ;; define a list of all subcommands
-  (defconst argo-all-subcommands (rs//bash-complete-argo-subcommands "argo"))
+;; define a list of all subcommands
+(defconst argo-all-subcommands (rs//bash-complete-argo-subcommands "argo"))
 
-  (defconst argo-command-definitions
-    (mapconcat
-     'identity
-     (flatten-list
-      (rs//subcommand-tree-to-commands
-       (cons "argo" argo-all-subcommands) nil #'rs//create-command-definition))
-     "\n"))
-  #+end_src
+(defconst argo-command-definitions
+  (mapconcat
+   'identity
+   (flatten-list
+    (rs//subcommand-tree-to-commands
+     (cons "argo" argo-all-subcommands) nil #'rs//create-command-definition))
+   "\n"))
+#+end_src
 
-  figuring out flags
+figuring out flags
 
-  #+begin_src emacs-lisp
-  (rs//replace-sexp (rs//add-null-completers (rs//group-flags (rs//bash-complete-argo-flags "argo"))))
-  #+end_src
+#+begin_src emacs-lisp
+(rs//replace-sexp (rs//add-null-completers (rs//group-flags (rs//bash-complete-argo-flags "argo"))))
+#+end_src
