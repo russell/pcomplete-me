@@ -1,6 +1,6 @@
 ;;; pcmpl-argo-test.el --- Tests for Argo completion  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2021  Russell Sim
+;; Copyright (C) 2021-2022  Russell Sim
 
 ;; Author: Russell Sim <russell.sim@gmail.com>
 ;; Keywords:
