@@ -57,10 +57,15 @@
 
 (defun pcmpl-me--flags (pflags)
   "Return the combine all the flags from `PFLAGS'."
-  (cl-sort (apply #'append (mapcar (lambda (e) (alist-get :args (pcmpl-me--arg-list e))) pflags)) 'string-lessp))
+  (cl-sort
+   (apply #'append (mapcar (lambda (e) (alist-get :args (pcmpl-me--arg-list e))) pflags))
+   'string-lessp))
 
 (defun pcmpl-me--normalise-flags (flags)
-  "Remove all FLAGS ending with `=' and add any missing flags."
+  "Remove flags that don't work with pcomplete.
+
+Remove all FLAGS ending with `=' and add implementations of the
+same flags without =."
   (mapcar (lambda (flag)
             (let ((flag-end-pos (- (length flag) 1)))
               (if (eq t (compare-strings "=" nil nil
