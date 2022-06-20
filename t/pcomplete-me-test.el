@@ -26,6 +26,48 @@
 
 (require 'pcomplete-me)
 
+(cl-defmacro pcmpl-me-test (command (test-fn &key inherit-global-flags))
+  (declare (indent 2))
+  (cl-flet ((test-name (&rest args) (intern (mapconcat 'symbol-name args "-"))))
+   (let* ((command-list (if (listp command) command (cons command nil)))
+          (global-command (car command-list))
+          (global-flags (intern (mapconcat 'symbol-name `(pcmpl ,global-command -global-flags) "-")))
+          (subcommand-flags (intern (mapconcat 'symbol-name `(pcmpl ,@command-list -flags) "-")))
+          (subcommand-subcommands (intern (mapconcat 'symbol-name `(pcmpl ,@command-list -subcommands) "-"))))
+     `(progn
+        (thunk-let ((actual-flags (funcall #',test-fn (quote ,command-list) :flags ,global-flags))
+                    (actual-subcommands (funcall #',test-fn (quote ,command-list) :subcommand)))
+
+          ;; Test for cases where we are missing flags in the Emacs side of the completion
+          (ert-deftest ,(test-name subcommand-flags  '-are-missing) ()
+            ,(format "Flags missing from Emacs completion %S" subcommand-flags)
+            (should
+             (equal
+              (cl-set-difference actual-flags ,subcommand-flags :test #'string-equal)
+              nil)))
+          ;; Test for cases where we have extra flags in the Emacs side of the completion
+          (ert-deftest ,(test-name subcommand-flags  '-has-unwanted-flags) ()
+            ,(format "Extra flags found in Emacs completion command %S" subcommand-flags)
+            (should
+             (equal
+              (cl-set-difference ,subcommand-flags actual-flags :test #'string-equal)
+              nil)))
+
+          ;; Test for cases where there are missing subcommands
+          (ert-deftest ,(test-name subcommand-subcommands' -are-missing) ()
+            ,(format "Subcommands missing from Emacs completion %S" subcommand-subcommands)
+            (should
+             (equal
+              (cl-set-difference actual-subcommands ,subcommand-subcommands :test #'string-equal)
+              nil)))
+          ;; Test for cases where we have declared extra subcommands
+          (ert-deftest ,(test-name subcommand-subcommands' -has-unwanted-subcommand) ()
+            ,(format "Extra subcommands in the system version of command %S" subcommand-subcommands)
+            (should
+             (equal
+              (cl-set-difference ,subcommand-subcommands actual-subcommands :test #'string-equal)
+              nil))))))))
+
 (ert-deftest pcmpl-me--flag-post-test ()
   (should
    (equal
