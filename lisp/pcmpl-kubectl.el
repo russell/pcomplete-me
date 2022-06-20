@@ -660,7 +660,8 @@ or slash based resources like \"pod/my-pod\"
   :flags
   '(("--container" "--container=" "-c" :kubernetes-resource-container)
     ("--retries" "--retries=")
-    ("--no-preserve")))
+    ("--no-preserve"))
+  :subcommands (pcmpl-me-get-completion-widget :files))
 
 
 (pcmpl-me-command (kubectl create)

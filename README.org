@@ -32,18 +32,44 @@ make test
 
 * adding new commands
 
+Configure completion in a test file like `t/pcmpl-tmp-test.sh
+#+begin_src sh
+source <(argo completion bash)
+#+end_src
+
+Then in a new elisp file
 #+begin_src emacs-lisp
 
-;; define a list of all subcommands
-(defconst argo-all-subcommands (rs//bash-complete-argo-subcommands "argo"))
+;; define a location for the completion file above
+(defconst pcmpl-tmp-test-bashinit
+  (list
+   (format "%s/pcmpl-tmp-test.sh"
+           (cond
+            (buffer-file-name
+             (file-name-directory buffer-file-name))
+            (load-file-name
+             (file-name-directory load-file-name))))))
 
-(defconst argo-command-definitions
-  (mapconcat
-   'identity
-   (flatten-list
-    (rs//subcommand-tree-to-commands
-     (cons "argo" argo-all-subcommands) nil #'rs//create-command-definition))
-   "\n"))
+
+;; define a list of all subcommands
+(let ((bash-completion-start-files pcmpl-tmp-test-bashinit))
+  (defconst tmp-all-subcommands (rs//bash-complete-argo-subcommands "argo")))
+
+;; evaluate this and then cleanup the subcommand tree
+(insert tmp-all-subcommands)
+
+(defconst tmp-command-definitions
+  (let ((bash-completion-start-files pcmpl-tmp-test-bashinit))
+    (mapconcat
+     'identity
+     (flatten-list
+      (rs//subcommand-tree-to-commands
+       (cons "cue" argo-all-subcommands) nil (lambda (command) (rs//create-command-definition command pcmpl-cue--global-flags))))
+     "\n")))
+
+
+;; evaluate a line like this to insert the values
+(insert tmp-command-definitions)
 #+end_src
 
 figuring out flags

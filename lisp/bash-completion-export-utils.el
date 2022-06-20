@@ -108,8 +108,8 @@
   (format "(pcmpl-me-test (%s) (:inherit-global-flags t))"
           (mapconcat #'identity command " ")))
 
-(defun rs//create-command-definition (command)
-  (pp-to-string (macroexpand-1 `(rs//generate-pcmpl-me-command ,command ,pcmpl-argo--global-flags))))
+(defun rs//create-command-definition (command &optional global-flags)
+  (pp-to-string (macroexpand-1 `(rs//generate-pcmpl-me-command ,command ,global-flags))))
 
 (defun rs//subcommand-tree-to-commands (tree path format-fn)
   ;; TODO this doesn't correctly capture all subcommand's it misses
@@ -147,11 +147,12 @@
 (defmacro rs//generate-pcmpl-me-command (command &optional global-flags)
   ""
   (let* ((shell-args (mapconcat 'identity command " "))
-         (subcommands (rs//bash-complete-argo-subcommand shell-args))
+         (args (mapcar #'intern command))
+         (subcommands (rs//bash-complete-subcommand shell-args))
          (flags (rs//add-null-completers
                  (rs//group-flags
-                  (rs//bash-complete-argo-flags shell-args global-flags)))))
-   `(pcmpl-me-command ,(mapcar #'intern command)
+                  (rs//bash-complete-flags shell-args global-flags)))))
+   `(pcmpl-me-command ,args
       :inherit-global-flags ,(when global-flags t)
       :flags (quote ,flags)
       :subcommands (quote ,subcommands))))
