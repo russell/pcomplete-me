@@ -214,5 +214,15 @@
                        ("--verbs" "--verbs=" :null)))
     '("--api-group" "--api-group=" "--cached" "--namespaced" "--no-headers"
       "--output" "--output=" "--sort-by" "--sort-by=" "--verbs" "--verbs=" "-o"))))
+
+(ert-deftest pcmpl-me--cache-expired ()
+  "Verify if the time has expired"
+  (should
+   ;; Should not be expired
+   (eql (pcmpl-me--cache-expired (time-subtract (current-time) 10)) nil))
+  (should
+   ;; Should be expired
+   (eql (pcmpl-me--cache-expired (time-subtract (current-time) 121)) t)))
+
 (provide 'pcomplete-me-test)
 ;;; pcomplete-me-test.el ends here

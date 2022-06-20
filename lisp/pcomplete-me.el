@@ -31,6 +31,11 @@
 (defvar pcmpl-me--context nil)
 (defvar pcmpl-me-debug nil)
 
+(defcustom pcompl-me-debug nil
+  "Debug messages for pcomplete-me completions."
+  :group 'pcomplete-me
+  :type 'boolean)
+
 (defun pcmpl-me--complete-from-list (&rest things)
   ""
   (if (> (length things) 1)
@@ -295,15 +300,71 @@ COMMAND can be either a list with subcommands or a symbol.
              ,@body))))))
 
 (defun pcmpl-me--call1 (program &rest args)
-  ""
+  "Call process in temporary buffer.
+
+PROGRAM is the binary to be executed, and arguments ARGS to pass
+to it."
   (with-temp-buffer
     (list (apply 'call-process program nil (current-buffer) nil args)
           (buffer-string))))
 
+(defvar pcmpl-me--cache-size 10
+  "Size of the cache, set to 0 to disable the cache.
+Disabling the cache is useful on non-incremental UIs like default completion or
+for performance profiling of the annotators.")
+
+(defvar pcmpl-me--cache-expiry 120
+  "Expiry time in seconds.")
+
+(defvar pcmpl-me--cache (cons nil (make-hash-table :test #'equal
+                                                   :size pcmpl-me--cache-size))
+  "The cache, pair of list and hashtable.")
+
+(defun pcmpl-me--cache-reset ()
+  "Reset the cache."
+  (setq pcmpl-me--cache (and pcmpl-me--cache (> pcmpl-me--cache-size 0)
+                             (cons nil (make-hash-table :test #'equal
+                                                        :size pcmpl-me--cache-size)))))
+
+(defun pcmpl-me--cache-expired-p (time)
+  "Return T if TIME is expired."
+  (time-less-p
+   (time-add time pcmpl-me--cache-expiry)
+   (current-time)))
+
+(defun pcmpl-me--call-cached (cache args)
+  "Cached results of subprocesses called with ARGS.
+
+The CACHE keeps around the last `pcmpl-me--cache-size' computed
+annotations. Will refresh items if older than the
+`pcmpl-me--cache-expiry'
+"
+  (if cache
+      (let* ((ht (cdr cache)))
+        (cl-destructuring-bind (expiry entry) (or (gethash args ht) '(nil nil))
+          ;; if entry is null or expired create a new entry
+          (if (or (null entry) (pcmpl-me--cache-expired-p expiry))
+              (let ((val (apply #'pcmpl-me--call1 args)))
+                (push args (car cache))
+                (puthash args (list (current-time) val) ht)
+                (when (>= (hash-table-count ht) pcmpl-me--cache-size)
+                  (let ((end (last (car cache) 2)))
+                    (remhash (cadr end) ht)
+                    (setcdr end nil)))
+                val)
+            entry)
+          )
+        )
+    (apply #'pcmpl-me--call1 args)))
+
 (defun pcmpl-me--call (&rest args)
-  ""
+  "Call subprocess with ARGS."
   (cl-destructuring-bind (code result)
-      (apply #'pcmpl-me--call1 args)
+      (let ((time (current-time)))
+        (prog1
+            (pcmpl-me--call-cached pcmpl-me--cache args)
+          (when pcompl-me-debug
+           (message "pcmpl-me--call (%.06f) %S" (float-time (time-since time)) args))))
     (if (= code 0)
         result
       (message (string-trim result))
