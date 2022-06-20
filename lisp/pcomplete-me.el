@@ -82,7 +82,9 @@ same flags without =."
 
 (defun pcmpl-me--list (items &optional filter-fn)
   ""
-  (let ((filtered-items (funcall filter-fn items)))
+  (let ((filtered-items (if filter-fn
+                            (funcall filter-fn items)
+                          items)))
    (lambda (string pred _action)
      (all-completions string filtered-items pred))))
 
