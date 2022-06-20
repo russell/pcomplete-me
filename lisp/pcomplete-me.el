@@ -45,10 +45,11 @@
       things)))
 
 (defvar pcmpl-me-completers
-  '(:null (lambda () (pcomplete-here*))
-    :files pcomplete-entries
-           :dirs pcomplete-dirs
-           :list pcmpl-me--complete-from-list))
+  '(:null (lambda ())
+          :files pcomplete-entries
+          :file-or-directory pcomplete-dirs-or-entries
+          :dirs pcomplete-dirs
+          :list pcmpl-me--complete-from-list))
 
 (defun pcmpl-me--context-get (key &optional context)
   ""
@@ -78,6 +79,12 @@ same flags without =."
                  (substring flag 0 flag-end-pos)
                flag)))
           flags))
+
+(defun pcmpl-me--list (items &optional filter-fn)
+  ""
+  (let ((filtered-items (funcall filter-fn items)))
+   (lambda (string pred _action)
+     (all-completions string filtered-items pred))))
 
 (defun pcmpl-me--matcher-expression (alist)
   "Generate an expression for matchers from ALIST."
@@ -272,26 +279,26 @@ COMMAND can be either a list with subcommands or a symbol.
                 `(,global-inline-fn))
              ,(if subcommands
                   `(if (pcomplete-match "\\`-" 0)
-                       (pcomplete-here* (append
+                       (pcomplete-here* (completion-table-merge
                                          ,(cond
                                            ((or (functionp subcommands) (functionp (car subcommands)))
-                                            `(funcall ,subcommands))
+                                            `(funcall ,(seq-subseq subcommands 0 2) ,@(cddr subcommands)))
                                            ((listp subcommands)
                                             subcommand-subcommands))
-                                         (funcall ,filter-flags ,subcommand-flags)
+                                         (funcall #'pcmpl-me--list ,subcommand-flags ,filter-flags)
                                          ,(when inherit-global-flags
-                                             `(funcall ,filter-flags ,global-flags))))
+                                            `(funcall #'pcmpl-me--list ,global-flags ,filter-flags))))
                      ,(cond
                        ((or (functionp subcommands) (functionp (car subcommands)))
-                        `(let ((subcommands-result (funcall ,subcommands)))
-                           (when (listp subcommands-result)
-                               (pcomplete-here* subcommands-result))))
+                        `(let ((subcommands-result (funcall ,(seq-subseq subcommands 0 2) ,@(cddr subcommands))))
+                           (when (or (listp subcommands-result) (functionp subcommands-result))
+                             (pcomplete-here* subcommands-result))))
                        ((listp subcommands)
-                        `(pcomplete-here* ,subcommand-subcommands))))
+                        `(pcomplete-here* (pcmpl-me--list ,subcommand-subcommands)))))
                 `(pcomplete-here* (append
-                                   (funcall ,filter-flags ,subcommand-flags)
+                                   (funcall #'pcmpl-me--list ,subcommand-flags ,filter-flags)
                                    ,(when inherit-global-flags
-                                       `(funcall ,filter-flags ,global-flags)()))))
+                                      `(funcall #'pcmpl-me--list ,global-flags ,filter-flags)))))
 
              ,@(pcmpl-me--flag-post-matchers flags)
              ,@(pcmpl-me--subcommand-matchers command-list subcommands-list)
