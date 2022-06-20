@@ -294,7 +294,7 @@ COMMAND can be either a list with subcommands or a symbol.
                            (when (or (listp subcommands-result) (functionp subcommands-result))
                              (pcomplete-here* subcommands-result))))
                        ((listp subcommands)
-                        `(pcomplete-here* (pcmpl-me--list ,subcommand-subcommands)))))
+                        `(pcomplete-here* ,subcommand-subcommands))))
                 `(pcomplete-here* (append
                                    (funcall #'pcmpl-me--list ,subcommand-flags ,filter-flags)
                                    ,(when inherit-global-flags
