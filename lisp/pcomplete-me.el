@@ -352,17 +352,22 @@ annotations. Will refresh items if older than the
         (cl-destructuring-bind (expiry entry) (or (gethash args ht) '(nil nil))
           ;; if entry is null or expired create a new entry
           (if (or (null entry) (pcmpl-me--cache-expired-p expiry))
-              (let ((val (apply #'pcmpl-me--call1 args)))
-                (push args (car cache))
-                (puthash args (list (current-time) val) ht)
-                (when (>= (hash-table-count ht) pcmpl-me--cache-size)
-                  (let ((end (last (car cache) 2)))
-                    (remhash (cadr end) ht)
-                    (setcdr end nil)))
-                val)
-            entry)
-          )
-        )
+              (cl-destructuring-bind (code result)
+                  (apply #'pcmpl-me--call1 args)
+
+                ;; If command is a success then update the cache.
+                (when (= code 0)
+                  (push args (car cache))
+                  (puthash args (list (current-time) (list code result)) ht)
+
+                  ;; Remove old hash entries if we run out of space
+                  (when (>= (hash-table-count ht) pcmpl-me--cache-size)
+                    (let ((end (last (car cache) 2)))
+                      (remhash (cadr end) ht)
+                      (setcdr end nil))))
+
+                (list code result))
+            entry)))
     (apply #'pcmpl-me--call1 args)))
 
 (defun pcmpl-me--call (&rest args)
