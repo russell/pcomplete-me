@@ -29,9 +29,8 @@
 (require 'pcomplete)
 
 (defvar pcmpl-me--context nil)
-(defvar pcmpl-me-debug nil)
 
-(defcustom pcompl-me-debug nil
+(defcustom pcmpl-me-debug nil
   "Debug messages for pcomplete-me completions."
   :group 'pcomplete-me
   :type 'boolean)
@@ -372,7 +371,7 @@ annotations. Will refresh items if older than the
       (let ((time (current-time)))
         (prog1
             (pcmpl-me--call-cached pcmpl-me--cache args)
-          (when pcompl-me-debug
+          (when pcmpl-me-debug
            (message "pcmpl-me--call (%.06f) %S" (float-time (time-since time)) args))))
     (if (= code 0)
         result
