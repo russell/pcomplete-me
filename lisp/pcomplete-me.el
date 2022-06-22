@@ -336,9 +336,7 @@ for performance profiling of the annotators.")
 
 (defun pcmpl-me--cache-expired-p (time)
   "Return T if TIME is expired."
-  (time-less-p
-   (time-add time pcmpl-me--cache-expiry)
-   (current-time)))
+  (time-less-p time (current-time)))
 
 (defun pcmpl-me--call-cached (cache args)
   "Cached results of subprocesses called with ARGS.
@@ -358,7 +356,8 @@ annotations. Will refresh items if older than the
                 ;; If command is a success then update the cache.
                 (when (= code 0)
                   (push args (car cache))
-                  (puthash args (list (current-time) (list code result)) ht)
+                  (puthash args (list (time-add (current-time) pcmpl-me--cache-expiry)
+                                      (list code result)) ht)
 
                   ;; Remove old hash entries if we run out of space
                   (when (>= (hash-table-count ht) pcmpl-me--cache-size)
