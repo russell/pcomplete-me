@@ -402,30 +402,34 @@ annotations. Will refresh items if older than the
   (let ((cache (cdr pcmpl-me--cache)))
     (cl-destructuring-bind (expiry entry) (or (gethash args cache) '(nil nil))
       ;; if entry is null or expired create a new entry
+
       (if (or (null entry) (pcmpl-me--cache-expired-p (time-add expiry -10))) ; refresh cache 10s before expiry
           (progn
             (unless (gethash args (cdr pcmpl-me--parallel-processes))
-             (let ((process
-                    (pfuture-callback args
-                      :name (format "pcomplete-me %s" args)
-                      :on-success '(lambda (process status buffer)
-                                     (remhash args (cdr pcmpl-me--parallel-processes))  ; Clear entry from proc hash
-                                     (when (= (process-exit-status process) 0)
-                                       ;; Remove old hash entries if we run out of space
-                                       (pcmpl-me--cache-expire-oldest cache pcmpl-me--cache-size)
+              (if (<=  (hash-table-size (cdr pcmpl-me--parallel-processes))
+                       (hash-table-count (cdr pcmpl-me--parallel-processes)))
+               (let ((process
+                      (pfuture-callback args
+                        :name (format "pcomplete-me %s" args)
+                        :on-success '(lambda (process status buffer)
+                                       (remhash args (cdr pcmpl-me--parallel-processes))  ; Clear entry from proc hash
+                                       (when (= (process-exit-status process) 0)
+                                         ;; Remove old hash entries if we run out of space
+                                         (pcmpl-me--cache-expire-oldest cache pcmpl-me--cache-size)
 
-                                       (push args (car pcmpl-me--cache))
-                                       (puthash args
-                                                (list (time-add (current-time) pcmpl-me--cache-expiry)
-                                                      (list (process-exit-status process)
-                                                            (with-current-buffer buffer (buffer-string))))
-                                                cache)))
-                      :on-error '(lambda (process status buffer)
-                                   (remhash args pcmpl-me--parallel-processes)
-                                   (message "Error %s\n%s\n%s" process status
-                                            (with-current-buffer buffer (buffer-string)))))))
+                                         (push args (car pcmpl-me--cache))
+                                         (puthash args
+                                                  (list (time-add (current-time) pcmpl-me--cache-expiry)
+                                                        (list (process-exit-status process)
+                                                              (with-current-buffer buffer (buffer-string))))
+                                                  cache)))
+                        :on-error '(lambda (process status buffer)
+                                     (remhash args pcmpl-me--parallel-processes)
+                                     (message "Error %s\n%s\n%s" process status
+                                              (with-current-buffer buffer (buffer-string)))))))
 
-               (puthash args (list (time-add (current-time) pcmpl-me--cache-expiry) process) (cdr pcmpl-me--parallel-processes))))
+                 (puthash args (list (time-add (current-time) pcmpl-me--cache-expiry) process) (cdr pcmpl-me--parallel-processes)))
+               (message "pcmpl-me--call-process-async-cached ERROR too many autocomplete background processes")))
             entry)
         entry))))
 
