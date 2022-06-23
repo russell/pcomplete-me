@@ -25,7 +25,9 @@
 
 ;;; Code:
 
-(require 'pfuture)
+(eval-when-compile
+  (require 'pfuture))
+
 (require 'cl-lib)
 (require 'subr-x)
 (require 'pcomplete)
