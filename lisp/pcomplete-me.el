@@ -31,6 +31,7 @@
 (require 'cl-lib)
 (require 'subr-x)
 (require 'pcomplete)
+(require 'pfuture)
 
 (defvar pcmpl-me--context nil)
 
