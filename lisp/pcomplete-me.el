@@ -4,6 +4,7 @@
 
 ;; Author: Russell Sim <russell.sim@gmail.com>
 ;; Keywords: convenience
+;; Package-Requires: ((emacs "27.1") (pfuture "20220425.1242"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
