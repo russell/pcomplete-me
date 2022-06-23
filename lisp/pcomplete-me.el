@@ -407,8 +407,8 @@ annotations. Will refresh items if older than the
       (if (or (null entry) (pcmpl-me--cache-expired-p (time-add expiry -10))) ; refresh cache 10s before expiry
           (progn
             (unless (gethash args (cdr pcmpl-me--parallel-processes))
-              (if (<=  (hash-table-size (cdr pcmpl-me--parallel-processes))
-                       (hash-table-count (cdr pcmpl-me--parallel-processes)))
+              (if (<=  (hash-table-count (cdr pcmpl-me--parallel-processes))
+                       (hash-table-size (cdr pcmpl-me--parallel-processes)))
                (let ((process
                       (pfuture-callback args
                         :name (format "pcomplete-me %s" args)
