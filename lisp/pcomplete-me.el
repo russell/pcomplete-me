@@ -428,7 +428,7 @@ annotations. Will refresh items if older than the
                                                               (with-current-buffer buffer (buffer-string))))
                                                   cache)))
                         :on-error '(lambda (process status buffer)
-                                     (remhash args pcmpl-me--parallel-processes)
+                                     (remhash args (cdr pcmpl-me--parallel-processes))
                                      (message "Error %s\n%s\n%s" process status
                                               (with-current-buffer buffer (buffer-string)))))))
 
