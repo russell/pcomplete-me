@@ -46,46 +46,65 @@ CONTEXT is a context alist."
           (seq-filter (lambda (e) (member (car e)
                                           pcmpl-kubectl--override-flags)) context)))
 
+(defvar pcmpl-kubectl--cache
+  (make-hash-table :test #'equal
+                   :size pcmpl-me--cache-size)
+  "The cache, pair of list and hashtable.")
+
+(defun pcmpl-kubectl--cache-resource (kind &optional context)
+  "Return a list of all resources of a type.
+
+KIND is the type of resorce to complete.  CONTEXT is context
+alist."
+  (let* ((context-args (pcmpl-kubectl--override-args (or context pcmpl-me--context)))
+         (args `("get" ,@context-args "--output=json" ,kind)))
+    (funcall #'pcmpl-me--call-process-async-cached "kubectl" args :on-success-transform #'json-parse-string )))
+
+(defun pcmpl-kubectl--dig (hash &rest path)
+  "Take HASH and use the traverse it with PATH."
+  (reduce (lambda (h element) (gethash element h)) path :initial-value hash))
 
 (defun pcmpl-kubectl--complete-resource-of (kind &optional context)
   "Return a list of all resources of a type.
 
 KIND is the type of resorce to complete.  CONTEXT is context
 alist."
-  (let* ((context-args (pcmpl-kubectl--override-args (or context pcmpl-me--context)))
-         (template "{{ range .items  }}{{ .metadata.name }} {{ end }}")
-         (args `("kubectl" "get" ,@context-args "--output=template" "--template" ,template ,kind)))
-    (split-string (apply #'pcmpl-me--call args))))
-
+  (mapcar
+   (lambda (resource)
+     (pcmpl-kubectl--dig resource "metadata" "name"))
+   (gethash "items" (pcmpl-kubectl--cache-resource kind context))))
 
 (defun pcmpl-kubectl--complete-containers (&optional context)
   "Return containers from a pod.
 
-Take a KIND like `pod/my-pod' or `pod my-pod'.  CONTEXT is a
-context alist."
-  (let ((context-args (pcmpl-kubectl--override-args (or context pcmpl-me--context)))
-        (template (mapconcat
-                   #'identity
-                   '( ;; Pod like
-                     "{{ range .spec.initContainers }}{{ .name }} {{end}}"
-                     "{{ range .spec.containers  }}{{ .name }}{{ end }}"
-                     ;; Deployments
-                     "{{ range .spec.template.spec.initContainers }}{{ .name }} {{end}}"
-                     "{{ range .spec.template.spec.containers}}{{ .name }} {{end}}")
-                   " "))
-        (resource (format "%s/%s"
-                          (pcmpl-me--context-get :resource-kind context)
-                          (pcmpl-me--context-get :resource-name context))))
-   (split-string
-    (apply #'pcmpl-me--call
-           `("kubectl" "get" ,@context-args "--output=template" "--template" ,template ,resource)))))
-
+CONTEXT is a context alist."
+  (let ((resource (seq-find
+          (lambda (resource)
+            (equal (pcmpl-kubectl--dig resource "metadata" "name")
+                   (pcmpl-me--context-get :resource-name context)))
+          (gethash "items" (pcmpl-kubectl--cache-resource
+                            (pcmpl-me--context-get :resource-kind context)
+                            context)))))
+    (cl-case (intern (gethash "kind" resource))
+      (Pod
+        (mapcar
+         (lambda (e) (gethash "name" e))
+         (vconcat
+          (pcmpl-kubectl--dig resource "spec" "initContainers")
+          (pcmpl-kubectl--dig resource "spec" "containers"))))
+      (Deployment
+       (mapcar
+        (lambda (e) (gethash "name" e))
+        (vconcat
+         (pcmpl-kubectl--dig resource "spec" "template" "spec" "initContainers")
+         (pcmpl-kubectl--dig resource "spec" "template" "spec" "containers")))))))
 
 (defun pcmpl-kubectl--complete-resource-types (&optional context)
   "Return all the resource short names from the cluster.
 
 CONTEXT is a context alist."
-  (let ((context-args (pcmpl-kubectl--override-args (or context pcmpl-me--context))))
+  (let (;; filter context args to only the --context flag, because api-resources are global
+        (context-args (pcmpl-kubectl--override-args (list (assoc :context (or context pcmpl-me--context))))))
    (mapcar
     (lambda(e) (string-match "\\`\\([a-z]+\\)" e)
       (match-string 1 e))
@@ -96,22 +115,13 @@ CONTEXT is a context alist."
              `("kubectl" "api-resources" ,@context-args "--verbs" "get" "--output=wide" "--cached" "--request-timeout=5s" "--no-headers"))
       "\n")))))
 
-(defun pcmpl-kubectl--complete-resource-types-full (&optional context)
-  "Return all the resource types fully qualified names from the cluster.
-
-CONTEXT is a context alist."
-  (let ((context-args (pcmpl-kubectl--override-args (or context pcmpl-me--context))))
-   (split-string
-    (apply #'pcmpl-me--call
-           `("kubectl" "api-resources" ,@context-args "--output=name" "--cached" "--request-timeout=5s" "--verbs=get")))))
-
 (defun pcmpl-kubectl--complete (type)
   "Return names of available entries in a kubeconfig file.
 
 TYPE is used to specify the scope of the returned names."
   (let ((template (format "{{ range .%s}}{{ .name }} {{end}}" type)))
     (split-string
-     (apply #'pcmpl-me--call
+     (apply #'pcmpl-me--call-process-cached
             `("kubectl" "config" "view" "--output=template" "--template" ,template)))))
 
 (defun pcmpl-kubectl--complete-resource ()
