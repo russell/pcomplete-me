@@ -414,7 +414,7 @@ annotations. Will refresh items if older than the
                        (hash-table-size (cdr pcmpl-me--parallel-processes)))
                (let ((process
                       (pfuture-callback args
-                        :name (format "pcomplete-me %s" args)
+                        :name (format "*pcomplete-me %s*" args)
                         :on-success '(lambda (process status buffer)
                                        (remhash args (cdr pcmpl-me--parallel-processes))  ; Clear entry from proc hash
                                        (when (= (process-exit-status process) 0)
