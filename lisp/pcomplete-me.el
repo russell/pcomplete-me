@@ -355,9 +355,9 @@ for performance profiling of the annotators.")
   "Expire oldest entry from the CACHE hash table.
 
 Will keep the hash table from exceeding CACHE-SIZE."
-  (when (>= (hash-table-count cache) cache-size)
+  (when (>= (hash-table-count (cdr cache)) cache-size)
     (let ((end (last (car cache) 2)))
-      (remhash (cadr end) cache)
+      (remhash (cadr end) (cdr cache))
       (setcdr end nil))))
 
 (defun pcmpl-me--call-process-cached (args)
@@ -419,7 +419,7 @@ annotations. Will refresh items if older than the
                                        (remhash args (cdr pcmpl-me--parallel-processes))  ; Clear entry from proc hash
                                        (when (= (process-exit-status process) 0)
                                          ;; Remove old hash entries if we run out of space
-                                         (pcmpl-me--cache-expire-oldest cache pcmpl-me--cache-size)
+                                         (pcmpl-me--cache-expire-oldest pcmpl-me--cache pcmpl-me--cache-size)
 
                                          (push args (car pcmpl-me--cache))
                                          (puthash args
