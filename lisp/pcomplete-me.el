@@ -469,7 +469,9 @@ annotations. Will refresh items if older than the
                              "Error: async subprocess error\nArgs: %s\nStatus: %s\nOutput:%s\n" args process status
                              (with-current-buffer buffer (buffer-string)))))))
 
-                  (puthash args (list (time-add (current-time) pcmpl-me--cache-expiry) process) pcmpl-me--parallel-processes))
+                  (puthash args
+                           (list (time-add (current-time) pcmpl-me--cache-expiry) process)
+                           pcmpl-me--parallel-processes))
               (message "pcmpl-me--call-process-async-cached ERROR too many autocomplete background processes")))
           entry)
       entry)))
