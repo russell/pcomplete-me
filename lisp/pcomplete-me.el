@@ -325,8 +325,21 @@ or `pcmpl-me--call-process-async-cached'")
 PROGRAM is the binary to be executed, and arguments ARGS to pass
 to it."
   (with-temp-buffer
-    (list (apply 'call-process program nil (current-buffer) nil args)
-          (buffer-string))))
+    (let ((code
+            (let ((time (current-time)))
+              (prog1
+                  (apply 'call-process program nil (current-buffer) nil args)
+                (when pcmpl-me-debug
+                  (message "pcmpl-me--call (%.06f) %S" (float-time (time-since time)) args)))
+              ))
+           (result ))
+      (if (= code 0)
+          (string-trim (buffer-string))
+        (progn
+          (message "pcmpl-me--call-process error calling subprocess")
+          (pcmpl-me--error-message "Error: calling subprocess\nArgs: %s %s\nStatus: %s\nOutput:%s\n"
+                                   program args code (buffer-string))
+          nil)))))
 
 (defvar pcmpl-me--cache-size 10
   "Size of the cache, set to 0 to disable the cache.
@@ -335,6 +348,8 @@ for performance profiling of the annotators.")
 
 (defvar pcmpl-me--cache-expiry 120
   "Expiry time in seconds.")
+
+(defvar pcmpl-me--error-buffer "*pcomplete-me--error*")
 
 (defvar pcmpl-me--cache
   (cons nil (make-hash-table :test #'equal
@@ -360,7 +375,24 @@ Will keep the hash table from exceeding CACHE-SIZE."
       (remhash (cadr end) (cdr cache))
       (setcdr end nil))))
 
-(defun pcmpl-me--call-process-cached (args)
+(defmacro pcmpl-me--at-end-of-buffer (name &rest body)
+  "At the end of `special-mode' buffer NAME, execute BODY."
+  (declare (indent 1))
+  `(with-current-buffer (get-buffer-create ,name)
+     (unless (derived-mode-p 'special-mode)
+       (special-mode))
+     (goto-char (point-max))
+     (let ((inhibit-read-only t))
+       ,@body)))
+
+(defun pcmpl-me--error-message (msg &rest args)
+  "Log a message into a debug buffer.
+MSG and ARGS are as for that function."
+  (pcmpl-me--at-end-of-buffer pcmpl-me--error-buffer
+    (insert (apply 'format msg args))
+    (newline)))
+
+(defun pcmpl-me--call-process-cached (program &rest args)
   "Cached results of subprocesses called with ARGS.
 
 The CACHE keeps around the last `pcmpl-me--cache-size' computed
@@ -371,21 +403,20 @@ annotations. Will refresh items if older than the
     (cl-destructuring-bind (expiry entry) (or (gethash args cache) '(nil nil))
       ;; if entry is null or expired create a new entry
       (if (or (null entry) (pcmpl-me--cache-expired-p expiry))
-          (cl-destructuring-bind (code result)
-              (apply #'pcmpl-me--call-process args)
+          (let ((result (apply #'pcmpl-me--call-process program args)))
 
             ;; If command is a success then update the cache.
-            (when (= code 0)
+            (when result
               (push args (car pcmpl-me--cache))
               (puthash args
                        (list (time-add (current-time) pcmpl-me--cache-expiry)
-                             (list code result))
+                             result)
                        cache)
 
               ;; Remove old hash entries if we run out of space
               (pcmpl-me--cache-expire-oldest pcmpl-me--cache pcmpl-me--cache-size))
 
-            (list code result))
+            result)
         entry))))
 
 
@@ -396,7 +427,7 @@ annotations. Will refresh items if older than the
   "The cache, pair of list and hashtable of processes.")
 
 
-(defun pcmpl-me--call-process-async-cached (args)
+(defun pcmpl-me--call-process-async-cached (program &rest args)
   "Cached results of subprocesses called with ARGS.
 
 The CACHE keeps around the last `pcmpl-me--cache-size' computed
@@ -414,7 +445,7 @@ annotations. Will refresh items if older than the
               (if (<=  (hash-table-count process-table)
                        (hash-table-size process-table))
                (let ((process
-                      (pfuture-callback args
+                      (pfuture-callback (cons program args)
                         :name (format "*pcomplete-me %s*" args)
                         :on-success '(lambda (process status buffer)
                                        (remhash args process-table)  ; Clear entry from proc hash
@@ -425,13 +456,15 @@ annotations. Will refresh items if older than the
                                          (push args (car pcmpl-me--cache))
                                          (puthash args
                                                   (list (time-add (current-time) pcmpl-me--cache-expiry)
-                                                        (list (process-exit-status process)
-                                                              (with-current-buffer buffer (buffer-string))))
+                                                        (when (= (process-exit-status process) 0)
+                                                          (with-current-buffer buffer (buffer-string))))
                                                   cache)))
                         :on-error '(lambda (process status buffer)
                                      (remhash args process-table)
-                                     (message "Error %s\n%s\n%s" process status
-                                              (with-current-buffer buffer (buffer-string)))))))
+                                     (message "pcmpl-me--call-process-async-cached error calling subprocess")
+                                     (pcmpl-me--error-message
+                                      "Error: async subprocess error\nArgs: %s\nStatus: %s\nOutput:%s\n" args process status
+                                      (with-current-buffer buffer (buffer-string)))))))
 
                  (puthash args (list (time-add (current-time) pcmpl-me--cache-expiry) process) process-table))
                (message "pcmpl-me--call-process-async-cached ERROR too many autocomplete background processes")))
@@ -440,16 +473,7 @@ annotations. Will refresh items if older than the
 
 (defun pcmpl-me--call (&rest args)
   "Call subprocess with ARGS."
-  (cl-destructuring-bind (code result)
-      (let ((time (current-time)))
-        (prog1
-            (funcall pcmpl-me--process-backend args)
-          (when pcmpl-me-debug
-           (message "pcmpl-me--call (%.06f) %S" (float-time (time-since time)) args))))
-    (if (= code 0)
-        result
-      (message (string-trim result))
-      "")))
+  (apply pcmpl-me--process-backend args))
 
 (provide 'pcomplete-me)
 ;;; pcomplete-me.el ends here
