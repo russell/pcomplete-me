@@ -301,7 +301,7 @@ COMMAND can be either a list with subcommands or a symbol.
                              (pcomplete-here* subcommands-result))))
                        ((listp subcommands)
                         `(pcomplete-here* ,subcommand-subcommands))))
-                `(pcomplete-here* (append
+                `(pcomplete-here* (completion-table-merge
                                    (funcall #'pcmpl-me--list ,subcommand-flags ,filter-flags)
                                    ,(when inherit-global-flags
                                       `(funcall #'pcmpl-me--list ,global-flags ,filter-flags)))))
