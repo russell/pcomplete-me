@@ -444,30 +444,32 @@ annotations. Will refresh items if older than the
             (unless (gethash args process-table)
               (if (<=  (hash-table-count process-table)
                        (hash-table-size process-table))
-               (let ((process
-                      (pfuture-callback (cons program args)
-                        :name (format "*pcomplete-me %s*" args)
-                        :on-success '(lambda (process status buffer)
-                                       (remhash args process-table)  ; Clear entry from proc hash
-                                       (when (= (process-exit-status process) 0)
-                                         ;; Remove old hash entries if we run out of space
-                                         (pcmpl-me--cache-expire-oldest pcmpl-me--cache pcmpl-me--cache-size)
+                  (let ((process
+                         (pfuture-callback (cons program args)
+                           :name (format "*pcomplete-me %s*" args)
+                           :on-success
+                           '(lambda (process status buffer)
+                              (remhash args process-table)  ; Clear entry from proc hash
+                              (when (= (process-exit-status process) 0)
+                                ;; Remove old hash entries if we run out of space
+                                (pcmpl-me--cache-expire-oldest pcmpl-me--cache pcmpl-me--cache-size)
 
-                                         (push args (car pcmpl-me--cache))
-                                         (puthash args
-                                                  (list (time-add (current-time) pcmpl-me--cache-expiry)
-                                                        (when (= (process-exit-status process) 0)
-                                                          (with-current-buffer buffer (buffer-string))))
-                                                  cache)))
-                        :on-error '(lambda (process status buffer)
-                                     (remhash args process-table)
-                                     (message "pcmpl-me--call-process-async-cached error calling subprocess")
-                                     (pcmpl-me--error-message
-                                      "Error: async subprocess error\nArgs: %s\nStatus: %s\nOutput:%s\n" args process status
-                                      (with-current-buffer buffer (buffer-string)))))))
+                                (push args (car pcmpl-me--cache))
+                                (puthash args
+                                         (list (time-add (current-time) pcmpl-me--cache-expiry)
+                                               (when (= (process-exit-status process) 0)
+                                                 (with-current-buffer buffer (buffer-string))))
+                                         cache)))
+                           :on-error
+                           '(lambda (process status buffer)
+                              (remhash args process-table)
+                              (message "pcmpl-me--call-process-async-cached error calling subprocess")
+                              (pcmpl-me--error-message
+                               "Error: async subprocess error\nArgs: %s\nStatus: %s\nOutput:%s\n" args process status
+                               (with-current-buffer buffer (buffer-string)))))))
 
-                 (puthash args (list (time-add (current-time) pcmpl-me--cache-expiry) process) process-table))
-               (message "pcmpl-me--call-process-async-cached ERROR too many autocomplete background processes")))
+                    (puthash args (list (time-add (current-time) pcmpl-me--cache-expiry) process) process-table))
+                (message "pcmpl-me--call-process-async-cached ERROR too many autocomplete background processes")))
             entry)
         entry))))
 
