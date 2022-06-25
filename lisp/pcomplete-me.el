@@ -349,18 +349,18 @@ for performance profiling of the annotators.")
 (defvar pcmpl-me--cache-expiry 120
   "Expiry time in seconds.")
 
-(defvar pcmpl-me--error-buffer "*pcomplete-me--error*")
-
 (defvar pcmpl-me--cache
-  (cons nil (make-hash-table :test #'equal
-                             :size pcmpl-me--cache-size))
+  (make-hash-table :test #'equal
+                   :size pcmpl-me--cache-size)
   "The cache, pair of list and hashtable.")
+
+(defvar pcmpl-me--error-buffer "*pcomplete-me--error*")
 
 (defun pcmpl-me--cache-reset ()
   "Reset the cache."
   (setq pcmpl-me--cache (and pcmpl-me--cache (> pcmpl-me--cache-size 0)
-                             (cons nil (make-hash-table :test #'equal
-                                                        :size pcmpl-me--cache-size)))))
+                             (make-hash-table :test #'equal
+                                              :size pcmpl-me--cache-size))))
 
 (defun pcmpl-me--cache-expired-p (time)
   "Return T if TIME is expired."
@@ -370,10 +370,16 @@ for performance profiling of the annotators.")
   "Expire oldest entry from the CACHE hash table.
 
 Will keep the hash table from exceeding CACHE-SIZE."
-  (when (>= (hash-table-count (cdr cache)) cache-size)
-    (let ((end (last (car cache) 2)))
-      (remhash (cadr end) (cdr cache))
-      (setcdr end nil))))
+  (when (>= (hash-table-count cache) cache-size)
+
+    ;; Sort a list of timestamps and hash keys
+    (let ((key (cadar
+                (cl-sort
+                 (let ((values nil))
+                   (maphash (lambda (k v) (push (list (car v) k) values)) cache)
+                   values)
+                 #'time-less-p :key #'car))))
+      (remhash key cache))))
 
 (defmacro pcmpl-me--at-end-of-buffer (name &rest body)
   "At the end of `special-mode' buffer NAME, execute BODY."
@@ -399,31 +405,29 @@ The CACHE keeps around the last `pcmpl-me--cache-size' computed
 annotations. Will refresh items if older than the
 `pcmpl-me--cache-expiry'
 "
-  (let* ((cache (cdr pcmpl-me--cache)))
-    (cl-destructuring-bind (expiry entry) (or (gethash args cache) '(nil nil))
-      ;; if entry is null or expired create a new entry
-      (if (or (null entry) (pcmpl-me--cache-expired-p expiry))
-          (let ((result (apply #'pcmpl-me--call-process program args)))
+  (cl-destructuring-bind (expiry entry) (or (gethash args pcmpl-me--cache) '(nil nil))
+    ;; if entry is null or expired create a new entry
+    (if (or (null entry) (pcmpl-me--cache-expired-p expiry))
+        (let ((result (apply #'pcmpl-me--call-process program args)))
 
-            ;; If command is a success then update the cache.
-            (when result
-              (push args (car pcmpl-me--cache))
-              (puthash args
-                       (list (time-add (current-time) pcmpl-me--cache-expiry)
-                             result)
-                       cache)
+          ;; If command is a success then update the cache.
+          (when result
+            (puthash args
+                     (list (time-add (current-time) pcmpl-me--cache-expiry)
+                           result)
+                     pcmpl-me--cache)
 
-              ;; Remove old hash entries if we run out of space
-              (pcmpl-me--cache-expire-oldest pcmpl-me--cache pcmpl-me--cache-size))
+            ;; Remove old hash entries if we run out of space
+            (pcmpl-me--cache-expire-oldest pcmpl-me--cache pcmpl-me--cache-size))
 
-            result)
-        entry))))
+          result)
+      entry)))
 
 
 (defvar pcmpl-me--parallel-pool 5)
 (defvar pcmpl-me--parallel-processes
-  (cons nil (make-hash-table :test #'equal
-                             :size pcmpl-me--parallel-pool))
+  (make-hash-table :test #'equal
+                   :size pcmpl-me--parallel-pool)
   "The cache, pair of list and hashtable of processes.")
 
 
@@ -434,44 +438,41 @@ The CACHE keeps around the last `pcmpl-me--cache-size' computed
 annotations. Will refresh items if older than the
 `pcmpl-me--cache-expiry'
 "
-  (let ((cache (cdr pcmpl-me--cache))
-        (process-table (cdr pcmpl-me--parallel-processes)))
-    (cl-destructuring-bind (expiry entry) (or (gethash args cache) '(nil nil))
-      ;; if entry is null or expired create a new entry
+  (cl-destructuring-bind (expiry entry) (or (gethash args pcmpl-me--cache) '(nil nil))
+    ;; if entry is null or expired create a new entry
 
-      (if (or (null entry) (pcmpl-me--cache-expired-p (time-add expiry -10))) ; refresh cache 10s before expiry
-          (progn
-            (unless (gethash args process-table)
-              (if (<=  (hash-table-count process-table)
-                       (hash-table-size process-table))
-                  (let ((process
-                         (pfuture-callback (cons program args)
-                           :name (format "*pcomplete-me %s*" args)
-                           :on-success
-                           '(lambda (process status buffer)
-                              (remhash args process-table)  ; Clear entry from proc hash
-                              (when (= (process-exit-status process) 0)
-                                ;; Remove old hash entries if we run out of space
-                                (pcmpl-me--cache-expire-oldest pcmpl-me--cache pcmpl-me--cache-size)
+    (if (or (null entry) (pcmpl-me--cache-expired-p (time-add expiry -10))) ; refresh cache 10s before expiry
+        (progn
+          (unless (gethash args pcmpl-me--parallel-processes)
+            (if (<=  (hash-table-count pcmpl-me--parallel-processes)
+                     (hash-table-size pcmpl-me--parallel-processes))
+                (let ((process
+                       (pfuture-callback (cons program args)
+                         :name (format "*pcomplete-me %s*" args)
+                         :on-success
+                         '(lambda (process status buffer)
+                            (remhash args pcmpl-me--parallel-processes)  ; Clear entry from proc hash
+                            (when (= (process-exit-status process) 0)
+                              ;; Remove old hash entries if we run out of space
+                              (pcmpl-me--cache-expire-oldest pcmpl-me--cache pcmpl-me--cache-size)
 
-                                (push args (car pcmpl-me--cache))
-                                (puthash args
-                                         (list (time-add (current-time) pcmpl-me--cache-expiry)
-                                               (when (= (process-exit-status process) 0)
-                                                 (with-current-buffer buffer (buffer-string))))
-                                         cache)))
-                           :on-error
-                           '(lambda (process status buffer)
-                              (remhash args process-table)
-                              (message "pcmpl-me--call-process-async-cached error calling subprocess")
-                              (pcmpl-me--error-message
-                               "Error: async subprocess error\nArgs: %s\nStatus: %s\nOutput:%s\n" args process status
-                               (with-current-buffer buffer (buffer-string)))))))
+                              (puthash args
+                                       (list (time-add (current-time) pcmpl-me--cache-expiry)
+                                             (when (= (process-exit-status process) 0)
+                                               (with-current-buffer buffer (buffer-string))))
+                                       pcmpl-me--cache)))
+                         :on-error
+                         '(lambda (process status buffer)
+                            (remhash args pcmpl-me--parallel-processes)
+                            (message "pcmpl-me--call-process-async-cached error calling subprocess")
+                            (pcmpl-me--error-message
+                             "Error: async subprocess error\nArgs: %s\nStatus: %s\nOutput:%s\n" args process status
+                             (with-current-buffer buffer (buffer-string)))))))
 
-                    (puthash args (list (time-add (current-time) pcmpl-me--cache-expiry) process) process-table))
-                (message "pcmpl-me--call-process-async-cached ERROR too many autocomplete background processes")))
-            entry)
-        entry))))
+                  (puthash args (list (time-add (current-time) pcmpl-me--cache-expiry) process) pcmpl-me--parallel-processes))
+              (message "pcmpl-me--call-process-async-cached ERROR too many autocomplete background processes")))
+          entry)
+      entry)))
 
 (defun pcmpl-me--call (&rest args)
   "Call subprocess with ARGS."
