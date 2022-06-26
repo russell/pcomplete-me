@@ -238,6 +238,33 @@ used as the context key."
            ,@(pcmpl-me--flag-post-matchers flags)
            ,@body)))))
 
+(defmacro pcmpl-me--subcommands (subcommands subcommand-subcommands subcommand-flags filter-flags inherit-global-flags global-flags)
+  ""
+  (if subcommands
+      `(if (pcomplete-match "\\`-" 0)
+           (pcomplete-here* (completion-table-merge
+                             ,(cond
+                               ((or (functionp subcommands) (and (listp subcommands)
+                                                                 (functionp (car subcommands))))
+                                `(funcall ,(seq-subseq subcommands 0 2) ,@(cddr subcommands)))
+                               ((listp subcommands)
+                                subcommand-subcommands))
+                             (funcall #'pcmpl-me--list ,subcommand-flags ,filter-flags)
+                             ,(when inherit-global-flags
+                                `(funcall #'pcmpl-me--list ,global-flags ,filter-flags))))
+         ,(cond
+           ((or (functionp subcommands) (and (listp subcommands)
+                                             (functionp (car subcommands))))
+            `(let ((subcommands-result (funcall ,(seq-subseq subcommands 0 2) ,@(cddr subcommands))))
+               (when (or (listp subcommands-result) (functionp subcommands-result))
+                 (pcomplete-here* subcommands-result))))
+           ((listp subcommands)
+            `(pcomplete-here* ,subcommand-subcommands))))
+    `(pcomplete-here* (completion-table-merge
+                       (funcall #'pcmpl-me--list ,subcommand-flags ,filter-flags)
+                       ,(when inherit-global-flags
+                          `(funcall #'pcmpl-me--list ,global-flags ,filter-flags))))))
+
 (defmacro pcmpl-me-command (command &rest args)
   "Declare PCompletion for a command by specifying configuration options.
 
@@ -283,29 +310,9 @@ COMMAND can be either a list with subcommands or a symbol.
              ,@(pcmpl-me--flag-inline-matchers flags)
              ,(when inherit-global-flags
                 `(,global-inline-fn))
-             ,(if subcommands
-                  `(if (pcomplete-match "\\`-" 0)
-                       (pcomplete-here* (completion-table-merge
-                                         ,(cond
-                                           ((or (functionp subcommands) (functionp (car subcommands)))
-                                            `(funcall ,(seq-subseq subcommands 0 2) ,@(cddr subcommands)))
-                                           ((listp subcommands)
-                                            subcommand-subcommands))
-                                         (funcall #'pcmpl-me--list ,subcommand-flags ,filter-flags)
-                                         ,(when inherit-global-flags
-                                            `(funcall #'pcmpl-me--list ,global-flags ,filter-flags))))
-                     ,(cond
-                       ((or (functionp subcommands) (functionp (car subcommands)))
-                        `(let ((subcommands-result (funcall ,(seq-subseq subcommands 0 2) ,@(cddr subcommands))))
-                           (when (or (listp subcommands-result) (functionp subcommands-result))
-                             (pcomplete-here* subcommands-result))))
-                       ((listp subcommands)
-                        `(pcomplete-here* ,subcommand-subcommands))))
-                `(pcomplete-here* (completion-table-merge
-                                   (funcall #'pcmpl-me--list ,subcommand-flags ,filter-flags)
-                                   ,(when inherit-global-flags
-                                      `(funcall #'pcmpl-me--list ,global-flags ,filter-flags)))))
-
+             (pcmpl-me--subcommands ,subcommands ,subcommand-subcommands
+                                    ,subcommand-flags ,filter-flags
+                                    ,inherit-global-flags ,global-flags)
              ,@(pcmpl-me--flag-post-matchers flags)
              ,@(pcmpl-me--subcommand-matchers command-list subcommands-list)
              ,(when inherit-global-flags
@@ -426,6 +433,7 @@ annotations. Will refresh items if older than the
           result)
       entry)))
 
+
 
 (defvar pcmpl-me--parallel-pool 5)
 (defvar pcmpl-me--parallel-processes
