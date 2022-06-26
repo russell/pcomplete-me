@@ -239,5 +239,96 @@
     (pcmpl-me--cache-expire-oldest cache)
     (should (equal (hash-table-keys cache) '(baz bar)))))
 
+(pcmpl-me-global-args pcomplete-me-test
+  :flags
+  '(("--global-foo")
+    ("--fizzbuzz" "--fizzbuzz=" :null)
+    ("--global-bar")))
+
+(pcmpl-me-command pcomplete-me-test
+  :inherit-global-flags t
+  :flags
+  '(("--local-flag"))
+  :subcommands
+  '("command1" "command2"))
+
+(pcmpl-me-command (pcomplete-me-test command2)
+  :inherit-global-flags t
+  :flags
+  '(("--subcommand-flag")
+    ("--foobar" "--foobar=" :list "baz" "baaz"))
+  :subcommands
+  '("subcommand1" "subcommand2"))
+
+(defun pcomplete/pcomplete-me-test ()
+  "Completion for kubectl."
+  (let ((pcmpl-me--context nil))
+    (unwind-protect
+        (pcmpl-pcomplete-me-test)
+      (when pcmpl-me-debug
+        (message "pcomplete/pcomplete-me-test: pcmpl-me--context %S" pcmpl-me--context)))))
+
+(ert-deftest pcmpl-me-test-global-flags ()
+  ""
+  (should
+   (equal
+    (with-temp-buffer
+      (insert "pcomplete-me-test --global")
+      (pcomplete)
+      (buffer-string))
+    "pcomplete-me-test --global-bar")))
+
+(ert-deftest pcmpl-me-test-local-flags ()
+  ""
+  (should
+   (equal
+    (with-temp-buffer
+      (insert "pcomplete-me-test --local")
+      (pcomplete)
+      (buffer-string))
+    "pcomplete-me-test --local-flag ")))
+
+(ert-deftest pcmpl-me-test-subcommands ()
+  ""
+  (should
+   (equal
+    (with-temp-buffer
+      (insert "pcomplete-me-test co")
+      (pcomplete)
+      (buffer-string))
+    "pcomplete-me-test command1")))
+
+(ert-deftest pcmpl-me-test-nested-subcommands ()
+  ""
+  (should
+   (equal
+    (with-temp-buffer
+      (insert "pcomplete-me-test command2 sub")
+      (pcomplete)
+      (buffer-string))
+    "pcomplete-me-test command2 subcommand1")))
+
+(ert-deftest pcmpl-me-test-nested-subcommand-flags ()
+  ""
+  (should
+   (equal
+    (with-temp-buffer
+      (insert "pcomplete-me-test command2 --subcommand")
+      (pcomplete)
+      (buffer-string))
+    "pcomplete-me-test command2 --subcommand-flag ")))
+
+(ert-deftest pcmpl-me-test-nested-subcommand-flags-with-list ()
+  ""
+  (should
+   (equal
+    (with-temp-buffer
+      (insert "pcomplete-me-test command2 --foo")
+      (pcomplete)
+      (insert " ")
+      (pcomplete)
+      (buffer-string))
+    "pcomplete-me-test command2 --foobar baaz")))
+
 (provide 'pcomplete-me-test)
 ;;; pcomplete-me-test.el ends here
