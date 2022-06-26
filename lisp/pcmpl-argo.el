@@ -490,7 +490,7 @@ CONTEXT is context alist."
   (let ((pcmpl-me--context nil))
     (unwind-protect
         (pcmpl-argo)
-      (when pcmpl-me-debug (message "%S" pcmpl-me--context)))))
+      (when pcmpl-me-debug (message "pcomplete/argo: pcmpl-me--context %S" pcmpl-me--context)))))
 
 
 (provide 'pcmpl-argo)
