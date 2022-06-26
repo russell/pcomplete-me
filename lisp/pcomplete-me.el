@@ -380,11 +380,11 @@ for performance profiling of the annotators.")
   "Return T if TIME is expired."
   (time-less-p time (current-time)))
 
-(defun pcmpl-me--cache-expire-oldest (cache cache-size)
+(defun pcmpl-me--cache-expire-oldest (cache)
   "Expire oldest entry from the CACHE hash table.
 
 Will keep the hash table from exceeding CACHE-SIZE."
-  (when (>= (hash-table-count cache) cache-size)
+  (when (>= (hash-table-count cache) (hash-table-size cache))
 
     ;; Sort a list of timestamps and hash keys
     (let ((key (cadar
@@ -432,7 +432,7 @@ annotations. Will refresh items if older than the
                      pcmpl-me--cache)
 
             ;; Remove old hash entries if we run out of space
-            (pcmpl-me--cache-expire-oldest pcmpl-me--cache pcmpl-me--cache-size))
+            (pcmpl-me--cache-expire-oldest pcmpl-me--cache))
 
           result)
       entry)))
@@ -470,7 +470,7 @@ annotations. Will refresh items if older than the
                               (remhash cache-key pcmpl-me--parallel-processes)  ; Clear entry from proc hash
                               (when (= (process-exit-status process) 0)
                                 ;; Remove old hash entries if we run out of space
-                                (pcmpl-me--cache-expire-oldest pcmpl-me--cache pcmpl-me--cache-size)
+                                (pcmpl-me--cache-expire-oldest pcmpl-me--cache)
 
                                 (puthash cache-key
                                          (list (time-add (current-time) pcmpl-me--cache-expiry)
