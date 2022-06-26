@@ -250,7 +250,7 @@ used as the context key."
                              ,(cond
                                ((or (functionp subcommands) (and (listp subcommands)
                                                                  (functionp (car subcommands))))
-                                `(funcall ,(seq-subseq subcommands 0 2) ,@(cddr subcommands)))
+                                `(funcall ,subcommands))
                                ((listp subcommands)
                                 subcommand-subcommands))
                              (funcall #'pcmpl-me--list ,subcommand-flags ,filter-flags)
@@ -259,7 +259,7 @@ used as the context key."
          ,(cond
            ((or (functionp subcommands) (and (listp subcommands)
                                              (functionp (car subcommands))))
-            `(let ((subcommands-result (funcall ,(seq-subseq subcommands 0 2) ,@(cddr subcommands))))
+            `(let ((subcommands-result (funcall ,subcommands)))
                (when (or (listp subcommands-result) (functionp subcommands-result))
                  (pcomplete-here* subcommands-result))))
            ((listp subcommands)
@@ -280,8 +280,10 @@ this file.  Usage:
 
 COMMAND can be either a list with subcommands or a symbol.
 
+ARGS are
 :inherit-global-flags Should the command inherit commands from a global set.
 :flags                A list of flags
+:filter-flags         A function used to filter incompatible flags from completion
 :subcommands          A list of subcommands or a function that returns
                       subcommands."
   (declare (indent 1))

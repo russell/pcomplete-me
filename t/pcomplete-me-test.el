@@ -250,7 +250,12 @@
   :flags
   '(("--local-flag"))
   :subcommands
-  '("command1" "command2"))
+  '("command1" "command2" "subcommand-fn"))
+
+(pcmpl-me-command (pcomplete-me-test subcommand-fn)
+  :inherit-global-flags t
+  :subcommands
+  (lambda () '("subcommand-fn1" "subcommand-fn2")))
 
 (pcmpl-me-command (pcomplete-me-test command2)
   :inherit-global-flags t
@@ -259,6 +264,7 @@
     ("--foobar" "--foobar=" :list "baz" "baaz"))
   :subcommands
   '("subcommand1" "subcommand2"))
+
 
 (defun pcomplete/pcomplete-me-test ()
   "Completion for kubectl."
@@ -307,6 +313,16 @@
       (pcomplete)
       (buffer-string))
     "pcomplete-me-test command2 subcommand1")))
+
+(ert-deftest pcmpl-me-test-nested-subcommands-fn ()
+  ""
+  (should
+   (equal
+    (with-temp-buffer
+      (insert "pcomplete-me-test subcommand-fn sub")
+      (pcomplete)
+      (buffer-string))
+    "pcomplete-me-test subcommand-fn subcommand-fn1")))
 
 (ert-deftest pcmpl-me-test-nested-subcommand-flags ()
   ""
