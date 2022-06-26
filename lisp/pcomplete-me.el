@@ -35,6 +35,10 @@
 
 (defvar pcmpl-me--context nil)
 
+(defgroup pcomplete-me nil
+  "PComplete Me."
+  :group 'applications)
+
 (defcustom pcmpl-me-debug nil
   "Debug messages for pcomplete-me completions."
   :group 'pcomplete-me

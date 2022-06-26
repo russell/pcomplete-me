@@ -65,11 +65,13 @@ CONTEXT is context alist."
 CONTEXT is context alist."
   (let* ((context-args (pcmpl-argo--override-args (or context pcmpl-me--context)))
          (template "{{ range .items  }}{{ .metadata.name }} {{ end }}")
-         (args `("kubectl" "pods" ,@context-args
+         (args `(,pcmpl-me-kubectl-command "pods" ,@context-args
                  "--selector=workflows.argoproj.io/workflow"
                  "--output=template"
                  "--template" ,template)))
     (split-string (apply #'pcmpl-me--call args))))
+
+
 
 (pcmpl-me-set-completion-widget
  :argo-workflow (lambda () (pcmpl-argo--complete-workflow "")))

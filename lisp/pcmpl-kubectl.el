@@ -27,6 +27,12 @@
 (require 'cl-lib)
 (require 'pcomplete-me)
 
+
+(defcustom pcmpl-me-kubectl-command "kubectl"
+  "Debug messages for pcomplete-me completions."
+  :group 'pcomplete-me
+  :type 'string)
+
 (defconst kubectl-output-all
   '("json" "yaml" "name" "go-template" "go-template-file" "template" "templatefile" "jsonpath" "jsonpath-as-json" "jsonpath-file"))
 
@@ -58,7 +64,7 @@ KIND is the type of resorce to complete.  CONTEXT is context
 alist."
   (let* ((context-args (pcmpl-kubectl--override-args (or context pcmpl-me--context)))
          (args `("get" ,@context-args "--output=json" ,kind)))
-    (funcall #'pcmpl-me--call-process-async-cached "kubectl" args :on-success-transform #'json-parse-string )))
+    (funcall #'pcmpl-me--call-process-async-cached pcmpl-me-kubectl-command args :on-success-transform #'json-parse-string )))
 
 (defun pcmpl-kubectl--dig (hash &rest path)
   "Take HASH and use the traverse it with PATH."
@@ -112,7 +118,7 @@ CONTEXT is a context alist."
      (lambda (e) (not (equal e "")))
      (split-string
       (apply #'pcmpl-me--call
-             `("kubectl" "api-resources" ,@context-args "--verbs" "get" "--output=wide" "--cached" "--request-timeout=5s" "--no-headers"))
+             `(,pcmpl-me-kubectl-command "api-resources" ,@context-args "--verbs" "get" "--output=wide" "--cached" "--request-timeout=5s" "--no-headers"))
       "\n")))))
 
 (defun pcmpl-kubectl--complete (type)
@@ -122,7 +128,7 @@ TYPE is used to specify the scope of the returned names."
   (let ((template (format "{{ range .%s}}{{ .name }} {{end}}" type)))
     (split-string
      (apply #'pcmpl-me--call-process-cached
-            `("kubectl" "config" "view" "--output=template" "--template" ,template)))))
+            `(,pcmpl-me-kubectl-command "config" "view" "--output=template" "--template" ,template)))))
 
 (defun pcmpl-kubectl--complete-resource ()
   "Complete a single resources by name of a single kind.
