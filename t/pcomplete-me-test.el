@@ -219,10 +219,25 @@
   "Verify if the time has expired"
   (should
    ;; Should not be expired
-   (eql (pcmpl-me--cache-expired (time-subtract (current-time) 10)) nil))
+   (eql (pcmpl-me--cache-expired-p (time-subtract (current-time) -10)) nil))
   (should
    ;; Should be expired
-   (eql (pcmpl-me--cache-expired (time-subtract (current-time) 121)) t)))
+   (eql (pcmpl-me--cache-expired-p (time-subtract (current-time) 10)) t)))
+
+(ert-deftest pcmpl-me--cache-expire-oldest ()
+  "Verify that expiring element from the hash works when it's full."
+  (let ((cache (make-hash-table :test #'equal :size 3)))
+    (puthash 'foo `(,(time-add (current-time) 10) foo) cache)
+    (puthash 'bar `(,(time-add (current-time) 20) bar) cache)
+
+    ;; Shouldn't expire because the hash isn't full
+    (pcmpl-me--cache-expire-oldest cache)
+    (should (equal (hash-table-keys cache) '(bar foo)))
+
+    ;; Should expire because now the hash is full
+    (puthash 'baz `(,(time-add (current-time) 15) baz) cache)
+    (pcmpl-me--cache-expire-oldest cache)
+    (should (equal (hash-table-keys cache) '(baz bar)))))
 
 (provide 'pcomplete-me-test)
 ;;; pcomplete-me-test.el ends here
