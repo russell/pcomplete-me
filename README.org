@@ -77,3 +77,9 @@ figuring out flags
 #+begin_src emacs-lisp
 (rs//replace-sexp (rs//add-null-completers (rs//group-flags (rs//bash-complete-argo-flags "argo"))))
 #+end_src
+
+* Known Issues
+
+Errors are not propagated correctly, setting =pcmpl-me-debug= to =t=
+won't work unless you directly call =(pcomplete t)= while in an eshell
+buffer you'll actually see log output.
