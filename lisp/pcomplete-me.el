@@ -33,8 +33,6 @@
 (require 'pcomplete)
 (require 'pfuture)
 
-(defvar pcmpl-me--context nil)
-
 (defgroup pcomplete-me nil
   "PComplete Me."
   :group 'applications)
@@ -45,22 +43,38 @@
   :type 'boolean)
 
 (defun pcmpl-me--complete-from-list (&rest things)
-  ""
+  "A completion command that takes a list of THINGS as strings."
   (flatten-list things))
 
 (defvar pcmpl-me-completers
+  "Registered completion widgets as an plist."
   '(:null (lambda ())
           :files pcomplete-entries
           :file-or-directory pcomplete-dirs-or-entries
           :dirs pcomplete-dirs
           :list pcmpl-me--complete-from-list))
 
+(defvar pcmpl-me--context
+  "An ALIST storing the current context from the command.
+
+As the command is processed by the completion flags like --foo
+will be put into keys named :foo in the
+context. `pcmpl-me--context-get' can be used to access the stored
+values."
+  nil)
+
 (defun pcmpl-me--context-get (key &optional context)
-  ""
+  "Get the value of KEY from the CONTEXT.
+
+By default `pcmpl-me--context' will be used for the context
+value."
   (cdr (assoc key (or context pcmpl-me--context))))
 
 (defun pcmpl-me--context-set (key value &optional context)
-  ""
+  "Set the VALUE of KEY in the CONTEXT.
+
+By default `pcmpl-me--context' will be used for the context
+value."
   (if context
       (push (cons key value) context)
     (push (cons key value) pcmpl-me--context)))
@@ -85,7 +99,10 @@ same flags without =."
           flags))
 
 (defun pcmpl-me--list (items &optional filter-fn)
-  ""
+  "Return a completion function from a list of strings.
+
+ITEMS should be a list of strings.  The FILTER-FN is used to
+strip invalid values one such function is `pcmpl-me--normalise-flags'."
   (let ((filtered-items (if filter-fn
                             (funcall filter-fn items)
                           items)))
