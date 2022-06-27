@@ -46,11 +46,7 @@
 
 (defun pcmpl-me--complete-from-list (&rest things)
   ""
-  (if (> (length things) 1)
-      things
-    (if (listp (car things))
-        (car things)
-      things)))
+  (flatten-list things))
 
 (defvar pcmpl-me-completers
   '(:null (lambda ())
