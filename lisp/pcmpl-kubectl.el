@@ -34,7 +34,8 @@
   :type 'string)
 
 (defconst kubectl-output-all
-  '("json" "yaml" "name" "go-template" "go-template-file" "template" "templatefile" "jsonpath" "jsonpath-as-json" "jsonpath-file"))
+  '("json" "yaml" "name" "go-template" "go-template-file" "template" "templatefile"
+    "jsonpath" "jsonpath-as-json" "jsonpath-file" "custom-columns-file" "custom-columns" "wide"))
 
 (defconst kubectl-output-name
   '("name"))
@@ -1401,7 +1402,7 @@ or slash based resources like \"pod/my-pod\"
     ("--label-columns" "--label-columns=" "-L" :null)
     ("--no-headers")
     ("--output-watch-events")
-    ("--output" "--output=" "-o" :null)
+    ("--output" "--output=" "-o" :list kubectl-output-all)
     ("--raw" "--raw=" :null)
     ("--recursive" "-R")
     ("--selector" "--selector=" "-l" :null)
