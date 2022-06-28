@@ -510,8 +510,8 @@ annotations. Will refresh items if older than the
             entry)
         entry))))
 
-(defun pcmpl-me--call (program &rest args)
-  "Call subprocess with ARGS."
+(defun pcmpl-me--call (program args)
+  "Call PROGRAM with ARGS."
   (funcall pcmpl-me--process-backend program args))
 
 (provide 'pcomplete-me)

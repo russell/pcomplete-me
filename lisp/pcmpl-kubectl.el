@@ -121,8 +121,9 @@ CONTEXT is a context alist."
      (lambda (e) (not (equal e "")))
      (split-string
       (or
-       (apply #'pcmpl-me--call
-              `(,pcmpl-me-kubectl-command "api-resources" ,@context-args "--verbs" "get" "--output=wide" "--cached" "--request-timeout=5s" "--no-headers"))
+       (funcall #'pcmpl-me--call
+                pcmpl-me-kubectl-command
+                `("api-resources" ,@context-args "--verbs" "get" "--output=wide" "--cached" "--request-timeout=5s" "--no-headers"))
        "")
       "\n")))))
 
@@ -132,8 +133,9 @@ CONTEXT is a context alist."
 TYPE is used to specify the scope of the returned names."
   (let ((template (format "{{ range .%s}}{{ .name }} {{end}}" type)))
     (split-string
-     (apply #'pcmpl-me--call-process-cached
-            `(,pcmpl-me-kubectl-command "config" "view" "--output=template" "--template" ,template)))))
+     (funcall #'pcmpl-me--call-process-cached
+              pcmpl-me-kubectl-command
+              `("config" "view" "--output=template" "--template" ,template)))))
 
 (defun pcmpl-kubectl--complete-resource ()
   "Complete a single resources by name of a single kind.

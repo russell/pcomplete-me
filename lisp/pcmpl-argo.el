@@ -44,9 +44,8 @@ CONTEXT is a context alist."
 KIND is the type of resorce to complete.  CONTEXT is context
 alist."
   (let* ((context-args (pcmpl-argo--override-args (or context pcmpl-me--context)))
-         (args `("argo" ,kind "list" ,@context-args
-                 "--output=name")))
-    (split-string (apply #'pcmpl-me--call args))))
+         (args `(,kind "list" ,@context-args "--output=name")))
+    (split-string (funcall #'pcmpl-me--call "argo" args))))
 
 
 (defun pcmpl-argo--complete-workflow (status &optional context)
@@ -54,10 +53,8 @@ alist."
 
 CONTEXT is context alist."
   (let* ((context-args (pcmpl-argo--override-args (or context pcmpl-me--context)))
-         (args `("argo" "list" ,@context-args
-                 "--output=name"
-                 "--status" ,status)))
-    (split-string (apply #'pcmpl-me--call args))))
+         (args `("list" ,@context-args "--output=name" "--status" ,status)))
+    (split-string (funcall #'pcmpl-me--call "argo" args))))
 
 (defun pcmpl-argo--complete-workflow-pods (&optional context)
   "Return a list of all workflow pods.
@@ -65,11 +62,11 @@ CONTEXT is context alist."
 CONTEXT is context alist."
   (let* ((context-args (pcmpl-argo--override-args (or context pcmpl-me--context)))
          (template "{{ range .items  }}{{ .metadata.name }} {{ end }}")
-         (args `(,pcmpl-me-kubectl-command "pods" ,@context-args
+         (args `("pods" ,@context-args
                  "--selector=workflows.argoproj.io/workflow"
                  "--output=template"
                  "--template" ,template)))
-    (split-string (apply #'pcmpl-me--call args))))
+    (split-string (funcall #'pcmpl-me--call pcmpl-me-kubectl-command args))))
 
 
 
