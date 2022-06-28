@@ -261,16 +261,25 @@ This function returns a completion section for subcommands.  It
 can handle when the subcommands are declared as either a list, or
 a function."
   (if subcommands
-      `(pcomplete-here* (completion-table-merge
-                        ,(cond
-                          ((or (functionp subcommands) (and (listp subcommands)
-                                                            (functionp (car subcommands))))
-                           `(funcall ,subcommands))
-                          ((listp subcommands)
-                           subcommand-subcommands))
-                        (funcall #'pcmpl-me--list ,subcommand-flags ,filter-flags)
-                        ,(when inherit-global-flags
-                           `(funcall #'pcmpl-me--list ,global-flags ,filter-flags))))
+      `(if (pcomplete-match "\\`-" 0)
+           (pcomplete-here* (completion-table-merge
+                             ,(cond
+                               ((or (functionp subcommands) (and (listp subcommands)
+                                                                 (functionp (car subcommands))))
+                                `(funcall ,subcommands))
+                               ((listp subcommands)
+                                subcommand-subcommands))
+                             (funcall #'pcmpl-me--list ,subcommand-flags ,filter-flags)
+                             ,(when inherit-global-flags
+                                `(funcall #'pcmpl-me--list ,global-flags ,filter-flags))))
+         ,(cond
+           ((or (functionp subcommands) (and (listp subcommands)
+                                             (functionp (car subcommands))))
+            `(let ((subcommands-result (funcall ,subcommands)))
+               (when (or (listp subcommands-result) (functionp subcommands-result))
+                 (pcomplete-here* subcommands-result))))
+           ((listp subcommands)
+            `(pcomplete-here* ,subcommand-subcommands))))
     `(pcomplete-here* (completion-table-merge
                        (funcall #'pcmpl-me--list ,subcommand-flags ,filter-flags)
                        ,(when inherit-global-flags
