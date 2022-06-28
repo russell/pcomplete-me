@@ -117,8 +117,10 @@ CONTEXT is a context alist."
     (seq-filter
      (lambda (e) (not (equal e "")))
      (split-string
-      (apply #'pcmpl-me--call
-             `(,pcmpl-me-kubectl-command "api-resources" ,@context-args "--verbs" "get" "--output=wide" "--cached" "--request-timeout=5s" "--no-headers"))
+      (or
+       (apply #'pcmpl-me--call
+              `(,pcmpl-me-kubectl-command "api-resources" ,@context-args "--verbs" "get" "--output=wide" "--cached" "--request-timeout=5s" "--no-headers"))
+       "")
       "\n")))))
 
 (defun pcmpl-kubectl--complete (type)
