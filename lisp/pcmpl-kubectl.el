@@ -49,8 +49,14 @@
 
 CONTEXT is a context alist."
   (mapcar (lambda (e) (format "--%s=%s" (string-trim (symbol-name (car e)) ":") (cdr e)))
-          (seq-filter (lambda (e) (member (car e)
-                                          pcmpl-kubectl--override-flags)) context)))
+          (pcmpl-kubectl--override-context context)))
+
+(defun pcmpl-kubectl--override-context (context &optional flags)
+  "Filter the CONTEXT alist for keys that match override FLAGS.
+
+FLAGS defaults to `pcmpl-kubectl--override-flags'"
+  (let ((filter-flags (or flags pcmpl-kubectl--override-flags)))
+   (seq-filter (lambda (e) (member (car e) filter-flags)) context)))
 
 (defvar pcmpl-kubectl--cache
   (make-hash-table :test #'equal
@@ -64,7 +70,10 @@ KIND is the type of resorce to complete.  CONTEXT is context
 alist."
   (let* ((context-args (pcmpl-kubectl--override-args (or context pcmpl-me--context)))
          (args `("get" ,@context-args "--output=json" ,kind)))
-    (funcall #'pcmpl-me--call-process-async-cached pcmpl-me-kubectl-command args :on-success-transform #'json-parse-string )))
+    (funcall #'pcmpl-me--call-process-async-cached
+             pcmpl-me-kubectl-command args
+             :on-success-transform #'json-parse-string
+             :cache-key `(:kubernetes-resources ,kind ,(pcmpl-kubectl--override-context context)))))
 
 (defun pcmpl-kubectl--dig (hash &rest path)
   "Take HASH and use the traverse it with PATH."
@@ -112,8 +121,10 @@ CONTEXT is a context alist."
   "Return all the resource short names from the cluster.
 
 CONTEXT is a context alist."
-  (let (;; filter context args to only the --context flag, because api-resources are global
-        (context-args (pcmpl-kubectl--override-args (list (assoc :context (or context pcmpl-me--context))))))
+  (let* (;; filter context everything except the namespace argument
+         (context (pcmpl-kubectl--override-context (or context pcmpl-me--context)
+                                                  '(:kubeconfig :cluster :user :context :server)))
+         (context-args (pcmpl-kubectl--override-args context)))
    (mapcar
     (lambda(e) (string-match "\\`\\([a-z0-9]+\\)" e)
       (match-string 1 e))
@@ -121,9 +132,10 @@ CONTEXT is a context alist."
      (lambda (e) (not (equal e "")))
      (split-string
       (or
-       (funcall #'pcmpl-me--call
+       (funcall #'pcmpl-me--call-process-async-cached
                 pcmpl-me-kubectl-command
-                `("api-resources" ,@context-args "--verbs" "get" "--output=wide" "--cached" "--request-timeout=5s" "--no-headers"))
+                `("api-resources" ,@context-args "--verbs" "get" "--output=wide" "--cached" "--request-timeout=5s" "--no-headers")
+                :cache-key `(:resource-types ,context))
        "")
       "\n")))))
 

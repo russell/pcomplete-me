@@ -464,51 +464,52 @@ annotations. Will refresh items if older than the
   "The cache, pair of list and hashtable of processes.")
 
 
-(cl-defun pcmpl-me--call-process-async-cached (program args &key (on-success-transform #'identity))
+(cl-defun pcmpl-me--call-process-async-cached (program args &key
+                                                       (on-success-transform #'identity)
+                                                       (cache-key (cons program args)))
   "Cached results of subprocesses called with ARGS.
 
 The CACHE keeps around the last `pcmpl-me--cache-size' computed
 annotations. Will refresh items if older than the
 `pcmpl-me--cache-expiry'
 "
-  (let ((cache-key (cons program args)))
-    (cl-destructuring-bind (expiry entry) (or (gethash cache-key pcmpl-me--cache) '(nil nil))
-      ;; if entry is null or expired create a new entry
+  (cl-destructuring-bind (expiry entry) (or (gethash cache-key pcmpl-me--cache) '(nil nil))
+    ;; if entry is null or expired create a new entry
 
-      (if (or (null entry) (pcmpl-me--cache-expired-p (time-add expiry -10))) ; refresh cache 10s before expiry
-          (progn
-            (unless (gethash cache-key pcmpl-me--parallel-processes)
-              (if (<=  (hash-table-count pcmpl-me--parallel-processes)
-                       (hash-table-size pcmpl-me--parallel-processes))
-                  (let ((process
-                         (pfuture-callback cache-key
-                           :name (format "*pcomplete-me %s*" args)
-                           :on-success
-                           '(lambda (process status buffer)
-                              (remhash cache-key pcmpl-me--parallel-processes)  ; Clear entry from proc hash
-                              (when (= (process-exit-status process) 0)
-                                ;; Remove old hash entries if we run out of space
-                                (pcmpl-me--cache-expire-oldest pcmpl-me--cache)
+    (if (or (null entry) (pcmpl-me--cache-expired-p (time-add expiry -10))) ; refresh cache 10s before expiry
+        (progn
+          (unless (gethash cache-key pcmpl-me--parallel-processes)
+            (if (<=  (hash-table-count pcmpl-me--parallel-processes)
+                     (hash-table-size pcmpl-me--parallel-processes))
+                (let ((process
+                       (pfuture-callback (cons program args)
+                         :name (format "*pcomplete-me %s*" args)
+                         :on-success
+                         '(lambda (process status buffer)
+                            (remhash cache-key pcmpl-me--parallel-processes)  ; Clear entry from proc hash
+                            (when (= (process-exit-status process) 0)
+                              ;; Remove old hash entries if we run out of space
+                              (pcmpl-me--cache-expire-oldest pcmpl-me--cache)
 
-                                (puthash cache-key
-                                         (list (time-add (current-time) pcmpl-me--cache-expiry)
-                                               (when (= (process-exit-status process) 0)
-                                                 (funcall on-success-transform (with-current-buffer buffer (buffer-string)))))
-                                         pcmpl-me--cache)))
-                           :on-error
-                           '(lambda (process status buffer)
-                              (message "pcmpl-me--call-process-async-cached error calling subprocess")
-                              (pcmpl-me--error-message
-                               "Error: async subprocess error\nArgs: %s\nStatus: %s\nOutput:%s\n" args process status
-                               (with-current-buffer buffer (buffer-string)))
-                              (remhash cache-key pcmpl-me--parallel-processes)))))
+                              (puthash cache-key
+                                       (list (time-add (current-time) pcmpl-me--cache-expiry)
+                                             (when (= (process-exit-status process) 0)
+                                               (funcall on-success-transform (with-current-buffer buffer (buffer-string)))))
+                                       pcmpl-me--cache)))
+                         :on-error
+                         '(lambda (process status buffer)
+                            (message "pcmpl-me--call-process-async-cached error calling subprocess")
+                            (pcmpl-me--error-message
+                             "Error: async subprocess error\nArgs: %s\nStatus: %s\nOutput:%s\n" args process status
+                             (with-current-buffer buffer (buffer-string)))
+                            (remhash cache-key pcmpl-me--parallel-processes)))))
 
-                    (puthash cache-key
-                             (list (time-add (current-time) pcmpl-me--cache-expiry) process)
-                             pcmpl-me--parallel-processes))
-                (message "pcmpl-me--call-process-async-cached ERROR too many autocomplete background processes")))
-            entry)
-        entry))))
+                  (puthash cache-key
+                           (list (time-add (current-time) pcmpl-me--cache-expiry) process)
+                           pcmpl-me--parallel-processes))
+              (message "pcmpl-me--call-process-async-cached ERROR too many autocomplete background processes")))
+          entry)
+      entry)))
 
 (defun pcmpl-me--call (program args)
   "Call PROGRAM with ARGS."
