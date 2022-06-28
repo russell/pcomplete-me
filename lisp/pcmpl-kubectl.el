@@ -75,35 +75,38 @@ alist."
 
 KIND is the type of resorce to complete.  CONTEXT is context
 alist."
-  (mapcar
-   (lambda (resource)
-     (pcmpl-kubectl--dig resource "metadata" "name"))
-   (gethash "items" (pcmpl-kubectl--cache-resource kind context))))
+  (let* ((cached-resources (pcmpl-kubectl--cache-resource kind (or context pcmpl-me--context)))
+         (resources (when cached-resources (gethash "items" cached-resources))))
+    (mapcar (lambda (resource) (pcmpl-kubectl--dig resource "metadata" "name"))
+            resources)))
 
 (defun pcmpl-kubectl--complete-containers (&optional context)
   "Return containers from a pod.
 
 CONTEXT is a context alist."
-  (let ((resource (seq-find
-          (lambda (resource)
-            (equal (pcmpl-kubectl--dig resource "metadata" "name")
-                   (pcmpl-me--context-get :resource-name context)))
-          (gethash "items" (pcmpl-kubectl--cache-resource
+  (let* ((cached-resources (pcmpl-kubectl--cache-resource
                             (pcmpl-me--context-get :resource-kind context)
-                            context)))))
-    (cl-case (intern (gethash "kind" resource))
-      (Pod
+                            context))
+         (resources (when cached-resources (gethash "items" cached-resources)))
+         (resource (seq-find
+                    (lambda (resource)
+                      (equal (pcmpl-kubectl--dig resource "metadata" "name")
+                             (pcmpl-me--context-get :resource-name context)))
+                    resources)))
+    (when resource
+     (cl-case (intern (gethash "kind" resource))
+       (Pod
         (mapcar
          (lambda (e) (gethash "name" e))
          (vconcat
           (pcmpl-kubectl--dig resource "spec" "initContainers")
           (pcmpl-kubectl--dig resource "spec" "containers"))))
-      (Deployment
-       (mapcar
-        (lambda (e) (gethash "name" e))
-        (vconcat
-         (pcmpl-kubectl--dig resource "spec" "template" "spec" "initContainers")
-         (pcmpl-kubectl--dig resource "spec" "template" "spec" "containers")))))))
+       (Deployment
+        (mapcar
+         (lambda (e) (gethash "name" e))
+         (vconcat
+          (pcmpl-kubectl--dig resource "spec" "template" "spec" "initContainers")
+          (pcmpl-kubectl--dig resource "spec" "template" "spec" "containers"))))))))
 
 (defun pcmpl-kubectl--complete-resource-types (&optional context)
   "Return all the resource short names from the cluster.
@@ -173,13 +176,16 @@ or slash based resources like \"pod/my-pod\"
    ((pcomplete-match "\\`.*,\\([a-z9-0]*\\)" 0)
     (pcomplete-here* (pcmpl-kubectl--complete-resource-types) (pcomplete-match-string 1 0))
     (pcmpl-me--context-set :resource-kind (pcomplete-arg 1)))
+
    ;; Resources based where the kind was already specified
    ((pcmpl-me--context-get :resource-kind)
     (pcomplete-here* (pcmpl-kubectl--complete-resource-of (pcmpl-me--context-get :resource-kind))))
+
    ;; Resources like kind/name
    ((pcomplete-match "\\`\\(.*\\)/\\(.*\\)\\'" 0)
     (pcomplete-here* (pcmpl-kubectl--complete-resource-of (pcomplete-match-string 1 0))
                      (pcomplete-match-string 2 0)))
+
    ;; Complete resource kinds
    (t
     (pcomplete-here* (pcmpl-kubectl--complete-resource-types))
