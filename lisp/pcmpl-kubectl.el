@@ -112,7 +112,7 @@ CONTEXT is a context alist."
   (let (;; filter context args to only the --context flag, because api-resources are global
         (context-args (pcmpl-kubectl--override-args (list (assoc :context (or context pcmpl-me--context))))))
    (mapcar
-    (lambda(e) (string-match "\\`\\([a-z]+\\)" e)
+    (lambda(e) (string-match "\\`\\([a-z0-9]+\\)" e)
       (match-string 1 e))
     (seq-filter
      (lambda (e) (not (equal e "")))
