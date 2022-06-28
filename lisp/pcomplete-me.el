@@ -47,21 +47,20 @@
   (flatten-list things))
 
 (defvar pcmpl-me-completers
-  "Registered completion widgets as an plist."
   '(:null (lambda ())
           :files pcomplete-entries
           :file-or-directory pcomplete-dirs-or-entries
           :dirs pcomplete-dirs
-          :list pcmpl-me--complete-from-list))
+          :list pcmpl-me--complete-from-list)
+  "Registered completion widgets as an plist.")
 
-(defvar pcmpl-me--context
+(defvar pcmpl-me--context nil
   "An ALIST storing the current context from the command.
 
 As the command is processed by the completion flags like --foo
 will be put into keys named :foo in the
 context. `pcmpl-me--context-get' can be used to access the stored
-values."
-  nil)
+values.")
 
 (defun pcmpl-me--context-get (key &optional context)
   "Get the value of KEY from the CONTEXT.
