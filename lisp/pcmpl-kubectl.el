@@ -78,7 +78,7 @@ alist."
 
 (defun pcmpl-kubectl--dig (hash &rest path)
   "Take HASH and use the traverse it with PATH."
-  (reduce (lambda (h element) (gethash element h)) path :initial-value hash))
+  (cl-reduce (lambda (h element) (gethash element h)) path :initial-value hash))
 
 (defun pcmpl-kubectl--complete-resource-of (kind &optional context)
   "Return a list of all resources of a type.
